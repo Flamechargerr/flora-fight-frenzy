@@ -1,92 +1,78 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 140 33% 97%;
+    --foreground: 140 10% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 140 10% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 140 10% 10%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 142 72% 29%;
+    --primary-foreground: 144 100% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 38 92% 70%;
+    --secondary-foreground: 32 40% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 140 5% 96%;
+    --muted-foreground: 140 5% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 204 100% 59%;
+    --accent-foreground: 204 100% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 140 10% 90%;
+    --input: 140 10% 90%;
+    --ring: 142 72% 29%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 142 20% 12%;
+    --foreground: 140 10% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 142 25% 12%;
+    --card-foreground: 140 10% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 142 25% 12%;
+    --popover-foreground: 140 10% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 142 70% 40%;
+    --primary-foreground: 144 100% 98%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 38 92% 60%;
+    --secondary-foreground: 32 40% 10%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 140 10% 20%;
+    --muted-foreground: 140 10% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 204 100% 40%;
+    --accent-foreground: 204 100% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 140 10% 25%;
+    --input: 140 10% 25%;
+    --ring: 142 70% 40%;
   }
 }
 
@@ -96,6 +82,41 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-lg;
+  }
+  
+  .plant-card {
+    @apply relative rounded-xl overflow-hidden bg-gradient-to-br from-garden-light to-garden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95;
+  }
+  
+  .sun-resource {
+    @apply absolute cursor-pointer w-12 h-12 bg-sun rounded-full shadow-lg transform transition-all duration-200 flex items-center justify-center text-yellow-800 font-bold animate-float hover:scale-110 active:scale-90;
+  }
+  
+  .enemy {
+    @apply absolute bg-enemy rounded-full flex items-center justify-center shadow-lg;
+  }
+  
+  .plant {
+    @apply absolute rounded-full shadow-md flex items-center justify-center;
+  }
+  
+  .grid-cell {
+    @apply border border-garden-dark/30 relative flex items-center justify-center transition-all duration-200 hover:bg-garden-light/20;
+  }
+  
+  .grid-cell.available {
+    @apply cursor-pointer hover:bg-garden-light/50;
+  }
+  
+  .grid-cell.unavailable {
+    @apply cursor-not-allowed bg-red-500/10 hover:bg-red-500/20;
   }
 }
