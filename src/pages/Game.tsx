@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import GameBoard from '../components/GameBoard';
 import { ArrowLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
@@ -7,13 +7,47 @@ import { ArrowLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
 const Game = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   
   const handleGameOver = () => {
     setIsGameOver(true);
   };
 
+  useEffect(() => {
+    // Auto-hide intro after 8 seconds
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 8000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-garden-light/30 to-garden/20 p-4 sm:p-6 md:p-8">
+      {/* Story Intro */}
+      {showIntro && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-8 animate-fadeIn">
+          <div className="max-w-2xl glass p-6 rounded-xl text-left">
+            <h2 className="text-2xl font-bold text-garden mb-4">The Last Garden</h2>
+            <p className="mb-3 text-white">
+              As zombie hordes approach your precious garden, the ancient Plant Stars have awakened to defend their realm. 
+            </p>
+            <p className="mb-3 text-white">
+              "For centuries we have lived in peace," whispers the elder Sunflower, "but now the undead threaten our existence."
+            </p>
+            <p className="mb-3 text-white">
+              You must help the Plant Stars survive three waves of zombies. Collect sunlight to grow your defenses and stop the zombies before they cross your garden!
+            </p>
+            <button 
+              onClick={() => setShowIntro(false)}
+              className="mt-4 bg-garden px-4 py-2 rounded-lg text-white font-bold hover:bg-garden-dark transition-colors"
+            >
+              Begin Defense!
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Game Header */}
       <div className="glass mb-6 p-4 rounded-xl flex items-center justify-between animate-fadeIn">
         <Link 

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import PlantCard from './PlantCard';
 import SunResource from './SunResource';
 import Enemy from './Enemy';
@@ -43,8 +43,8 @@ interface GridPosition {
 }
 
 const GameBoard = ({ onGameOver }: GameBoardProps) => {
-  const [sunAmount, setSunAmount] = useState(100);
-  const [activeWave, setActiveWave] = useState(1);
+  const [sunAmount, setSunAmount] = useState(150); // Starting with more sun
+  const [currentWave, setCurrentWave] = useState(1);
   const [waveProgress, setWaveProgress] = useState(0);
   const [sunResources, setSunResources] = useState<{id: string, x: number, y: number}[]>([]);
   const [enemies, setEnemies] = useState<EnemyType[]>([]);
@@ -52,6 +52,20 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
   const [selectedPlant, setSelectedPlant] = useState<PlantType | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [showWaveMessage, setShowWaveMessage] = useState(false);
+  const [waveMessage, setWaveMessage] = useState('');
+  const [waveCompleted, setWaveCompleted] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const [gameWon, setGameWon] = useState(false);
+  
+  const waveConfig = useRef({
+    1: { enemies: 10, speed: 80, health: 100, interval: 3000 },
+    2: { enemies: 15, speed: 100, health: 150, interval: 2500 },
+    3: { enemies: 20, speed: 120, health: 200, interval: 2000 }
+  });
+  
+  const enemiesLeftInWave = useRef(waveConfig.current[1].enemies);
+  const enemiesSpawned = useRef(0);
   
   const ROWS = 5;
   const COLS = 9;
@@ -101,6 +115,63 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     },
   ];
 
+  // Start the first wave
+  useEffect(() => {
+    setTimeout(() => {
+      showWaveAnnouncement(1);
+    }, 1000);
+  }, []);
+
+  // Wave announcement handler
+  const showWaveAnnouncement = (waveNumber: number) => {
+    const messages = {
+      1: "Wave 1: The Scouts - Zombies spotted on the horizon!",
+      2: "Wave 2: The Horde - More zombies are coming!",
+      3: "Wave 3: Final Stand - The undead elite approaches!"
+    };
+    
+    setWaveMessage(messages[waveNumber as keyof typeof messages]);
+    setShowWaveMessage(true);
+    
+    setTimeout(() => {
+      setShowWaveMessage(false);
+      startWave(waveNumber);
+    }, 3000);
+  };
+  
+  // Start a wave
+  const startWave = (waveNumber: number) => {
+    setCurrentWave(waveNumber);
+    enemiesLeftInWave.current = waveConfig.current[waveNumber as keyof typeof waveConfig.current].enemies;
+    enemiesSpawned.current = 0;
+    setWaveProgress(0);
+    setWaveCompleted(false);
+  };
+  
+  // Complete a wave
+  const completeWave = () => {
+    setWaveCompleted(true);
+    setScore(prev => prev + (currentWave * 100)); // Bonus for completing wave
+    
+    if (currentWave < 3) {
+      // Start countdown to next wave
+      setCountdown(5);
+      const timer = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            showWaveAnnouncement(currentWave + 1);
+            return 5;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      // Game won after wave 3
+      setGameWon(true);
+    }
+  };
+
   // Generate a sun resource
   const generateSun = useCallback(() => {
     const id = Date.now().toString();
@@ -121,14 +192,15 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     setSunResources(prev => prev.filter(sun => sun.id !== id));
   }, []);
 
-  // Generate enemies
+  // Generate enemies for current wave
   const generateEnemy = useCallback(() => {
-    if (isGameOver) return;
+    if (isGameOver || waveCompleted || enemiesSpawned.current >= enemiesLeftInWave.current) return;
     
+    const waveSettings = waveConfig.current[currentWave as keyof typeof waveConfig.current];
     const id = Date.now().toString();
     const row = Math.floor(Math.random() * ROWS);
-    const health = 100 * (1 + (activeWave * 0.2));
-    const speed = 100 + (activeWave * 10); // pixels per second
+    const health = waveSettings.health;
+    const speed = waveSettings.speed + (Math.random() * 20 - 10); // Add some variation
     
     setEnemies(prev => [...prev, { 
       id, 
@@ -137,7 +209,9 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
       row, 
       position: gameArea.width // start from the right edge
     }]);
-  }, [activeWave, gameArea.width, isGameOver]);
+    
+    enemiesSpawned.current++;
+  }, [currentWave, gameArea.width, isGameOver, waveCompleted]);
 
   // Place a plant on the grid
   const placePlant = (row: number, col: number) => {
@@ -163,30 +237,28 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
 
   // Game loop
   useEffect(() => {
-    if (isGameOver) return;
+    if (isGameOver || gameWon) return;
 
-    // Sun generation timer
+    // Sun generation timer - more frequent sun
     const sunTimer = setInterval(() => {
       generateSun();
-    }, 5000);
+    }, 3000);
     
-    // Enemy generation timer
+    // Enemy generation timer based on current wave
+    const waveSettings = waveConfig.current[currentWave as keyof typeof waveConfig.current];
     const enemyTimer = setInterval(() => {
-      generateEnemy();
-      
-      // Increase wave progress
-      setWaveProgress(prev => {
-        const newProgress = prev + 1;
-        if (newProgress >= 10) {
-          setActiveWave(w => w + 1);
-          return 0;
-        }
-        return newProgress;
-      });
-    }, 3000 - (activeWave * 200));
+      if (enemiesSpawned.current < waveSettings.enemies && !waveCompleted) {
+        generateEnemy();
+      }
+    }, waveSettings.interval);
     
     // Game tick timer
     const gameTickTimer = setInterval(() => {
+      // Check if wave is complete
+      if (enemies.length === 0 && enemiesSpawned.current >= waveSettings.enemies && !waveCompleted) {
+        completeWave();
+      }
+      
       // Move enemies
       setEnemies(prevEnemies => {
         const newEnemies = prevEnemies.map(enemy => {
@@ -293,9 +365,9 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
       clearInterval(sunflowerTimer);
     };
   }, [
-    activeWave, enemies, generateEnemy, generateSun, 
+    currentWave, enemies, generateEnemy, generateSun, 
     gameArea.height, gameArea.width, isGameOver, 
-    onGameOver, plants, COLS, ROWS
+    onGameOver, plants, COLS, ROWS, waveCompleted, gameWon
   ]);
 
   // Render grid
@@ -342,12 +414,12 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
       <div className="glass mb-4 p-3 rounded-xl flex items-center justify-between">
         <div className="flex items-center">
           <div className="bg-garden-light/50 px-4 py-2 rounded-lg flex items-center mr-4">
-            <Sun className="text-sun w-5 h-5 mr-2" />
+            <Sun className="text-yellow-400 w-5 h-5 mr-2" />
             <span className="font-bold">{sunAmount}</span>
           </div>
           
           <div className="bg-garden-light/50 px-4 py-2 rounded-lg">
-            <span className="text-sm">Wave {activeWave}</span>
+            <span className="text-sm">Wave {currentWave}/3</span>
             <div className="w-32 h-2 bg-white/50 rounded-full mt-1">
               <div 
                 className="h-full bg-garden rounded-full transition-all duration-200"
@@ -419,16 +491,57 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
             />
           ))}
           
-          {/* Game over overlay */}
-          {isGameOver && (
+          {/* Wave message overlay */}
+          {showWaveMessage && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-40 animate-fadeIn">
+              <div className="text-center p-6 bg-garden-dark/90 rounded-xl border-2 border-garden">
+                <h2 className="text-3xl font-bold text-white mb-2">{waveMessage}</h2>
+                <p className="text-yellow-200">Prepare your defenses!</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Between waves countdown */}
+          {waveCompleted && currentWave < 3 && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-40 animate-fadeIn">
+              <div className="text-center p-6 bg-garden-dark/90 rounded-xl border-2 border-garden">
+                <h2 className="text-3xl font-bold text-white mb-2">Wave {currentWave} Complete!</h2>
+                <p className="text-yellow-200 mb-4">Next wave starting in {countdown} seconds</p>
+                <p className="text-white">Plant more defenses while you can!</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Game won overlay */}
+          {gameWon && (
             <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center animate-fadeIn">
-              <h2 className="text-4xl font-bold text-white mb-4">Game Over</h2>
-              <p className="text-xl text-white mb-6">Final Score: {score}</p>
+              <h2 className="text-4xl font-bold text-white mb-2">Victory!</h2>
+              <p className="text-xl text-white mb-6">The garden is saved! Final Score: {score}</p>
+              <p className="text-white mb-4 max-w-md text-center">
+                "Thank you, brave defender," whispers the elder Sunflower. "The Plant Stars will remember your bravery."
+              </p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-6 py-3 bg-garden rounded-lg text-white font-bold hover:bg-garden-dark transition-colors"
               >
                 Play Again
+              </button>
+            </div>
+          )}
+          
+          {/* Game over overlay */}
+          {isGameOver && (
+            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center animate-fadeIn">
+              <h2 className="text-4xl font-bold text-white mb-2">Game Over</h2>
+              <p className="text-xl text-white mb-6">The zombies have invaded! Final Score: {score}</p>
+              <p className="text-white mb-4 max-w-md text-center">
+                "We'll rise again," the plants whisper as the zombies overrun your garden.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-garden rounded-lg text-white font-bold hover:bg-garden-dark transition-colors"
+              >
+                Try Again
               </button>
             </div>
           )}
