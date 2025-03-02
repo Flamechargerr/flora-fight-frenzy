@@ -66,6 +66,8 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
   
   const enemiesLeftInWave = useRef(waveConfig.current[1].enemies);
   const enemiesSpawned = useRef(0);
+  const enemySpawnTimer = useRef<NodeJS.Timeout | null>(null);
+  const gameStarted = useRef(false);
   
   const ROWS = 5;
   const COLS = 9;
@@ -119,7 +121,14 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
   useEffect(() => {
     setTimeout(() => {
       showWaveAnnouncement(1);
+      gameStarted.current = true;
     }, 1000);
+    
+    return () => {
+      if (enemySpawnTimer.current) {
+        clearInterval(enemySpawnTimer.current);
+      }
+    };
   }, []);
 
   // Wave announcement handler
@@ -146,6 +155,41 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     enemiesSpawned.current = 0;
     setWaveProgress(0);
     setWaveCompleted(false);
+    
+    // Clear any existing timers
+    if (enemySpawnTimer.current) {
+      clearInterval(enemySpawnTimer.current);
+    }
+    
+    // Start spawning enemies at the configured interval
+    const waveSettings = waveConfig.current[waveNumber as keyof typeof waveConfig.current];
+    enemySpawnTimer.current = setInterval(() => {
+      if (enemiesSpawned.current < waveSettings.enemies && !waveCompleted && gameStarted.current) {
+        const newEnemy = createEnemy(waveSettings);
+        setEnemies(prev => [...prev, newEnemy]);
+        enemiesSpawned.current++;
+        setWaveProgress(prev => prev + 1);
+      } else if (enemiesSpawned.current >= waveSettings.enemies) {
+        // Stop spawning when all enemies for the wave have been spawned
+        if (enemySpawnTimer.current) {
+          clearInterval(enemySpawnTimer.current);
+          enemySpawnTimer.current = null;
+        }
+      }
+    }, waveSettings.interval);
+  };
+  
+  // Create a new enemy with the correct properties
+  const createEnemy = (waveSettings: { speed: number; health: number }) => {
+    const id = `enemy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const row = Math.floor(Math.random() * ROWS);
+    return {
+      id,
+      health: waveSettings.health,
+      speed: waveSettings.speed + (Math.random() * 20 - 10), // Add some variation
+      row,
+      position: gameArea.width // start from the right edge
+    };
   };
   
   // Complete a wave
@@ -194,24 +238,17 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
 
   // Generate enemies for current wave
   const generateEnemy = useCallback(() => {
-    if (isGameOver || waveCompleted || enemiesSpawned.current >= enemiesLeftInWave.current) return;
+    if (isGameOver || waveCompleted || enemiesSpawned.current >= enemiesLeftInWave.current || !gameStarted.current) {
+      return;
+    }
     
     const waveSettings = waveConfig.current[currentWave as keyof typeof waveConfig.current];
-    const id = Date.now().toString();
-    const row = Math.floor(Math.random() * ROWS);
-    const health = waveSettings.health;
-    const speed = waveSettings.speed + (Math.random() * 20 - 10); // Add some variation
+    const newEnemy = createEnemy(waveSettings);
     
-    setEnemies(prev => [...prev, { 
-      id, 
-      health, 
-      speed, 
-      row, 
-      position: gameArea.width // start from the right edge
-    }]);
-    
+    setEnemies(prev => [...prev, newEnemy]);
     enemiesSpawned.current++;
-  }, [currentWave, gameArea.width, isGameOver, waveCompleted]);
+    setWaveProgress(prev => prev + 1);
+  }, [currentWave, isGameOver, waveCompleted]);
 
   // Place a plant on the grid
   const placePlant = (row: number, col: number) => {
@@ -244,23 +281,17 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
       generateSun();
     }, 3000);
     
-    // Enemy generation timer based on current wave
-    const waveSettings = waveConfig.current[currentWave as keyof typeof waveConfig.current];
-    const enemyTimer = setInterval(() => {
-      if (enemiesSpawned.current < waveSettings.enemies && !waveCompleted) {
-        generateEnemy();
-      }
-    }, waveSettings.interval);
-    
     // Game tick timer
     const gameTickTimer = setInterval(() => {
       // Check if wave is complete
-      if (enemies.length === 0 && enemiesSpawned.current >= waveSettings.enemies && !waveCompleted) {
+      if (enemies.length === 0 && enemiesSpawned.current >= enemiesLeftInWave.current && gameStarted.current && !waveCompleted) {
         completeWave();
       }
       
       // Move enemies
       setEnemies(prevEnemies => {
+        if (prevEnemies.length === 0) return prevEnemies;
+        
         const newEnemies = prevEnemies.map(enemy => {
           // Move enemy based on speed
           const newPosition = enemy.position - (enemy.speed / 10);
@@ -360,7 +391,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     
     return () => {
       clearInterval(sunTimer);
-      clearInterval(enemyTimer);
+      if (enemySpawnTimer.current) clearInterval(enemySpawnTimer.current);
       clearInterval(gameTickTimer);
       clearInterval(sunflowerTimer);
     };
@@ -423,7 +454,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
             <div className="w-32 h-2 bg-white/50 rounded-full mt-1">
               <div 
                 className="h-full bg-garden rounded-full transition-all duration-200"
-                style={{ width: `${(waveProgress / 10) * 100}%` }}
+                style={{ width: `${(enemiesSpawned.current / enemiesLeftInWave.current) * 100}%` }}
               />
             </div>
           </div>
