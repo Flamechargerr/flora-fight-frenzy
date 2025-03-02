@@ -11,6 +11,7 @@ const Game = () => {
   const [gameStarted, setGameStarted] = useState(false);
   
   const handleGameOver = () => {
+    console.log("Game over triggered from GameBoard");
     setIsGameOver(true);
   };
 

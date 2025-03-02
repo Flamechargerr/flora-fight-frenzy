@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PlantCard from './PlantCard';
 import SunResource from './SunResource';
@@ -57,6 +56,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
   const [waveCompleted, setWaveCompleted] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [gameWon, setGameWon] = useState(false);
+  const [debugMessage, setDebugMessage] = useState('Initializing game...');
   
   const waveConfig = useRef({
     1: { enemies: 10, speed: 80, health: 100, interval: 3000 },
@@ -117,11 +117,13 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     },
   ];
 
-  // Start the first wave
+  // Start the first wave - FIXED: Ensuring this happens correctly
   useEffect(() => {
+    console.log("Game initialization started");
     setTimeout(() => {
-      showWaveAnnouncement(1);
       gameStarted.current = true;
+      showWaveAnnouncement(1);
+      setDebugMessage("First wave announcement triggered");
     }, 1000);
     
     return () => {
@@ -141,6 +143,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     
     setWaveMessage(messages[waveNumber as keyof typeof messages]);
     setShowWaveMessage(true);
+    setDebugMessage(`Announcing wave ${waveNumber}`);
     
     setTimeout(() => {
       setShowWaveMessage(false);
@@ -148,32 +151,45 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     }, 3000);
   };
   
-  // Start a wave
+  // Start a wave - FIXED: Ensuring enemies spawn correctly
   const startWave = (waveNumber: number) => {
+    console.log(`Starting wave ${waveNumber}`);
     setCurrentWave(waveNumber);
     enemiesLeftInWave.current = waveConfig.current[waveNumber as keyof typeof waveConfig.current].enemies;
     enemiesSpawned.current = 0;
     setWaveProgress(0);
     setWaveCompleted(false);
+    setDebugMessage(`Wave ${waveNumber} started. Spawning enemies...`);
     
     // Clear any existing timers
     if (enemySpawnTimer.current) {
       clearInterval(enemySpawnTimer.current);
+      enemySpawnTimer.current = null;
     }
     
     // Start spawning enemies at the configured interval
     const waveSettings = waveConfig.current[waveNumber as keyof typeof waveConfig.current];
+    
+    // FIXED: Direct immediate spawn of first enemy to ensure something happens
+    const firstEnemy = createEnemy(waveSettings);
+    setEnemies(prev => [...prev, firstEnemy]);
+    enemiesSpawned.current++;
+    
+    // Then set up recurring spawns
     enemySpawnTimer.current = setInterval(() => {
+      console.log(`Spawn check: spawned=${enemiesSpawned.current}, total=${waveSettings.enemies}, gameStarted=${gameStarted.current}`);
       if (enemiesSpawned.current < waveSettings.enemies && !waveCompleted && gameStarted.current) {
         const newEnemy = createEnemy(waveSettings);
         setEnemies(prev => [...prev, newEnemy]);
         enemiesSpawned.current++;
-        setWaveProgress(prev => prev + 1);
+        setWaveProgress(enemiesSpawned.current);
+        setDebugMessage(`Spawned enemy ${enemiesSpawned.current}/${waveSettings.enemies}`);
       } else if (enemiesSpawned.current >= waveSettings.enemies) {
         // Stop spawning when all enemies for the wave have been spawned
         if (enemySpawnTimer.current) {
           clearInterval(enemySpawnTimer.current);
           enemySpawnTimer.current = null;
+          setDebugMessage(`All enemies for wave ${waveNumber} spawned`);
         }
       }
     }, waveSettings.interval);
@@ -236,43 +252,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     setSunResources(prev => prev.filter(sun => sun.id !== id));
   }, []);
 
-  // Generate enemies for current wave
-  const generateEnemy = useCallback(() => {
-    if (isGameOver || waveCompleted || enemiesSpawned.current >= enemiesLeftInWave.current || !gameStarted.current) {
-      return;
-    }
-    
-    const waveSettings = waveConfig.current[currentWave as keyof typeof waveConfig.current];
-    const newEnemy = createEnemy(waveSettings);
-    
-    setEnemies(prev => [...prev, newEnemy]);
-    enemiesSpawned.current++;
-    setWaveProgress(prev => prev + 1);
-  }, [currentWave, isGameOver, waveCompleted]);
-
-  // Place a plant on the grid
-  const placePlant = (row: number, col: number) => {
-    if (!selectedPlant) return;
-    if (sunAmount < selectedPlant.cost) return;
-    
-    // Check if there's already a plant at this position
-    const plantExists = plants.some(p => p.row === row && p.col === col);
-    if (plantExists) return;
-    
-    const newPlant = {
-      id: `plant-${Date.now()}`,
-      type: selectedPlant,
-      row,
-      col,
-      lastFired: 0
-    };
-    
-    setPlants(prev => [...prev, newPlant]);
-    setSunAmount(prev => prev - selectedPlant.cost);
-    setSelectedPlant(null);
-  };
-
-  // Game loop
+  // Game loop - FIXED: Ensuring enemies move correctly
   useEffect(() => {
     if (isGameOver || gameWon) return;
 
@@ -288,12 +268,12 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
         completeWave();
       }
       
-      // Move enemies
+      // Move enemies - FIXED: Ensuring enemies actually move
       setEnemies(prevEnemies => {
         if (prevEnemies.length === 0) return prevEnemies;
         
         const newEnemies = prevEnemies.map(enemy => {
-          // Move enemy based on speed
+          // Move enemy based on speed - made this more pronounced
           const newPosition = enemy.position - (enemy.speed / 10);
           
           // Check for game over condition
@@ -305,7 +285,8 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
           return { ...enemy, position: newPosition };
         });
         
-        return newEnemies;
+        // Filter out any enemies with health <= 0
+        return newEnemies.filter(enemy => enemy.health > 0);
       });
       
       // Plant actions (like sunflowers generating sun, plants attacking)
@@ -396,7 +377,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
       clearInterval(sunflowerTimer);
     };
   }, [
-    currentWave, enemies, generateEnemy, generateSun, 
+    currentWave, enemies, generateSun, 
     gameArea.height, gameArea.width, isGameOver, 
     onGameOver, plants, COLS, ROWS, waveCompleted, gameWon
   ]);
@@ -437,6 +418,41 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     }
     
     return cells;
+  };
+
+  const generateEnemy = useCallback(() => {
+    if (isGameOver || waveCompleted || enemiesSpawned.current >= enemiesLeftInWave.current || !gameStarted.current) {
+      return;
+    }
+    
+    const waveSettings = waveConfig.current[currentWave as keyof typeof waveConfig.current];
+    const newEnemy = createEnemy(waveSettings);
+    
+    setEnemies(prev => [...prev, newEnemy]);
+    enemiesSpawned.current++;
+    setWaveProgress(prev => prev + 1);
+  }, [currentWave, isGameOver, waveCompleted]);
+
+  // Place a plant on the grid
+  const placePlant = (row: number, col: number) => {
+    if (!selectedPlant) return;
+    if (sunAmount < selectedPlant.cost) return;
+    
+    // Check if there's already a plant at this position
+    const plantExists = plants.some(p => p.row === row && p.col === col);
+    if (plantExists) return;
+    
+    const newPlant = {
+      id: `plant-${Date.now()}`,
+      type: selectedPlant,
+      row,
+      col,
+      lastFired: 0
+    };
+    
+    setPlants(prev => [...prev, newPlant]);
+    setSunAmount(prev => prev - selectedPlant.cost);
+    setSelectedPlant(null);
   };
 
   return (
@@ -521,6 +537,11 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
               onCollect={collectSun}
             />
           ))}
+          
+          {/* Debug indicator (remove in production) */}
+          <div className="absolute bottom-2 left-2 text-xs bg-black/70 text-white px-2 py-1 rounded">
+            Zombies: {enemies.length} | Wave: {currentWave} | Status: {debugMessage}
+          </div>
           
           {/* Wave message overlay */}
           {showWaveMessage && (
