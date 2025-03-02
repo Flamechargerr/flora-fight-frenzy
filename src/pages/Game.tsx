@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import GameBoard from '../components/GameBoard';
-import { ArrowLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Trophy, Volume2, VolumeX, Play } from 'lucide-react';
 
 const Game = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [gameStarted, setGameStarted] = useState(false);
   
   const handleGameOver = () => {
     setIsGameOver(true);
@@ -86,7 +87,24 @@ const Game = () => {
       
       {/* Game Content */}
       <div className="w-full max-w-6xl mx-auto animate-fadeIn">
-        <GameBoard onGameOver={handleGameOver} />
+        {!gameStarted ? (
+          <div className="glass p-8 rounded-xl text-center">
+            <h2 className="text-2xl font-bold text-garden-dark mb-4">Ready to Defend Your Garden?</h2>
+            <p className="mb-6 text-gray-700">
+              Place your plants strategically to defend against the zombie horde. 
+              Collect sun to plant more defenders. Don't let zombies reach the left side of your garden!
+            </p>
+            <button 
+              onClick={() => setGameStarted(true)}
+              className="bg-garden hover:bg-garden-dark text-white font-bold py-3 px-8 rounded-lg text-lg flex items-center mx-auto transition-colors"
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Start Defending!
+            </button>
+          </div>
+        ) : (
+          <GameBoard onGameOver={handleGameOver} />
+        )}
       </div>
     </div>
   );
