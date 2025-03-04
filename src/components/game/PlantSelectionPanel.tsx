@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PlantCard from '../PlantCard';
-import { PlantType } from '../../hooks/useGameState';
+import { PlantType } from '../../game/types';
 
 interface PlantSelectionPanelProps {
   plantTypes: PlantType[];

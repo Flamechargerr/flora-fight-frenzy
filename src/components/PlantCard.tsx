@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { PlantType } from '../hooks/useGameState';
+import { PlantType } from '../game/types';
 import { Sun } from 'lucide-react';
 
 interface PlantCardProps {
