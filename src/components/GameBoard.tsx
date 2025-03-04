@@ -67,11 +67,11 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
   
   // Updated wave config for 5 rounds with increasing difficulty
   const waveConfig = useRef({
-    1: { enemies: 5, speed: 60, health: 100, interval: 4000, types: ['basic'] },
-    2: { enemies: 8, speed: 80, health: 150, interval: 3500, types: ['basic', 'cone'] },
-    3: { enemies: 12, speed: 90, health: 200, interval: 3000, types: ['basic', 'cone', 'bucket'] },
-    4: { enemies: 15, speed: 100, health: 250, interval: 2500, types: ['basic', 'cone', 'bucket'] },
-    5: { enemies: 20, speed: 120, health: 300, interval: 2000, types: ['basic', 'cone', 'bucket', 'door'] }
+    1: { enemies: 5, speed: 60, health: 100, interval: 5000, types: ['basic'] },
+    2: { enemies: 8, speed: 80, health: 150, interval: 4500, types: ['basic', 'cone'] },
+    3: { enemies: 12, speed: 90, health: 200, interval: 4000, types: ['basic', 'cone', 'bucket'] },
+    4: { enemies: 15, speed: 100, health: 250, interval: 3500, types: ['basic', 'cone', 'bucket'] },
+    5: { enemies: 20, speed: 120, health: 300, interval: 3000, types: ['basic', 'cone', 'bucket', 'door'] }
   });
   
   const enemiesLeftInWave = useRef(waveConfig.current[1].enemies);

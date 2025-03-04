@@ -38,7 +38,7 @@ const Game = () => {
               "For centuries we have lived in peace," whispers the elder Sunflower, "but now the undead threaten our existence."
             </p>
             <p className="mb-3 text-white">
-              You must help the Plant Stars survive three waves of zombies. Collect sunlight to grow your defenses and stop the zombies before they cross your garden!
+              You must help the Plant Stars survive five waves of zombies. Collect sunlight to grow your defenses and stop the zombies before they cross your garden!
             </p>
             <button 
               onClick={() => setShowIntro(false)}
