@@ -1,9 +1,10 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PlantCard from './PlantCard';
 import SunResource from './SunResource';
 import Enemy from './Enemy';
 import Plant from './Plant';
-import { Sun } from 'lucide-react';
+import { Sun, Sparkles } from 'lucide-react';
 
 interface GameBoardProps {
   onGameOver: () => void;
@@ -26,6 +27,7 @@ interface EnemyType {
   speed: number;
   row: number;
   position: number;
+  type: string;
 }
 
 interface PlantInstance {
@@ -36,18 +38,23 @@ interface PlantInstance {
   lastFired: number;
 }
 
-interface GridPosition {
+interface ProjectileType {
+  id: string;
   row: number;
-  col: number;
+  startX: number;
+  endX: number;
+  type: string;
+  progress: number;
 }
 
 const GameBoard = ({ onGameOver }: GameBoardProps) => {
-  const [sunAmount, setSunAmount] = useState(150); // Starting with more sun
+  const [sunAmount, setSunAmount] = useState(150);
   const [currentWave, setCurrentWave] = useState(1);
   const [waveProgress, setWaveProgress] = useState(0);
   const [sunResources, setSunResources] = useState<{id: string, x: number, y: number}[]>([]);
   const [enemies, setEnemies] = useState<EnemyType[]>([]);
   const [plants, setPlants] = useState<PlantInstance[]>([]);
+  const [projectiles, setProjectiles] = useState<ProjectileType[]>([]);
   const [selectedPlant, setSelectedPlant] = useState<PlantType | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
@@ -58,16 +65,20 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
   const [gameWon, setGameWon] = useState(false);
   const [debugMessage, setDebugMessage] = useState('Initializing game...');
   
+  // Updated wave config for 5 rounds with increasing difficulty
   const waveConfig = useRef({
-    1: { enemies: 10, speed: 80, health: 100, interval: 3000 },
-    2: { enemies: 15, speed: 100, health: 150, interval: 2500 },
-    3: { enemies: 20, speed: 120, health: 200, interval: 2000 }
+    1: { enemies: 5, speed: 60, health: 100, interval: 4000, types: ['basic'] },
+    2: { enemies: 8, speed: 80, health: 150, interval: 3500, types: ['basic', 'cone'] },
+    3: { enemies: 12, speed: 90, health: 200, interval: 3000, types: ['basic', 'cone', 'bucket'] },
+    4: { enemies: 15, speed: 100, health: 250, interval: 2500, types: ['basic', 'cone', 'bucket'] },
+    5: { enemies: 20, speed: 120, health: 300, interval: 2000, types: ['basic', 'cone', 'bucket', 'door'] }
   });
   
   const enemiesLeftInWave = useRef(waveConfig.current[1].enemies);
   const enemiesSpawned = useRef(0);
   const enemySpawnTimer = useRef<NodeJS.Timeout | null>(null);
   const gameStarted = useRef(false);
+  const activeEnemies = useRef(0);
   
   const ROWS = 5;
   const COLS = 9;
@@ -115,9 +126,19 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
       color: 'bg-blue-400',
       icon: '❄️' 
     },
+    { 
+      id: 'fireshooter', 
+      name: 'Fire Shooter', 
+      cost: 200, 
+      damage: 35, 
+      range: 800, 
+      cooldown: 2500,
+      color: 'bg-red-500',
+      icon: '🔥' 
+    },
   ];
 
-  // Start the first wave - FIXED: Ensuring this happens correctly
+  // Start the first wave
   useEffect(() => {
     console.log("Game initialization started");
     setTimeout(() => {
@@ -138,7 +159,9 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     const messages = {
       1: "Wave 1: The Scouts - Zombies spotted on the horizon!",
       2: "Wave 2: The Horde - More zombies are coming!",
-      3: "Wave 3: Final Stand - The undead elite approaches!"
+      3: "Wave 3: The Heavy-Duty - Tougher zombies approaching!",
+      4: "Wave 4: The Swarm - Zombie numbers increasing!",
+      5: "Wave 5: Final Stand - The undead elite approaches!"
     };
     
     setWaveMessage(messages[waveNumber as keyof typeof messages]);
@@ -151,12 +174,14 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     }, 3000);
   };
   
-  // Start a wave - FIXED: Ensuring enemies spawn correctly
+  // Start a wave with fixed enemy spawning
   const startWave = (waveNumber: number) => {
     console.log(`Starting wave ${waveNumber}`);
     setCurrentWave(waveNumber);
-    enemiesLeftInWave.current = waveConfig.current[waveNumber as keyof typeof waveConfig.current].enemies;
+    const waveSettings = waveConfig.current[waveNumber as keyof typeof waveConfig.current];
+    enemiesLeftInWave.current = waveSettings.enemies;
     enemiesSpawned.current = 0;
+    activeEnemies.current = 0;
     setWaveProgress(0);
     setWaveCompleted(false);
     setDebugMessage(`Wave ${waveNumber} started. Spawning enemies...`);
@@ -167,44 +192,53 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
       enemySpawnTimer.current = null;
     }
     
-    // Start spawning enemies at the configured interval
-    const waveSettings = waveConfig.current[waveNumber as keyof typeof waveConfig.current];
+    // Spawn first enemy immediately
+    spawnNewEnemy(waveSettings);
     
-    // FIXED: Direct immediate spawn of first enemy to ensure something happens
-    const firstEnemy = createEnemy(waveSettings);
-    setEnemies(prev => [...prev, firstEnemy]);
-    enemiesSpawned.current++;
-    
-    // Then set up recurring spawns
+    // Then set up recurring spawns with a reliable interval timer
     enemySpawnTimer.current = setInterval(() => {
-      console.log(`Spawn check: spawned=${enemiesSpawned.current}, total=${waveSettings.enemies}, gameStarted=${gameStarted.current}`);
       if (enemiesSpawned.current < waveSettings.enemies && !waveCompleted && gameStarted.current) {
-        const newEnemy = createEnemy(waveSettings);
-        setEnemies(prev => [...prev, newEnemy]);
-        enemiesSpawned.current++;
-        setWaveProgress(enemiesSpawned.current);
-        setDebugMessage(`Spawned enemy ${enemiesSpawned.current}/${waveSettings.enemies}`);
+        spawnNewEnemy(waveSettings);
       } else if (enemiesSpawned.current >= waveSettings.enemies) {
         // Stop spawning when all enemies for the wave have been spawned
         if (enemySpawnTimer.current) {
           clearInterval(enemySpawnTimer.current);
           enemySpawnTimer.current = null;
-          setDebugMessage(`All enemies for wave ${waveNumber} spawned`);
+          setDebugMessage(`All enemies for wave ${waveNumber} spawned. ${activeEnemies.current} enemies active.`);
         }
       }
     }, waveSettings.interval);
   };
   
+  // Helper function to spawn a new enemy
+  const spawnNewEnemy = (waveSettings: any) => {
+    const newEnemy = createEnemy(waveSettings);
+    setEnemies(prev => [...prev, newEnemy]);
+    enemiesSpawned.current++;
+    activeEnemies.current++;
+    setWaveProgress(enemiesSpawned.current);
+    setDebugMessage(`Spawned enemy ${enemiesSpawned.current}/${waveSettings.enemies}, active: ${activeEnemies.current}`);
+  };
+  
   // Create a new enemy with the correct properties
-  const createEnemy = (waveSettings: { speed: number; health: number }) => {
+  const createEnemy = (waveSettings: { speed: number; health: number; types: string[] }) => {
     const id = `enemy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const row = Math.floor(Math.random() * ROWS);
+    const type = waveSettings.types[Math.floor(Math.random() * waveSettings.types.length)];
+    
+    // Different health for different zombie types
+    let healthModifier = 1;
+    if (type === 'cone') healthModifier = 1.5;
+    if (type === 'bucket') healthModifier = 2;
+    if (type === 'door') healthModifier = 2.5;
+    
     return {
       id,
-      health: waveSettings.health,
+      health: waveSettings.health * healthModifier,
       speed: waveSettings.speed + (Math.random() * 20 - 10), // Add some variation
       row,
-      position: gameArea.width // start from the right edge
+      position: gameArea.width, // start from the right edge
+      type
     };
   };
   
@@ -213,7 +247,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     setWaveCompleted(true);
     setScore(prev => prev + (currentWave * 100)); // Bonus for completing wave
     
-    if (currentWave < 3) {
+    if (currentWave < 5) { // Updated to 5 rounds
       // Start countdown to next wave
       setCountdown(5);
       const timer = setInterval(() => {
@@ -227,7 +261,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
         });
       }, 1000);
     } else {
-      // Game won after wave 3
+      // Game won after wave 5
       setGameWon(true);
     }
   };
@@ -252,7 +286,28 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     setSunResources(prev => prev.filter(sun => sun.id !== id));
   }, []);
 
-  // Game loop - FIXED: Ensuring enemies move correctly
+  // Fire a projectile
+  const fireProjectile = (plant: PlantInstance, targetPosition: number) => {
+    const cellWidth = gameArea.width / COLS;
+    const plantPosition = (plant.col + 1) * cellWidth;
+    
+    let projectileType = 'pea';
+    if (plant.type.id === 'iceshooter') projectileType = 'ice';
+    if (plant.type.id === 'fireshooter') projectileType = 'fire';
+    
+    const newProjectile = {
+      id: `proj-${Date.now()}-${Math.random()}`,
+      row: plant.row,
+      startX: plantPosition - cellWidth/2,
+      endX: targetPosition,
+      type: projectileType,
+      progress: 0
+    };
+    
+    setProjectiles(prev => [...prev, newProjectile]);
+  };
+
+  // Game loop - Main game logic
   useEffect(() => {
     if (isGameOver || gameWon) return;
 
@@ -261,19 +316,33 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
       generateSun();
     }, 3000);
     
+    // Projectile movement timer
+    const projectileTimer = setInterval(() => {
+      setProjectiles(prevProjectiles => {
+        return prevProjectiles.map(proj => {
+          const newProgress = proj.progress + 0.1;
+          if (newProgress >= 1) {
+            return null; // Remove completed projectiles
+          }
+          return { ...proj, progress: newProgress };
+        }).filter(Boolean) as ProjectileType[];
+      });
+    }, 50);
+    
     // Game tick timer
     const gameTickTimer = setInterval(() => {
-      // Check if wave is complete
-      if (enemies.length === 0 && enemiesSpawned.current >= enemiesLeftInWave.current && gameStarted.current && !waveCompleted) {
+      // Check if wave is complete when all enemies defeated
+      if (enemies.length === 0 && enemiesSpawned.current >= enemiesLeftInWave.current && 
+          gameStarted.current && !waveCompleted && activeEnemies.current === 0) {
         completeWave();
       }
       
-      // Move enemies - FIXED: Ensuring enemies actually move
+      // Move enemies
       setEnemies(prevEnemies => {
         if (prevEnemies.length === 0) return prevEnemies;
         
         const newEnemies = prevEnemies.map(enemy => {
-          // Move enemy based on speed - made this more pronounced
+          // Move enemy based on speed
           const newPosition = enemy.position - (enemy.speed / 10);
           
           // Check for game over condition
@@ -327,6 +396,9 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
               // Attack the first enemy
               const targetEnemy = enemiesInRange[0];
               
+              // Fire a visual projectile
+              fireProjectile(plant, targetEnemy.position);
+              
               setEnemies(prevEnemies => {
                 return prevEnemies.map(enemy => {
                   if (enemy.id === targetEnemy.id) {
@@ -335,6 +407,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
                     if (newHealth <= 0) {
                       // Enemy defeated
                       setScore(prev => prev + 10);
+                      activeEnemies.current--; // Decrement active enemies count
                       return { ...enemy, health: 0 };
                     }
                     
@@ -372,6 +445,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     
     return () => {
       clearInterval(sunTimer);
+      clearInterval(projectileTimer);
       if (enemySpawnTimer.current) clearInterval(enemySpawnTimer.current);
       clearInterval(gameTickTimer);
       clearInterval(sunflowerTimer);
@@ -426,11 +500,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
     }
     
     const waveSettings = waveConfig.current[currentWave as keyof typeof waveConfig.current];
-    const newEnemy = createEnemy(waveSettings);
-    
-    setEnemies(prev => [...prev, newEnemy]);
-    enemiesSpawned.current++;
-    setWaveProgress(prev => prev + 1);
+    spawnNewEnemy(waveSettings);
   }, [currentWave, isGameOver, waveCompleted]);
 
   // Place a plant on the grid
@@ -466,7 +536,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
           </div>
           
           <div className="bg-garden-light/50 px-4 py-2 rounded-lg">
-            <span className="text-sm">Wave {currentWave}/3</span>
+            <span className="text-sm">Wave {currentWave}/5</span>
             <div className="w-32 h-2 bg-white/50 rounded-full mt-1">
               <div 
                 className="h-full bg-garden rounded-full transition-all duration-200"
@@ -517,6 +587,28 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
             />
           ))}
           
+          {/* Projectiles */}
+          {projectiles.map((projectile) => (
+            <div 
+              key={projectile.id}
+              className={`absolute h-4 rounded-full z-10 ${
+                projectile.type === 'pea' ? 'bg-green-500 w-4' : 
+                projectile.type === 'ice' ? 'bg-blue-400 w-4' : 
+                'bg-red-500 w-5'
+              }`}
+              style={{
+                left: projectile.startX + (projectile.endX - projectile.startX) * projectile.progress,
+                top: (projectile.row * (gameArea.height / ROWS)) + (gameArea.height / ROWS / 2) - 8,
+                boxShadow: projectile.type === 'fire' ? '0 0 10px #ff3821' : 
+                           projectile.type === 'ice' ? '0 0 8px #41c7ff' : '0 0 5px #5bd942'
+              }}
+            >
+              {projectile.type === 'fire' && (
+                <div className="absolute inset-0 animate-pulse bg-yellow-500 rounded-full opacity-60 scale-[1.3]" />
+              )}
+            </div>
+          ))}
+          
           {/* Enemies */}
           {enemies.map((enemy) => (
             <Enemy
@@ -538,7 +630,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
             />
           ))}
           
-          {/* Debug indicator (remove in production) */}
+          {/* Debug indicator */}
           <div className="absolute bottom-2 left-2 text-xs bg-black/70 text-white px-2 py-1 rounded">
             Zombies: {enemies.length} | Wave: {currentWave} | Status: {debugMessage}
           </div>
@@ -554,7 +646,7 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
           )}
           
           {/* Between waves countdown */}
-          {waveCompleted && currentWave < 3 && (
+          {waveCompleted && currentWave < 5 && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-40 animate-fadeIn">
               <div className="text-center p-6 bg-garden-dark/90 rounded-xl border-2 border-garden">
                 <h2 className="text-3xl font-bold text-white mb-2">Wave {currentWave} Complete!</h2>
@@ -568,7 +660,11 @@ const GameBoard = ({ onGameOver }: GameBoardProps) => {
           {gameWon && (
             <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center animate-fadeIn">
               <h2 className="text-4xl font-bold text-white mb-2">Victory!</h2>
-              <p className="text-xl text-white mb-6">The garden is saved! Final Score: {score}</p>
+              <div className="flex items-center mb-4">
+                <Sparkles className="text-yellow-400 w-6 h-6 mr-2" />
+                <p className="text-xl text-white">Final Score: {score}</p>
+                <Sparkles className="text-yellow-400 w-6 h-6 ml-2" />
+              </div>
               <p className="text-white mb-4 max-w-md text-center">
                 "Thank you, brave defender," whispers the elder Sunflower. "The Plant Stars will remember your bravery."
               </p>
