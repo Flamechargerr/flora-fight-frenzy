@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface PlantType {
@@ -19,6 +18,9 @@ export interface EnemyType {
   row: number;
   position: number;
   type: string;
+  isEating?: boolean;
+  targetPlant?: string;
+  damage?: number;
 }
 
 export interface PlantInstance {
@@ -27,6 +29,8 @@ export interface PlantInstance {
   row: number;
   col: number;
   lastFired: number;
+  health?: number;
+  maxHealth?: number;
 }
 
 export interface ProjectileType {
@@ -111,6 +115,23 @@ export const PLANT_TYPES: PlantType[] = [
   },
 ];
 
+// Initial plant health values
+const PLANT_HEALTH = {
+  sunflower: 300,
+  peashooter: 300,
+  wallnut: 1000,
+  iceshooter: 300,
+  fireshooter: 300
+};
+
+// Zombie damage values
+const ZOMBIE_DAMAGE = {
+  basic: 1,
+  cone: 1.5,
+  bucket: 2,
+  door: 3
+};
+
 export const useGameState = ({ onGameOver }: UseGameStateProps) => {
   const [sunAmount, setSunAmount] = useState(150);
   const [currentWave, setCurrentWave] = useState(1);
@@ -180,7 +201,7 @@ export const useGameState = ({ onGameOver }: UseGameStateProps) => {
       }
     };
   }, []);
-
+  
   // Create a new enemy with the correct properties
   const createEnemy = (waveSettings: { speed: number; health: number; types: string[] }) => {
     const id = `enemy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -199,7 +220,9 @@ export const useGameState = ({ onGameOver }: UseGameStateProps) => {
       speed: waveSettings.speed + (Math.random() * 20 - 10), // Add some variation
       row,
       position: gameArea.width, // start from the right edge
-      type
+      type,
+      isEating: false,
+      damage: ZOMBIE_DAMAGE[type as keyof typeof ZOMBIE_DAMAGE] || 1
     };
   };
   
@@ -246,7 +269,7 @@ export const useGameState = ({ onGameOver }: UseGameStateProps) => {
           setDebugMessage(`All enemies for wave ${waveNumber} spawned. ${activeEnemies.current} enemies active.`);
         }
       }
-    }, waveSettings.interval);
+    }, 5000); // Fixed 5 second interval between zombies
   };
   
   // Complete a wave
@@ -314,7 +337,7 @@ export const useGameState = ({ onGameOver }: UseGameStateProps) => {
     setProjectiles(prev => [...prev, newProjectile]);
   };
 
-  // Place a plant on the grid
+  // Place a plant on the grid with health
   const placePlant = (row: number, col: number) => {
     if (!selectedPlant) return;
     if (sunAmount < selectedPlant.cost) return;
@@ -323,12 +346,16 @@ export const useGameState = ({ onGameOver }: UseGameStateProps) => {
     const plantExists = plants.some(p => p.row === row && p.col === col);
     if (plantExists) return;
     
+    const maxHealth = PLANT_HEALTH[selectedPlant.id as keyof typeof PLANT_HEALTH] || 300;
+    
     const newPlant = {
       id: `plant-${Date.now()}`,
       type: selectedPlant,
       row,
       col,
-      lastFired: 0
+      lastFired: 0,
+      health: maxHealth,
+      maxHealth
     };
     
     setPlants(prev => [...prev, newPlant]);
@@ -376,25 +403,103 @@ export const useGameState = ({ onGameOver }: UseGameStateProps) => {
         completeWave();
       }
       
-      // Move enemies
+      // Process plant-zombie interactions
+      // 1. Find plants that zombies can eat
+      const plantsWithPosition = plants.map(plant => {
+        const cellWidth = gameArea.width / COLS;
+        const plantPosition = plant.col * cellWidth + (cellWidth / 2);
+        return { ...plant, position: plantPosition };
+      });
+      
+      // 2. Move enemies and handle plant eating
       setEnemies(prevEnemies => {
         if (prevEnemies.length === 0) return prevEnemies;
         
         const newEnemies = prevEnemies.map(enemy => {
-          // Move enemy based on speed
-          const newPosition = enemy.position - (enemy.speed / 10);
+          // Check if there's a plant in the same row in front of the zombie
+          const plantsInPath = plantsWithPosition.filter(plant => 
+            plant.row === enemy.row && plant.position >= enemy.position - 30 && plant.position <= enemy.position + 10
+          );
           
-          // Check for game over condition
-          if (newPosition <= 0) {
-            setIsGameOver(true);
-            onGameOver();
+          // If there's a plant to eat and not already eating
+          if (plantsInPath.length > 0 && !enemy.isEating) {
+            const targetPlant = plantsInPath[0];
+            return { 
+              ...enemy, 
+              isEating: true, 
+              targetPlant: targetPlant.id,
+              speed: 0 // Stop moving while eating
+            };
           }
-          
-          return { ...enemy, position: newPosition };
+          // If already eating, continue to eat
+          else if (enemy.isEating && enemy.targetPlant) {
+            return { ...enemy };  // Keep eating state
+          }
+          // Otherwise, continue moving
+          else {
+            // Move enemy based on speed
+            const newPosition = enemy.position - (enemy.speed / 10);
+            
+            // Check for game over condition
+            if (newPosition <= 0) {
+              setIsGameOver(true);
+              onGameOver();
+            }
+            
+            return { ...enemy, position: newPosition };
+          }
         });
         
         // Filter out any enemies with health <= 0
         return newEnemies.filter(enemy => enemy.health > 0);
+      });
+      
+      // 3. Process damage to plants
+      setPlants(prevPlants => {
+        const updatedPlants = prevPlants.map(plant => {
+          // Find enemies eating this plant
+          const eatingEnemies = enemies.filter(enemy => 
+            enemy.isEating && enemy.targetPlant === plant.id
+          );
+          
+          if (eatingEnemies.length > 0) {
+            // Calculate total damage from all eating enemies
+            const totalDamage = eatingEnemies.reduce((sum, enemy) => 
+              sum + (enemy.damage || 1), 0);
+            
+            const newHealth = (plant.health || 0) - totalDamage;
+            
+            if (newHealth <= 0) {
+              // Plant is completely eaten, return null to remove it
+              return null;
+            }
+            
+            return { ...plant, health: newHealth };
+          }
+          
+          return plant;
+        }).filter(Boolean) as PlantInstance[];
+        
+        // If a plant was eaten, free zombies that were eating it
+        if (updatedPlants.length < prevPlants.length) {
+          setEnemies(prevEnemies => 
+            prevEnemies.map(enemy => {
+              const plantExists = updatedPlants.some(p => p.id === enemy.targetPlant);
+              if (enemy.isEating && !plantExists) {
+                // Reset zombie to walking state
+                return { 
+                  ...enemy, 
+                  isEating: false, 
+                  targetPlant: undefined, 
+                  speed: waveConfig.current[currentWave as keyof typeof waveConfig.current].speed
+                };
+              }
+              return enemy;
+            })
+          );
+        }
+        
+        return updatedPlants;
       });
       
       // Plant actions (like sunflowers generating sun, plants attacking)

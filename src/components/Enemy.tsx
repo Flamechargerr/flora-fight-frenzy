@@ -1,5 +1,5 @@
 
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 
 interface EnemyProps {
   enemy: {
@@ -9,6 +9,8 @@ interface EnemyProps {
     row: number;
     position: number;
     type: string;
+    isEating?: boolean;
+    targetPlant?: string;
   };
   gridDimensions: {
     rows: number;
@@ -33,10 +35,16 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
   
   const healthPercentage = (enemy.health / maxHealth) * 100;
   
-  // Add walking animation
-  const isWalking = true;
+  // Add eating and walking animations
+  const isEating = enemy.isEating;
+  const isWalking = !isEating;
+  
   const wobbleStyle = {
-    animation: 'zombieWalk 0.8s infinite alternate',
+    animation: isWalking ? 'zombieWalk 0.8s infinite alternate' : 'none',
+  };
+  
+  const eatingStyle = {
+    animation: isEating ? 'zombieEat 0.5s infinite' : 'none',
   };
   
   return (
@@ -48,7 +56,7 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
         top: `${top - (size/2)}px`, 
         left: `${enemy.position}px`,
         transition: 'left 0.1s linear',
-        ...(isWalking ? wobbleStyle : {})
+        ...(isWalking ? wobbleStyle : eatingStyle)
       }}
     >
       <div className="relative w-full h-full flex items-center justify-center">
@@ -71,8 +79,11 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
             <div className="w-[60%] h-[60%] bg-black rounded-full"></div>
           </div>
           
-          {/* Zombie mouth */}
-          <div className="absolute w-[60%] h-[20%] bg-red-900 bottom-[20%] rounded-md flex items-center justify-around">
+          {/* Zombie mouth - animate when eating */}
+          <div 
+            className="absolute w-[60%] h-[20%] bg-red-900 bottom-[20%] rounded-md flex items-center justify-around"
+            style={isEating ? { animation: 'mouthOpen 0.5s infinite' } : {}}
+          >
             <div className="w-[10%] h-[80%] bg-yellow-100"></div>
             <div className="w-[10%] h-[80%] bg-yellow-100"></div>
             <div className="w-[10%] h-[80%] bg-yellow-100"></div>

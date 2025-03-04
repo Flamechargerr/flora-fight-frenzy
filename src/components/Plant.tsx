@@ -1,6 +1,5 @@
-
 import { memo } from 'react';
-import { PlantType } from './GameBoard';
+import { PlantType } from '../hooks/useGameState';
 
 interface PlantProps {
   plant: {
@@ -9,6 +8,8 @@ interface PlantProps {
     row: number;
     col: number;
     lastFired: number;
+    health?: number;
+    maxHealth?: number;
   };
   gridDimensions: {
     rows: number;
@@ -32,6 +33,11 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
   const isShootingPlant = plant.type.id === 'peashooter' || plant.type.id === 'iceshooter' || plant.type.id === 'fireshooter';
   const isShooting = isShootingPlant && Date.now() - plant.lastFired < 500;
   
+  // Calculate plant health percentage if being eaten
+  const healthPercentage = plant.health && plant.maxHealth 
+    ? (plant.health / plant.maxHealth) * 100 
+    : 100;
+  
   return (
     <div 
       className="plant"
@@ -40,7 +46,8 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
         height: `${size}px`, 
         left: `${left - (size/2)}px`, 
         top: `${top - (size/2)}px`,
-        zIndex: 5
+        zIndex: 5,
+        opacity: healthPercentage < 100 ? Math.max(0.6, healthPercentage / 100) : 1
       }}
     >
       {plant.type.id === 'sunflower' && (
@@ -186,6 +193,16 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
               <div className="w-full h-full bg-gradient-to-r from-red-500 to-transparent rounded-full"></div>
             </div>
           )}
+        </div>
+      )}
+      
+      {/* Plant health bar - Only show when damaged */}
+      {healthPercentage < 100 && (
+        <div className="absolute -top-5 left-0 w-full h-2 bg-black/60 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-green-500 transition-all duration-200"
+            style={{ width: `${healthPercentage}%` }}
+          />
         </div>
       )}
     </div>
