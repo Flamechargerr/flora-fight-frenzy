@@ -21,7 +21,7 @@ interface EnemyProps {
 }
 
 const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
-  const cellHeight = gameArea.height / gridDimensions.rows;
+  const cellHeight = gameAreaSize.height / gridDimensions.rows;
   const top = enemy.row * cellHeight + (cellHeight / 2);
   const size = cellHeight * 0.85;
   
