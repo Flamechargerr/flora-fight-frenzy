@@ -1,10 +1,16 @@
-import { memo } from 'react';
-import { PlantType } from '../hooks/useGameState';
+
+import { memo, useState, useEffect } from 'react';
 
 interface PlantProps {
   plant: {
     id: string;
-    type: PlantType;
+    type: {
+      id: string;
+      name: string;
+      color: string;
+      icon: string;
+      damage: number;
+    };
     row: number;
     col: number;
     lastFired: number;
@@ -22,21 +28,167 @@ interface PlantProps {
 }
 
 const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
+  const [isRecoil, setIsRecoil] = useState(false);
   const cellWidth = gameAreaSize.width / gridDimensions.cols;
   const cellHeight = gameAreaSize.height / gridDimensions.rows;
-  
   const left = plant.col * cellWidth + (cellWidth / 2);
   const top = plant.row * cellHeight + (cellHeight / 2);
-  const size = Math.min(cellWidth, cellHeight) * 0.85;
+  const size = Math.min(cellWidth, cellHeight) * 0.8;
   
-  // Show animation for shooting plants
-  const isShootingPlant = plant.type.id === 'peashooter' || plant.type.id === 'iceshooter' || plant.type.id === 'fireshooter';
-  const isShooting = isShootingPlant && Date.now() - plant.lastFired < 500;
-  
-  // Calculate plant health percentage if being eaten
+  // Health percentage for health bar
   const healthPercentage = plant.health && plant.maxHealth 
     ? (plant.health / plant.maxHealth) * 100 
     : 100;
+  
+  // Monitor plant.lastFired to trigger recoil animation
+  useEffect(() => {
+    if (plant.lastFired > 0 && (plant.type.id === 'peashooter' || plant.type.id === 'iceshooter' || plant.type.id === 'fireshooter')) {
+      setIsRecoil(true);
+      const timer = setTimeout(() => {
+        setIsRecoil(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [plant.lastFired, plant.type.id]);
+  
+  // Different plant visualization based on type
+  let plantStyle = {};
+  let plantContent = null;
+  
+  switch (plant.type.id) {
+    case 'sunflower':
+      plantContent = (
+        <div className="w-full h-full flex flex-col items-center justify-center">
+          <div className="w-[70%] h-[70%] rounded-full bg-yellow-400 flex items-center justify-center border-4 border-yellow-500">
+            <div className="w-[60%] h-[60%] rounded-full bg-yellow-700 flex items-center justify-center">
+              <div className="w-[50%] h-[50%] rounded-full bg-yellow-900"></div>
+            </div>
+          </div>
+          <div className="absolute w-full h-full pointer-events-none">
+            <div className="absolute w-[25%] h-[40%] bg-green-700 rounded-full -bottom-[15%] left-[37.5%]"></div>
+            <div className="absolute w-[20%] h-[20%] bg-yellow-400 rounded-full top-[10%] right-[10%] transform rotate-45"></div>
+            <div className="absolute w-[20%] h-[20%] bg-yellow-400 rounded-full top-[10%] left-[10%] transform -rotate-45"></div>
+            <div className="absolute w-[20%] h-[20%] bg-yellow-400 rounded-full bottom-[30%] right-[5%] transform rotate-12"></div>
+            <div className="absolute w-[20%] h-[20%] bg-yellow-400 rounded-full bottom-[30%] left-[5%] transform -rotate-12"></div>
+          </div>
+        </div>
+      );
+      break;
+      
+    case 'peashooter':
+      plantContent = (
+        <div 
+          className={`w-full h-full flex flex-col items-center justify-center transition-transform duration-200 ${isRecoil ? 'scale-95 -translate-x-2' : ''}`}
+        >
+          <div className="w-[60%] h-[60%] rounded-full bg-green-500 flex items-center justify-center border-4 border-green-600 relative overflow-visible">
+            <div className="w-[50%] h-[50%] rounded-full bg-green-700"></div>
+            
+            {/* Shooter mouth */}
+            <div className={`absolute w-[40%] h-[40%] bg-green-800 rounded-full right-[-10%] flex items-center justify-center transition-all duration-200 ${isRecoil ? 'scale-90 right-[-5%]' : ''}`}>
+              <div className="w-[50%] h-[50%] rounded-full bg-black"></div>
+            </div>
+          </div>
+          <div className="absolute w-full h-full pointer-events-none">
+            <div className="absolute w-[25%] h-[40%] bg-green-700 rounded-full -bottom-[15%] left-[37.5%]"></div>
+            <div className="absolute w-[30%] h-[15%] bg-green-600 rounded-full top-[20%] left-[35%]"></div>
+          </div>
+        </div>
+      );
+      break;
+      
+    case 'iceshooter':
+      plantContent = (
+        <div 
+          className={`w-full h-full flex flex-col items-center justify-center transition-transform duration-200 ${isRecoil ? 'scale-95 -translate-x-2' : ''}`}
+        >
+          <div className="w-[60%] h-[60%] rounded-full bg-blue-400 flex items-center justify-center border-4 border-blue-500 relative overflow-visible">
+            <div className="w-[50%] h-[50%] rounded-full bg-blue-600"></div>
+            
+            {/* Ice crystals on top */}
+            <div className="absolute w-[20%] h-[30%] bg-blue-200 top-[-15%] left-[25%] transform rotate-45"></div>
+            <div className="absolute w-[15%] h-[25%] bg-blue-200 top-[-10%] right-[30%] transform -rotate-15"></div>
+            
+            {/* Shooter mouth */}
+            <div className={`absolute w-[40%] h-[40%] bg-blue-700 rounded-full right-[-10%] flex items-center justify-center transition-all duration-200 ${isRecoil ? 'scale-90 right-[-5%]' : ''}`}>
+              <div className="w-[50%] h-[50%] rounded-full bg-black"></div>
+            </div>
+          </div>
+          <div className="absolute w-full h-full pointer-events-none">
+            <div className="absolute w-[25%] h-[40%] bg-green-700 rounded-full -bottom-[15%] left-[37.5%]"></div>
+            
+            {/* Cold aura */}
+            <div className="absolute inset-0 rounded-full bg-blue-100 opacity-20 animate-pulse"></div>
+          </div>
+        </div>
+      );
+      break;
+      
+    case 'fireshooter':
+      plantContent = (
+        <div 
+          className={`w-full h-full flex flex-col items-center justify-center transition-transform duration-200 ${isRecoil ? 'scale-95 -translate-x-2' : ''}`}
+        >
+          <div className="w-[60%] h-[60%] rounded-full bg-red-500 flex items-center justify-center border-4 border-red-600 relative overflow-visible">
+            <div className="w-[50%] h-[50%] rounded-full bg-red-700"></div>
+            
+            {/* Fire on top */}
+            <div className="absolute w-[30%] h-[40%] bg-yellow-500 top-[-20%] left-[35%] rounded-t-full animate-flame"></div>
+            <div className="absolute w-[20%] h-[30%] bg-orange-500 top-[-15%] left-[25%] rounded-t-full animate-flame" style={{ animationDelay: '0.2s' }}></div>
+            <div className="absolute w-[25%] h-[35%] bg-red-600 top-[-18%] right-[20%] rounded-t-full animate-flame" style={{ animationDelay: '0.4s' }}></div>
+            
+            {/* Shooter mouth */}
+            <div className={`absolute w-[40%] h-[40%] bg-red-800 rounded-full right-[-10%] flex items-center justify-center transition-all duration-200 ${isRecoil ? 'scale-90 right-[-5%]' : ''}`}>
+              <div className="w-[50%] h-[50%] rounded-full bg-black"></div>
+            </div>
+          </div>
+          <div className="absolute w-full h-full pointer-events-none">
+            <div className="absolute w-[25%] h-[40%] bg-green-700 rounded-full -bottom-[15%] left-[37.5%]"></div>
+            
+            {/* Heat aura */}
+            <div className="absolute inset-0 rounded-full bg-red-500 opacity-10 animate-pulse"></div>
+          </div>
+        </div>
+      );
+      break;
+      
+    case 'wallnut':
+      plantContent = (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="w-[80%] h-[80%] rounded-full bg-amber-700 flex items-center justify-center border-4 border-amber-800">
+            {/* Crack visual cues for damage */}
+            {healthPercentage < 75 && (
+              <div className="absolute top-[20%] right-[30%] w-[30%] h-[2px] bg-amber-900 transform rotate-45"></div>
+            )}
+            {healthPercentage < 50 && (
+              <div className="absolute top-[40%] left-[20%] w-[40%] h-[3px] bg-amber-900 transform -rotate-25"></div>
+            )}
+            {healthPercentage < 25 && (
+              <div className="absolute bottom-[30%] right-[25%] w-[35%] h-[4px] bg-amber-900 transform rotate-12"></div>
+            )}
+            
+            {/* Face */}
+            <div className="w-[60%] h-[60%] rounded-full bg-amber-600 flex flex-col items-center justify-center">
+              {/* Eyes */}
+              <div className="flex w-[80%] justify-around mb-2">
+                <div className="w-[25%] h-[25%] bg-amber-900 rounded-full"></div>
+                <div className="w-[25%] h-[25%] bg-amber-900 rounded-full"></div>
+              </div>
+              
+              {/* Mouth - changes with health */}
+              {healthPercentage > 50 ? (
+                <div className="w-[60%] h-[15%] bg-amber-900 rounded-full mt-2"></div>
+              ) : (
+                <div className="w-[60%] h-[15%] bg-amber-900 rounded-full mt-2 transform scale-y-50"></div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+      break;
+      
+    default:
+      plantContent = <div className={`text-4xl ${plant.type.color}`}>{plant.type.icon}</div>;
+  }
   
   return (
     <div 
@@ -45,162 +197,20 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
         width: `${size}px`, 
         height: `${size}px`, 
         left: `${left - (size/2)}px`, 
-        top: `${top - (size/2)}px`,
-        zIndex: 5,
-        opacity: healthPercentage < 100 ? Math.max(0.6, healthPercentage / 100) : 1
+        top: `${top - (size/2)}px`
       }}
     >
-      {plant.type.id === 'sunflower' && (
-        <div className="w-full h-full relative flex items-center justify-center">
-          {/* Stem */}
-          <div className="absolute w-[10%] h-[40%] bg-green-600 bottom-0 rounded-sm">
-            <div className="absolute w-[160%] h-[30%] bg-green-500 rounded-full left-[-30%] bottom-[50%] rotate-45"></div>
-            <div className="absolute w-[160%] h-[30%] bg-green-500 rounded-full left-[-30%] bottom-[30%] -rotate-45"></div>
-          </div>
-          {/* Flower */}
-          <div className="absolute w-[80%] h-[80%] rounded-full bg-yellow-400 top-[5%] flex items-center justify-center animate-pulse">
-            <div className="absolute w-[70%] h-[70%] bg-yellow-600 rounded-full flex items-center justify-center">
-              <div className="w-[50%] h-[50%] bg-yellow-800 rounded-full"></div>
-            </div>
-            {/* Animated Petals */}
-            {[...Array(8)].map((_, i) => (
-              <div 
-                key={i}
-                className="absolute w-[30%] h-[30%] bg-yellow-300 rounded-full animate-pulse"
-                style={{ 
-                  transform: `rotate(${i * 45}deg) translateY(-130%)`,
-                  animationDelay: `${i * 0.1}s`,
-                }}
-              ></div>
-            ))}
-          </div>
-          {/* Face */}
-          <div className="absolute w-[15%] h-[8%] bg-black rounded-full top-[35%] left-[30%]"></div>
-          <div className="absolute w-[15%] h-[8%] bg-black rounded-full top-[35%] right-[30%]"></div>
-          <div className="absolute w-[30%] h-[10%] bg-black rounded-full top-[50%] transform scale-y-50 scale-x-75"></div>
-        </div>
-      )}
+      {plantContent}
       
-      {plant.type.id === 'peashooter' && (
-        <div className="w-full h-full relative flex items-center justify-center">
-          {/* Stem and pot */}
-          <div className="absolute w-[15%] h-[40%] bg-green-600 bottom-[10%] rounded-sm">
-            <div className="absolute w-[180%] h-[15%] bg-green-500 rounded-full left-[-40%] bottom-[70%] rotate-[-20deg]"></div>
-            <div className="absolute w-[180%] h-[15%] bg-green-500 rounded-full left-[-40%] bottom-[50%] rotate-[20deg]"></div>
-          </div>
-          <div className="absolute w-[50%] h-[15%] bg-amber-800 bottom-0 rounded-md">
-            <div className="absolute inset-0 bg-gradient-to-t from-amber-900 to-transparent opacity-60"></div>
-          </div>
-          {/* Head */}
-          <div className="absolute w-[75%] h-[65%] bg-green-500 rounded-full top-[5%] flex items-center justify-center">
-            {/* Face */}
-            <div className="absolute w-[15%] h-[15%] bg-black rounded-full top-[30%] left-[25%]"></div>
-            <div className="absolute w-[15%] h-[15%] bg-black rounded-full top-[30%] right-[25%]"></div>
-            <div className="absolute w-[25%] h-[10%] bg-black rounded-full top-[50%] transform scale-y-50"></div>
-          </div>
-          {/* Shooter */}
-          <div className="absolute w-[40%] h-[30%] bg-green-600 rounded-full top-[20%] right-[-10%] flex items-center justify-center">
-            <div className="absolute w-[50%] h-[50%] rounded-full bg-green-700 right-[10%]"></div>
-          </div>
-          {/* Projectile animation when firing */}
-          {isShooting && (
-            <div className="absolute w-[60%] h-[5%] right-0 top-[35%] flex items-center">
-              <div className="w-full h-full bg-gradient-to-r from-green-500 to-transparent rounded-full"></div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {plant.type.id === 'wallnut' && (
-        <div className="w-full h-full relative flex items-center justify-center">
-          {/* Nut body with texture */}
-          <div className="absolute w-[85%] h-[85%] bg-amber-600 rounded-full flex items-center justify-center overflow-hidden">
-            <div className="absolute w-[85%] h-[85%] bg-amber-500 rounded-full"></div>
-            {/* Texture */}
-            <div className="absolute w-full h-full opacity-30">
-              <div className="absolute w-[40%] h-[40%] bg-amber-700 rounded-full top-[10%] left-[10%]"></div>
-              <div className="absolute w-[30%] h-[30%] bg-amber-700 rounded-full bottom-[20%] right-[15%]"></div>
-              <div className="absolute w-[20%] h-[20%] bg-amber-700 rounded-full top-[50%] right-[30%]"></div>
-            </div>
-            {/* Face */}
-            <div className="absolute w-[15%] h-[10%] bg-black rounded-full top-[35%] left-[25%]"></div>
-            <div className="absolute w-[15%] h-[10%] bg-black rounded-full top-[35%] right-[25%]"></div>
-            <div className="absolute w-[40%] h-[15%] border-t-4 border-black top-[55%] rounded-t-full transform scale-y-50"></div>
-          </div>
-        </div>
-      )}
-      
-      {plant.type.id === 'iceshooter' && (
-        <div className="w-full h-full relative flex items-center justify-center">
-          {/* Stem and pot */}
-          <div className="absolute w-[15%] h-[40%] bg-blue-700 bottom-[10%] rounded-sm"></div>
-          <div className="absolute w-[50%] h-[15%] bg-blue-900 bottom-0 rounded-md">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-800 to-blue-700 opacity-50"></div>
-          </div>
-          {/* Head */}
-          <div className="absolute w-[75%] h-[65%] bg-blue-400 rounded-full top-[5%] flex items-center justify-center overflow-hidden">
-            {/* Ice effect */}
-            <div className="absolute w-full h-full bg-gradient-to-br from-blue-300 to-blue-500"></div>
-            {/* Ice crystals */}
-            <div className="absolute w-[20%] h-[30%] bg-blue-200 -top-[5%] transform rotate-45"></div>
-            <div className="absolute w-[20%] h-[30%] bg-blue-200 -top-[15%] left-[40%] transform -rotate-15"></div>
-            <div className="absolute w-[20%] h-[30%] bg-blue-200 -top-[5%] right-[10%] transform rotate-60"></div>
-            {/* Face */}
-            <div className="absolute w-[15%] h-[15%] bg-black rounded-full top-[30%] left-[25%]"></div>
-            <div className="absolute w-[15%] h-[15%] bg-black rounded-full top-[30%] right-[25%]"></div>
-            <div className="absolute w-[25%] h-[10%] bg-black rounded-full top-[50%] transform scale-y-50"></div>
-          </div>
-          {/* Shooter */}
-          <div className="absolute w-[40%] h-[30%] bg-blue-500 rounded-full top-[20%] right-[-10%] flex items-center justify-center">
-            <div className="absolute w-[50%] h-[50%] rounded-full bg-blue-600 right-[10%]"></div>
-          </div>
-          {/* Projectile animation when firing */}
-          {isShooting && (
-            <div className="absolute w-[60%] h-[5%] right-0 top-[35%] flex items-center">
-              <div className="w-full h-full bg-gradient-to-r from-blue-400 to-transparent rounded-full"></div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {plant.type.id === 'fireshooter' && (
-        <div className="w-full h-full relative flex items-center justify-center">
-          {/* Stem and pot */}
-          <div className="absolute w-[15%] h-[40%] bg-red-800 bottom-[10%] rounded-sm"></div>
-          <div className="absolute w-[50%] h-[15%] bg-red-900 bottom-0 rounded-md">
-            <div className="absolute inset-0 bg-gradient-to-t from-red-950 to-transparent opacity-60"></div>
-          </div>
-          {/* Head */}
-          <div className="absolute w-[75%] h-[65%] bg-red-500 rounded-full top-[5%] flex items-center justify-center overflow-hidden">
-            {/* Fire effect */}
-            <div className="absolute w-full h-full bg-gradient-to-br from-red-400 to-red-600"></div>
-            {/* Flames */}
-            <div className="absolute w-[20%] h-[40%] bg-yellow-500 -top-[10%] left-[40%] animate-pulse"></div>
-            <div className="absolute w-[15%] h-[30%] bg-orange-500 -top-[5%] left-[25%] animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="absolute w-[15%] h-[30%] bg-orange-500 -top-[5%] right-[25%] animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-            {/* Face */}
-            <div className="absolute w-[15%] h-[15%] bg-black rounded-full top-[30%] left-[25%]"></div>
-            <div className="absolute w-[15%] h-[15%] bg-black rounded-full top-[30%] right-[25%]"></div>
-            <div className="absolute w-[25%] h-[10%] bg-black rounded-full top-[50%] transform scale-y-50"></div>
-          </div>
-          {/* Shooter */}
-          <div className="absolute w-[40%] h-[30%] bg-red-600 rounded-full top-[20%] right-[-10%] flex items-center justify-center">
-            <div className="absolute w-[50%] h-[50%] rounded-full bg-red-700 right-[10%]"></div>
-          </div>
-          {/* Projectile animation when firing */}
-          {isShooting && (
-            <div className="absolute w-[60%] h-[5%] right-0 top-[35%] flex items-center">
-              <div className="w-full h-full bg-gradient-to-r from-red-500 to-transparent rounded-full"></div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Plant health bar - Only show when damaged */}
-      {healthPercentage < 100 && (
-        <div className="absolute -top-5 left-0 w-full h-2 bg-black/60 rounded-full overflow-hidden">
+      {/* Health bar for plants with health */}
+      {plant.health !== undefined && plant.maxHealth !== undefined && (
+        <div className="absolute -bottom-5 left-0 w-full h-2 bg-black/60 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-green-500 transition-all duration-200"
+            className={`h-full transition-all duration-200 ${
+              healthPercentage > 70 ? 'bg-green-500' : 
+              healthPercentage > 30 ? 'bg-yellow-500' : 
+              'bg-red-500'
+            }`}
             style={{ width: `${healthPercentage}%` }}
           />
         </div>

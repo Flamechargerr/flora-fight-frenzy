@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { 
   PlantType, PlantInstance, EnemyType, ProjectileType, GameAreaDimensions, SunResource, 
@@ -20,9 +19,11 @@ export { ROWS, COLS, DEFAULT_GAME_AREA, PLANT_TYPES };
 
 export interface UseGameStateProps {
   onGameOver: () => void;
+  onLevelComplete?: (score: number) => void;
+  level?: number;
 }
 
-export const useGameState = ({ onGameOver }: UseGameStateProps) => {
+export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStateProps) => {
   const [sunAmount, setSunAmount] = useState(150);
   const [currentWave, setCurrentWave] = useState(1);
   const [waveProgress, setWaveProgress] = useState(0);
