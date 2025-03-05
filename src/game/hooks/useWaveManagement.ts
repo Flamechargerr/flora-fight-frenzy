@@ -86,19 +86,24 @@ export const useWaveManagement = ({
     // Spawn first enemy immediately
     spawnNewEnemy(waveSettings);
     
-    // Then set up recurring spawns with a reliable interval timer
+    // Then set up recurring spawns with the interval from wave config
+    const spawnInterval = waveSettings.interval || 5000; // Use wave interval or default to 5000ms
+    
     enemySpawnTimer.current = setInterval(() => {
-      if (enemiesSpawned.current < waveSettings.enemies && !setWaveCompleted && gameStarted.current) {
+      if (enemiesSpawned.current < waveSettings.enemies && gameStarted.current) {
         spawnNewEnemy(waveSettings);
-      } else if (enemiesSpawned.current >= waveSettings.enemies) {
-        // Stop spawning when all enemies for the wave have been spawned
-        if (enemySpawnTimer.current) {
-          clearInterval(enemySpawnTimer.current);
-          enemySpawnTimer.current = null;
-          setDebugMessage(`All enemies for wave ${waveNumber} spawned. ${activeEnemies.current} enemies active.`);
+        
+        // Check if we've spawned all enemies
+        if (enemiesSpawned.current >= waveSettings.enemies) {
+          // Stop spawning when all enemies for the wave have been spawned
+          if (enemySpawnTimer.current) {
+            clearInterval(enemySpawnTimer.current);
+            enemySpawnTimer.current = null;
+            setDebugMessage(`All enemies for wave ${waveNumber} spawned. ${activeEnemies.current} enemies active.`);
+          }
         }
       }
-    }, 5000); // Fixed 5 second interval between zombies
+    }, spawnInterval);
   }, [waveConfig, setCurrentWave, setWaveProgress, setWaveCompleted, setDebugMessage, spawnNewEnemy]);
 
   // Complete a wave
