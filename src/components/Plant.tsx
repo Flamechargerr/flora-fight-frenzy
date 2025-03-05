@@ -1,5 +1,5 @@
 
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 
 interface PlantProps {
   plant: {
@@ -28,6 +28,7 @@ interface PlantProps {
 }
 
 const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
+  const [isRecoil, setIsRecoil] = useState(false);
   const cellWidth = gameAreaSize.width / gridDimensions.cols;
   const cellHeight = gameAreaSize.height / gridDimensions.rows;
   const left = plant.col * cellWidth + (cellWidth / 2);
@@ -38,6 +39,17 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
   const healthPercentage = plant.health && plant.maxHealth 
     ? (plant.health / plant.maxHealth) * 100 
     : 100;
+  
+  // Monitor plant.lastFired to trigger recoil animation
+  useEffect(() => {
+    if (plant.lastFired > 0 && (plant.type.id === 'peashooter' || plant.type.id === 'iceshooter' || plant.type.id === 'fireshooter')) {
+      setIsRecoil(true);
+      const timer = setTimeout(() => {
+        setIsRecoil(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [plant.lastFired, plant.type.id]);
   
   // Different plant visualization based on type
   let plantContent = null;
@@ -64,7 +76,7 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
       
     case 'peashooter':
       plantContent = (
-        <div className="w-full h-full flex flex-col items-center justify-center">
+        <div className={`w-full h-full flex flex-col items-center justify-center ${isRecoil ? 'recoil' : ''}`}>
           <div className="w-[60%] h-[60%] rounded-full bg-green-500 flex items-center justify-center border-4 border-green-600 relative overflow-visible">
             <div className="w-[50%] h-[50%] rounded-full bg-green-700"></div>
             
@@ -83,7 +95,7 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
       
     case 'iceshooter':
       plantContent = (
-        <div className="w-full h-full flex flex-col items-center justify-center">
+        <div className={`w-full h-full flex flex-col items-center justify-center ${isRecoil ? 'recoil' : ''}`}>
           <div className="w-[60%] h-[60%] rounded-full bg-blue-400 flex items-center justify-center border-4 border-blue-500 relative overflow-visible">
             <div className="w-[50%] h-[50%] rounded-full bg-blue-600"></div>
             
@@ -108,7 +120,7 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
       
     case 'fireshooter':
       plantContent = (
-        <div className="w-full h-full flex flex-col items-center justify-center">
+        <div className={`w-full h-full flex flex-col items-center justify-center ${isRecoil ? 'recoil' : ''}`}>
           <div className="w-[60%] h-[60%] rounded-full bg-red-500 flex items-center justify-center border-4 border-red-600 relative overflow-visible">
             <div className="w-[50%] h-[50%] rounded-full bg-red-700"></div>
             

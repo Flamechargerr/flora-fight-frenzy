@@ -74,6 +74,15 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         className="flex flex-col md:flex-row gap-4 mb-4"
         style={{ minHeight: `${containerHeight}px` }}
       >
+        {/* Plant selection panel - moved to left side */}
+        <PlantSelectionPanel 
+          plantTypes={plantTypes}
+          selectedPlant={selectedPlant}
+          onSelectPlant={setSelectedPlant}
+          sunAmount={sunAmount}
+          containerHeight={containerHeight}
+        />
+        
         {/* Main game grid */}
         <GameGrid 
           gameArea={{ ...gameArea, height: containerHeight }}
@@ -85,15 +94,6 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
           debugMessage={debugMessage}
           onPlacePlant={placePlant}
           onCollectSun={collectSun}
-        />
-        
-        {/* Plant selection panel */}
-        <PlantSelectionPanel 
-          plantTypes={plantTypes}
-          selectedPlant={selectedPlant}
-          onSelectPlant={setSelectedPlant}
-          sunAmount={sunAmount}
-          containerHeight={containerHeight}
         />
       </div>
       
