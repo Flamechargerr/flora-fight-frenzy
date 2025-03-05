@@ -16,6 +16,8 @@ interface UseWaveManagementProps {
   setScore: React.Dispatch<React.SetStateAction<number>>;
   setCurrentWave: React.Dispatch<React.SetStateAction<number>>;
   setWaveProgress: React.Dispatch<React.SetStateAction<number>>;
+  setGameWon: React.Dispatch<React.SetStateAction<boolean>>;
+  currentWave: number;
 }
 
 export const useWaveManagement = ({
@@ -29,7 +31,9 @@ export const useWaveManagement = ({
   setCountdown,
   setScore,
   setCurrentWave,
-  setWaveProgress
+  setWaveProgress,
+  setGameWon,
+  currentWave
 }: UseWaveManagementProps) => {
   const enemiesLeftInWave = useRef(waveConfig[1].enemies);
   const enemiesSpawned = useRef(0);

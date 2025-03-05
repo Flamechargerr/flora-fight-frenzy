@@ -1,5 +1,6 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { 
+import type { 
   PlantType, PlantInstance, EnemyType, ProjectileType, GameAreaDimensions, SunResource, 
   WaveConfigMap
 } from '../game/types';
@@ -11,10 +12,11 @@ import { usePlantActions } from '../game/hooks/usePlantActions';
 import { generateRandomSun } from '../game/utils/sunUtils';
 import { updateProjectiles } from '../game/utils/projectileUtils';
 
-export { 
+export type { 
   PlantType, PlantInstance, EnemyType, ProjectileType, 
-  GameAreaDimensions, SunResource, ROWS, COLS, DEFAULT_GAME_AREA, PLANT_TYPES
+  GameAreaDimensions, SunResource
 };
+export { ROWS, COLS, DEFAULT_GAME_AREA, PLANT_TYPES };
 
 export interface UseGameStateProps {
   onGameOver: () => void;
@@ -59,7 +61,9 @@ export const useGameState = ({ onGameOver }: UseGameStateProps) => {
     setCountdown,
     setScore,
     setCurrentWave,
-    setWaveProgress
+    setWaveProgress,
+    setGameWon,
+    currentWave
   });
   
   // Plant actions
