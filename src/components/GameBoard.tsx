@@ -21,7 +21,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     sunResources, enemies, plants, projectiles, 
     selectedPlant, setSelectedPlant, score, 
     showWaveMessage, waveMessage, waveCompleted, countdown, 
-    gameWon, debugMessage, placePlant, collectSun, gameArea, 
+    gameWon, isGameOver, debugMessage, placePlant, collectSun, gameArea, 
     plantTypes 
   } = useGameState({ 
     onGameOver,
@@ -53,13 +53,18 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     return () => window.removeEventListener('resize', updateHeight);
   }, []);
   
+  // Function to handle restart
+  const handleRestart = () => {
+    onGameOver();
+  };
+  
   return (
     <div className="w-full flex flex-col">
       {/* Game Header with resources display */}
       <GameHeader 
         sunAmount={sunAmount} 
-        wave={currentWave} 
-        progress={waveProgress} 
+        currentWave={currentWave} 
+        waveProgress={waveProgress} 
         score={score}
         level={level}
       />
@@ -98,11 +103,14 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         waveMessage={waveMessage}
         waveCompleted={waveCompleted}
         countdown={countdown}
-        isGameWon={gameWon}
+        gameWon={gameWon}
+        isGameOver={isGameOver}
+        currentWave={currentWave}
+        score={score}
+        onRestart={handleRestart}
       />
     </div>
   );
 };
 
 export default GameBoard;
-

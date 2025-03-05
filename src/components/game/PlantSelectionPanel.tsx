@@ -8,6 +8,7 @@ interface PlantSelectionPanelProps {
   selectedPlant: PlantType | null;
   sunAmount: number;
   onSelectPlant: (plant: PlantType | null) => void;
+  containerHeight?: number; // Add this prop
 }
 
 const PlantSelectionPanel: React.FC<PlantSelectionPanelProps> = ({
@@ -15,9 +16,13 @@ const PlantSelectionPanel: React.FC<PlantSelectionPanelProps> = ({
   selectedPlant,
   sunAmount,
   onSelectPlant,
+  containerHeight,
 }) => {
   return (
-    <div className="w-40 glass rounded-xl p-3 mr-4 flex flex-col gap-3 overflow-y-auto">
+    <div 
+      className="w-40 glass rounded-xl p-3 flex flex-col gap-3 overflow-y-auto"
+      style={containerHeight ? { maxHeight: `${containerHeight}px` } : {}}
+    >
       {plantTypes.map(plant => (
         <PlantCard
           key={plant.id}

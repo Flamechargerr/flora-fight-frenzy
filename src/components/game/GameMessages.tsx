@@ -7,11 +7,11 @@ interface GameMessagesProps {
   waveMessage: string;
   waveCompleted: boolean;
   countdown: number;
-  currentWave: number;
-  gameWon: boolean;
-  isGameOver: boolean;
-  score: number;
-  onRestart: () => void;
+  gameWon: boolean; // Changed from isGameWon
+  currentWave?: number;
+  isGameOver?: boolean;
+  score?: number;
+  onRestart?: () => void;
 }
 
 const GameMessages: React.FC<GameMessagesProps> = ({
@@ -19,11 +19,11 @@ const GameMessages: React.FC<GameMessagesProps> = ({
   waveMessage,
   waveCompleted,
   countdown,
-  currentWave,
-  gameWon,
-  isGameOver,
-  score,
-  onRestart,
+  gameWon, // Changed from isGameWon
+  currentWave = 1,
+  isGameOver = false,
+  score = 0,
+  onRestart = () => {},
 }) => {
   return (
     <>
