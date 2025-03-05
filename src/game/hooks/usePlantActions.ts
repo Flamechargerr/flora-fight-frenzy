@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { PlantInstance, EnemyType, ProjectileType, PlantType, SunResource } from '../types';
 import { PLANT_HEALTH } from '../constants';
-import { createProjectile } from '../utils/projectileUtils';
+import { createProjectile, applyProjectileEffects } from '../utils/projectileUtils';
 import { generateSunNearPlant } from '../utils/sunUtils';
 
 interface UsePlantActionsProps {
@@ -30,11 +30,21 @@ export const usePlantActions = ({
 }: UsePlantActionsProps) => {
 
   // Fire a projectile
-  const fireProjectile = useCallback((plant: PlantInstance, targetPosition: number) => {
+  const fireProjectile = useCallback((plant: PlantInstance, targetEnemy: EnemyType) => {
     const cellWidth = gameArea.width / 9; // Using 9 as COLS
-    const newProjectile = createProjectile(plant, targetPosition, cellWidth);
+    const newProjectile = createProjectile(plant, targetEnemy.position, cellWidth);
     setProjectiles(prev => [...prev, newProjectile]);
-  }, [gameArea.width, setProjectiles]);
+    
+    // Apply effects based on projectile type
+    const updatedEnemy = applyProjectileEffects(targetEnemy, newProjectile.type);
+    
+    // Update enemy with applied effects
+    setEnemies(prevEnemies => {
+      return prevEnemies.map(enemy => 
+        enemy.id === updatedEnemy.id ? updatedEnemy : enemy
+      );
+    });
+  }, [gameArea.width, setProjectiles, setEnemies]);
 
   // Place a plant on the grid
   const placePlant = useCallback((row: number, col: number, selectedPlant: PlantType | null, plants: PlantInstance[], sunAmount: number) => {
@@ -101,11 +111,46 @@ export const usePlantActions = ({
           const targetEnemy = enemiesInRange[0];
           
           // Fire a visual projectile
-          fireProjectile(plant, targetEnemy.position);
+          fireProjectile(plant, targetEnemy);
+          
+          // Apply additional burning damage over time for enemies hit by fire
+          if (plant.type.id === 'fireshooter') {
+            const burnDuration = 3000; // 3 seconds of burning
+            const burnInterval = 500; // Apply burn damage every 0.5 seconds
+            let burnTicks = burnDuration / burnInterval;
+            
+            const burnTimer = setInterval(() => {
+              if (burnTicks <= 0) {
+                clearInterval(burnTimer);
+                return;
+              }
+              
+              setEnemies(prevEnemies => {
+                return prevEnemies.map(enemy => {
+                  if (enemy.id === targetEnemy.id && enemy.isBurning) {
+                    const newHealth = enemy.health - 5; // 5 burn damage per tick
+                    
+                    if (newHealth <= 0) {
+                      // Enemy defeated by burn damage
+                      setScore(prev => prev + 10);
+                      activeEnemies.current--; // Decrement active enemies count
+                      return { ...enemy, health: 0 };
+                    }
+                    
+                    return { ...enemy, health: newHealth };
+                  }
+                  return enemy;
+                }).filter(enemy => enemy.health > 0);
+              });
+              
+              burnTicks--;
+            }, burnInterval);
+          }
           
           setEnemies(prevEnemies => {
             return prevEnemies.map(enemy => {
               if (enemy.id === targetEnemy.id) {
+                // Apply base damage
                 const newHealth = enemy.health - plant.type.damage;
                 
                 if (newHealth <= 0) {
@@ -125,7 +170,7 @@ export const usePlantActions = ({
     });
     
     return plants;
-  }, [gameArea, setSunResources, setEnemies, setScore, activeEnemies, fireProjectile]);
+  }, [gameArea, setEnemies, setScore, activeEnemies, fireProjectile, setSunResources]);
 
   return {
     placePlant,

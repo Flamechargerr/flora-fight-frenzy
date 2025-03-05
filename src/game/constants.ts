@@ -42,7 +42,7 @@ export const PLANT_TYPES: PlantType[] = [
     id: 'iceshooter', 
     name: 'Ice Shooter', 
     cost: 175, 
-    damage: 10, 
+    damage: 10, // Less damage but slows zombies
     range: 900, 
     cooldown: 2000,
     color: 'bg-blue-400',
@@ -52,7 +52,7 @@ export const PLANT_TYPES: PlantType[] = [
     id: 'fireshooter', 
     name: 'Fire Shooter', 
     cost: 200, 
-    damage: 35, 
+    damage: 50, // Increased from 35 to 50 - highest damage
     range: 800, 
     cooldown: 2500,
     color: 'bg-red-500',

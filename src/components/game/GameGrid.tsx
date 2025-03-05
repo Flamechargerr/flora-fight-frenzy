@@ -95,7 +95,7 @@ const GameGrid: React.FC<GameGridProps> = ({
         />
       ))}
       
-      {/* Projectiles */}
+      {/* Projectiles with enhanced effects */}
       {projectiles.map((projectile) => (
         <div 
           key={projectile.id}
@@ -107,12 +107,25 @@ const GameGrid: React.FC<GameGridProps> = ({
           style={{
             left: projectile.startX + (projectile.endX - projectile.startX) * projectile.progress,
             top: (projectile.row * (gameArea.height / ROWS)) + (gameArea.height / ROWS / 2) - 8,
-            boxShadow: projectile.type === 'fire' ? '0 0 10px #ff3821' : 
-                      projectile.type === 'ice' ? '0 0 8px #41c7ff' : '0 0 5px #5bd942'
+            boxShadow: projectile.type === 'fire' ? '0 0 15px #ff3821' : 
+                      projectile.type === 'ice' ? '0 0 12px #41c7ff' : '0 0 5px #5bd942'
           }}
         >
+          {/* Enhanced projectile effects */}
           {projectile.type === 'fire' && (
-            <div className="absolute inset-0 animate-pulse bg-yellow-500 rounded-full opacity-60 scale-[1.3]" />
+            <>
+              <div className="absolute inset-0 animate-pulse bg-yellow-500 rounded-full opacity-60 scale-[1.3]" />
+              <div className="absolute inset-0 animate-pulse bg-orange-500 rounded-full opacity-40 scale-[1.6]" style={{ animationDelay: '0.2s' }} />
+              <div className="absolute top-[-4px] left-0 w-6 h-3 bg-yellow-400 rounded-full animate-flame" />
+            </>
+          )}
+          
+          {projectile.type === 'ice' && (
+            <>
+              <div className="absolute inset-0 animate-pulse bg-blue-300 rounded-full opacity-60 scale-[1.3]" />
+              <div className="absolute inset-0 animate-pulse bg-blue-100 rounded-full opacity-40 scale-[1.5]" style={{ animationDelay: '0.1s' }} />
+              <div className="absolute top-[-3px] left-0 w-5 h-2 bg-blue-200 rounded-full opacity-70" />
+            </>
           )}
         </div>
       ))}
