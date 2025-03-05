@@ -1,4 +1,3 @@
-
 export interface PlantType {
   id: string;
   name: string;
@@ -20,6 +19,9 @@ export interface EnemyType {
   isEating?: boolean;
   targetPlant?: string;
   damage?: number;
+  isFrozen?: boolean;
+  isBurning?: boolean;
+  burnDamage?: number;
 }
 
 export interface PlantInstance {
