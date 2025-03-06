@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useGameState } from '../hooks/useGameState';
 import GameHeader from './game/GameHeader';
 import GameGrid from './game/GameGrid';
@@ -23,7 +23,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     selectedPlant, setSelectedPlant, score, 
     showWaveMessage, waveMessage, waveCompleted, countdown, 
     gameWon, isGameOver, debugMessage, placePlant, collectSun, gameArea, 
-    plantTypes
+    plantTypes, removeEnemy
   } = useGameState({ 
     onGameOver,
     onLevelComplete,
@@ -45,6 +45,26 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     }
     setLawnMowers(initialLawnMowers);
   }, [ROWS]);
+  
+  // Handle zombie collisions with lawn mowers
+  const handleZombieCollisions = useCallback((mower, enemiesList) => {
+    const zombiesInPath = enemiesList.filter(
+      enemy => enemy.row === mower.row && 
+             enemy.position >= mower.position && 
+             enemy.position <= mower.position + 60
+    );
+    
+    if (zombiesInPath.length > 0) {
+      // Remove zombies hit by lawn mower
+      const zombieIds = zombiesInPath.map(z => z.id);
+      console.log(`Lawn mower in row ${mower.row} hit zombies:`, zombieIds);
+      
+      // Remove each zombie that was hit
+      zombieIds.forEach(id => removeEnemy(id));
+    }
+    
+    return zombiesInPath.length > 0;
+  }, [removeEnemy]);
   
   // Check for zombies that need to trigger lawn mowers
   useEffect(() => {
@@ -80,31 +100,22 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         setLawnMowers(prev => 
           prev.map(mower => {
             if (mower.activated && mower.position < gameArea.width + 100) {
-              return { ...mower, position: mower.position + 20 };
+              // Move the mower
+              const updatedMower = { ...mower, position: mower.position + 20 };
+              
+              // Check for collisions with zombies
+              handleZombieCollisions(updatedMower, enemies);
+              
+              return updatedMower;
             }
             return mower;
           })
         );
-        
-        // Handle zombie collisions with lawn mowers
-        activeMowers.forEach(mower => {
-          const zombiesInPath = enemies.filter(
-            enemy => enemy.row === mower.row && 
-                   enemy.position >= mower.position && 
-                   enemy.position <= mower.position + 60
-          );
-          
-          if (zombiesInPath.length > 0) {
-            // Remove zombies hit by lawn mower
-            const zombieIds = zombiesInPath.map(z => z.id);
-            console.log(`Lawn mower in row ${mower.row} hit zombies:`, zombieIds);
-          }
-        });
       }, 50);
       
       return () => clearInterval(interval);
     }
-  }, [lawnMowers, gameArea.width, enemies]);
+  }, [lawnMowers, gameArea.width, enemies, handleZombieCollisions]);
   
   // Handle level win condition
   useEffect(() => {
