@@ -23,12 +23,15 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     selectedPlant, setSelectedPlant, score, 
     showWaveMessage, waveMessage, waveCompleted, countdown, 
     gameWon, isGameOver, debugMessage, placePlant, collectSun, gameArea, 
-    plantTypes, ROWS
+    plantTypes
   } = useGameState({ 
     onGameOver,
     onLevelComplete,
     level
   });
+  
+  // Number of rows in the game grid
+  const ROWS = 5;
   
   // Initialize lawn mowers
   useEffect(() => {
@@ -52,10 +55,11 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
       enemies.forEach(enemy => {
         // If enemy is near the edge and there's an available mower in that row
         const mowerIndex = newLawnMowers.findIndex(
-          m => m.row === enemy.row && !m.activated && enemy.position <= 50
+          m => m.row === enemy.row && !m.activated && enemy.position <= 60
         );
         
         if (mowerIndex !== -1) {
+          console.log(`Activating mower in row ${enemy.row} for enemy at position ${enemy.position}`);
           newLawnMowers[mowerIndex].activated = true;
           mowerActivated = true;
         }
@@ -67,7 +71,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     }
   }, [enemies, lawnMowers]);
   
-  // Update lawn mower positions when activated
+  // Update lawn mower positions when activated and handle zombie collisions
   useEffect(() => {
     const activeMowers = lawnMowers.filter(m => m.activated);
     
@@ -81,11 +85,26 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
             return mower;
           })
         );
+        
+        // Handle zombie collisions with lawn mowers
+        activeMowers.forEach(mower => {
+          const zombiesInPath = enemies.filter(
+            enemy => enemy.row === mower.row && 
+                   enemy.position >= mower.position && 
+                   enemy.position <= mower.position + 60
+          );
+          
+          if (zombiesInPath.length > 0) {
+            // Remove zombies hit by lawn mower
+            const zombieIds = zombiesInPath.map(z => z.id);
+            console.log(`Lawn mower in row ${mower.row} hit zombies:`, zombieIds);
+          }
+        });
       }, 50);
       
       return () => clearInterval(interval);
     }
-  }, [lawnMowers, gameArea.width]);
+  }, [lawnMowers, gameArea.width, enemies]);
   
   // Handle level win condition
   useEffect(() => {

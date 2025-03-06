@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Plant from '../Plant';
 import Enemy from '../Enemy';
 import SunResource from '../SunResource';
@@ -10,9 +10,11 @@ import {
   ProjectileType, 
   EnemyType, 
   SunResource as SunResourceType,
-  ROWS,
-  COLS
 } from '../../hooks/useGameState';
+
+// Number of rows and columns in the grid
+const ROWS = 5;
+const COLS = 9;
 
 interface GameGridProps {
   gameArea: { width: number; height: number };
@@ -168,7 +170,7 @@ const GameGrid: React.FC<GameGridProps> = ({
       
       {/* Debug indicator */}
       <div className="absolute bottom-2 left-2 text-xs bg-black/70 text-white px-2 py-1 rounded">
-        Zombies: {enemies.length} | Wave: {enemies.length} | Status: {debugMessage}
+        Zombies: {enemies.length} | Active Mowers: {lawnMowers.filter(m => m.activated).length} | Status: {debugMessage}
       </div>
     </div>
   );

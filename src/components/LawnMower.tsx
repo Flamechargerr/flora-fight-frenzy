@@ -28,13 +28,15 @@ const LawnMower = memo(({
   
   return (
     <div 
-      className={`absolute transition-all duration-200 ${activated ? 'animate-lawn-mower' : ''}`}
+      className={`absolute transition-transform duration-300 ${activated ? 'animate-lawn-mower' : ''}`}
       style={{ 
         width: `${size}px`, 
         height: `${size}px`, 
         left: `${position}px`,
         top: `${top - (size/2)}px`,
-        zIndex: 30
+        zIndex: 30,
+        transform: activated ? 'rotate(5deg)' : 'rotate(0deg)',
+        transition: 'transform 0.1s ease-in-out, left 0.2s linear'
       }}
     >
       <div className="w-full h-full relative">
@@ -47,7 +49,7 @@ const LawnMower = memo(({
           <div className="absolute top-[20%] right-[15%] w-[40%] h-[10%] bg-gray-900 rounded-full"></div>
           
           {/* Blade */}
-          <div className="absolute bottom-[10%] left-[-5%] w-[50%] h-[40%] bg-gray-200 rounded-full border-2 border-gray-400">
+          <div className={`absolute bottom-[10%] left-[-5%] w-[50%] h-[40%] bg-gray-200 rounded-full border-2 border-gray-400 ${activated ? 'animate-spin' : ''}`}>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-[80%] h-[10%] bg-gray-400 rounded-full"></div>
               <div className="w-[10%] h-[80%] bg-gray-400 rounded-full"></div>
@@ -55,8 +57,8 @@ const LawnMower = memo(({
           </div>
           
           {/* Wheels */}
-          <div className="absolute bottom-[-10%] left-[15%] w-[20%] h-[20%] bg-black rounded-full"></div>
-          <div className="absolute bottom-[-10%] right-[15%] w-[20%] h-[20%] bg-black rounded-full"></div>
+          <div className={`absolute bottom-[-10%] left-[15%] w-[20%] h-[20%] bg-black rounded-full ${activated ? 'animate-spin' : ''}`}></div>
+          <div className={`absolute bottom-[-10%] right-[15%] w-[20%] h-[20%] bg-black rounded-full ${activated ? 'animate-spin' : ''}`}></div>
         </div>
       </div>
     </div>
