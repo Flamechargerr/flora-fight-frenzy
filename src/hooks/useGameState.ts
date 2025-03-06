@@ -96,6 +96,19 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
     placePlant(row, col, selectedPlant, plants, sunAmount);
   }, [placePlant, selectedPlant, plants, sunAmount]);
 
+  const removeEnemy = useCallback((id: string) => {
+    setEnemies(prev => {
+      const enemy = prev.find(e => e.id === id);
+      if (enemy) {
+        setScore(prevScore => prevScore + 10);
+        if (activeEnemies && typeof activeEnemies.current === 'number') {
+          activeEnemies.current -= 1;
+        }
+      }
+      return prev.filter(e => e.id !== id);
+    });
+  }, [activeEnemies]);
+
   useEffect(() => {
     const cleanup = initializeGame();
     return cleanup;
@@ -262,5 +275,6 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
     collectSun,
     gameArea,
     plantTypes: PLANT_TYPES,
+    removeEnemy,
   };
 };
