@@ -14,6 +14,7 @@ interface GameBoardProps {
 
 const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBoardProps) => {
   const [containerHeight, setContainerHeight] = useState(500);
+  const [lawnMowers, setLawnMowers] = useState<Array<{row: number; activated: boolean; position: number}>>([]);
   
   // Initialize game state
   const { 
@@ -22,12 +23,69 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     selectedPlant, setSelectedPlant, score, 
     showWaveMessage, waveMessage, waveCompleted, countdown, 
     gameWon, isGameOver, debugMessage, placePlant, collectSun, gameArea, 
-    plantTypes 
+    plantTypes, ROWS
   } = useGameState({ 
     onGameOver,
     onLevelComplete,
     level
   });
+  
+  // Initialize lawn mowers
+  useEffect(() => {
+    const initialLawnMowers = [];
+    for (let row = 0; row < ROWS; row++) {
+      initialLawnMowers.push({
+        row,
+        activated: false,
+        position: 20 // Position near the left edge
+      });
+    }
+    setLawnMowers(initialLawnMowers);
+  }, [ROWS]);
+  
+  // Check for zombies that need to trigger lawn mowers
+  useEffect(() => {
+    if (enemies.length > 0) {
+      const newLawnMowers = [...lawnMowers];
+      let mowerActivated = false;
+      
+      enemies.forEach(enemy => {
+        // If enemy is near the edge and there's an available mower in that row
+        const mowerIndex = newLawnMowers.findIndex(
+          m => m.row === enemy.row && !m.activated && enemy.position <= 50
+        );
+        
+        if (mowerIndex !== -1) {
+          newLawnMowers[mowerIndex].activated = true;
+          mowerActivated = true;
+        }
+      });
+      
+      if (mowerActivated) {
+        setLawnMowers(newLawnMowers);
+      }
+    }
+  }, [enemies, lawnMowers]);
+  
+  // Update lawn mower positions when activated
+  useEffect(() => {
+    const activeMowers = lawnMowers.filter(m => m.activated);
+    
+    if (activeMowers.length > 0) {
+      const interval = setInterval(() => {
+        setLawnMowers(prev => 
+          prev.map(mower => {
+            if (mower.activated && mower.position < gameArea.width + 100) {
+              return { ...mower, position: mower.position + 20 };
+            }
+            return mower;
+          })
+        );
+      }, 50);
+      
+      return () => clearInterval(interval);
+    }
+  }, [lawnMowers, gameArea.width]);
   
   // Handle level win condition
   useEffect(() => {
@@ -94,6 +152,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
           debugMessage={debugMessage}
           onPlacePlant={placePlant}
           onCollectSun={collectSun}
+          lawnMowers={lawnMowers}
         />
       </div>
       

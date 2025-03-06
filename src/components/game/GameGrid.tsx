@@ -3,6 +3,7 @@ import React from 'react';
 import Plant from '../Plant';
 import Enemy from '../Enemy';
 import SunResource from '../SunResource';
+import LawnMower from '../LawnMower';
 import { 
   PlantType, 
   PlantInstance, 
@@ -21,6 +22,7 @@ interface GameGridProps {
   sunResources: SunResourceType[];
   selectedPlant: PlantType | null;
   debugMessage: string;
+  lawnMowers: { row: number; activated: boolean; position: number }[];
   onPlacePlant: (row: number, col: number) => void;
   onCollectSun: (id: string) => void;
 }
@@ -33,6 +35,7 @@ const GameGrid: React.FC<GameGridProps> = ({
   sunResources,
   selectedPlant,
   debugMessage,
+  lawnMowers,
   onPlacePlant,
   onCollectSun,
 }) => {
@@ -92,6 +95,18 @@ const GameGrid: React.FC<GameGridProps> = ({
           plant={plant}
           gridDimensions={{ rows: ROWS, cols: COLS }}
           gameAreaSize={gameArea}
+        />
+      ))}
+      
+      {/* Lawn Mowers */}
+      {lawnMowers.map((mower, index) => (
+        <LawnMower
+          key={`mower-${index}`}
+          row={mower.row}
+          activated={mower.activated}
+          gameAreaSize={gameArea}
+          gridDimensions={{ rows: ROWS, cols: COLS }}
+          position={mower.position}
         />
       ))}
       

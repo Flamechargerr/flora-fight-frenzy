@@ -43,7 +43,6 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
   
   const gameArea = DEFAULT_GAME_AREA;
   
-  // Wave management
   const { 
     enemiesLeftInWave,
     enemiesSpawned,
@@ -67,7 +66,6 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
     currentWave
   });
   
-  // Plant actions
   const { placePlant, processPlantActions } = usePlantActions({
     gameArea,
     setPlants,
@@ -80,94 +78,75 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
     activeEnemies
   });
 
-  // Generate a sun resource
   const generateSun = useCallback(() => {
     const newSun = generateRandomSun(gameArea);
     setSunResources(prev => [...prev, newSun]);
     
-    // Remove sun after 10 seconds if not collected
     setTimeout(() => {
       setSunResources(prev => prev.filter(sun => sun.id !== newSun.id));
     }, 10000);
   }, [gameArea]);
 
-  // Handle sun collection
   const collectSun = useCallback((id: string) => {
     setSunAmount(prev => prev + 25);
     setSunResources(prev => prev.filter(sun => sun.id !== id));
   }, []);
 
-  // Wrapper for placePlant that includes the current state
   const handlePlacePlant = useCallback((row: number, col: number) => {
     placePlant(row, col, selectedPlant, plants, sunAmount);
   }, [placePlant, selectedPlant, plants, sunAmount]);
 
-  // Game initialization
   useEffect(() => {
     const cleanup = initializeGame();
     return cleanup;
   }, [initializeGame]);
 
-  // Game loop - Main game logic
   useEffect(() => {
     if (isGameOver || gameWon) return;
 
-    // Sun generation timer - more frequent sun
     const sunTimer = setInterval(() => {
       generateSun();
     }, 3000);
     
-    // Projectile movement timer
     const projectileTimer = setInterval(() => {
       setProjectiles(prevProjectiles => updateProjectiles(prevProjectiles));
     }, 50);
     
-    // Game tick timer
     const gameTickTimer = setInterval(() => {
-      // Check if wave is complete when all enemies defeated
       if (enemies.length === 0 && enemiesSpawned.current >= enemiesLeftInWave.current && 
           gameStarted.current && !waveCompleted && activeEnemies.current === 0) {
         completeWave();
       }
       
-      // Process plant-zombie interactions
-      // 1. Find plants that zombies can eat
       const plantsWithPosition = plants.map(plant => {
         const cellWidth = gameArea.width / COLS;
         const plantPosition = plant.col * cellWidth + (cellWidth / 2);
         return { ...plant, position: plantPosition };
       });
       
-      // 2. Move enemies and handle plant eating
       setEnemies(prevEnemies => {
         if (prevEnemies.length === 0) return prevEnemies;
         
         const newEnemies = prevEnemies.map(enemy => {
-          // Check if there's a plant in the same row in front of the zombie
           const plantsInPath = plantsWithPosition.filter(plant => 
             plant.row === enemy.row && plant.position >= enemy.position - 30 && plant.position <= enemy.position + 10
           );
           
-          // If there's a plant to eat and not already eating
           if (plantsInPath.length > 0 && !enemy.isEating) {
             const targetPlant = plantsInPath[0];
             return { 
               ...enemy, 
               isEating: true, 
               targetPlant: targetPlant.id,
-              speed: 0 // Stop moving while eating
+              speed: 0
             };
           }
-          // If already eating, continue to eat
           else if (enemy.isEating && enemy.targetPlant) {
-            return { ...enemy };  // Keep eating state
+            return { ...enemy };
           }
-          // Otherwise, continue moving
           else {
-            // Move enemy based on speed
             const newPosition = enemy.position - (enemy.speed / 10);
             
-            // Check for game over condition
             if (newPosition <= 0) {
               setIsGameOver(true);
               onGameOver();
@@ -177,27 +156,22 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
           }
         });
         
-        // Filter out any enemies with health <= 0
         return newEnemies.filter(enemy => enemy.health > 0);
       });
       
-      // 3. Process damage to plants
       setPlants(prevPlants => {
         const updatedPlants = prevPlants.map(plant => {
-          // Find enemies eating this plant
           const eatingEnemies = enemies.filter(enemy => 
             enemy.isEating && enemy.targetPlant === plant.id
           );
           
           if (eatingEnemies.length > 0) {
-            // Calculate total damage from all eating enemies
             const totalDamage = eatingEnemies.reduce((sum, enemy) => 
               sum + (enemy.damage || 1), 0);
             
             const newHealth = (plant.health || 0) - totalDamage;
             
             if (newHealth <= 0) {
-              // Plant is completely eaten, return null to remove it
               return null;
             }
             
@@ -207,13 +181,11 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
           return plant;
         }).filter(Boolean) as PlantInstance[];
         
-        // If a plant was eaten, free zombies that were eating it
         if (updatedPlants.length < prevPlants.length) {
           setEnemies(prevEnemies => 
             prevEnemies.map(enemy => {
               const plantExists = updatedPlants.some(p => p.id === enemy.targetPlant);
               if (enemy.isEating && !plantExists) {
-                // Reset zombie to walking state
                 return { 
                   ...enemy, 
                   isEating: false, 
@@ -229,18 +201,15 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
         return updatedPlants;
       });
       
-      // Process plant actions (sunflowers generating sun, plants attacking)
       setPlants(prevPlants => {
         const updatedPlants = processPlantActions(prevPlants, enemies);
         return [...updatedPlants];
       });
     }, 100);
     
-    // Auto-generate sun for sunflower plants
     const sunflowerTimer = setInterval(() => {
       const sunflowers = plants.filter(p => p.type.id === 'sunflower');
       if (sunflowers.length > 0) {
-        // Create sun near a random sunflower
         const randomSunflower = sunflowers[Math.floor(Math.random() * sunflowers.length)];
         const cellWidth = gameArea.width / COLS;
         const cellHeight = gameArea.height / ROWS;
