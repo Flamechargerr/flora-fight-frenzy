@@ -221,6 +221,45 @@
   }
 }
 
+@keyframes growWidth {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes lightning {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  75% {
+    opacity: 0.4;
+  }
+  85% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes electric {
+  0% {
+    opacity: 0.5;
+    box-shadow: 0 0 5px #4fc3f7, 0 0 10px #4fc3f7;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px #4fc3f7, 0 0 40px #4fc3f7;
+  }
+  100% {
+    opacity: 0.5;
+    box-shadow: 0 0 5px #4fc3f7, 0 0 10px #4fc3f7;
+  }
+}
+
 @keyframes lawn-mower {
   0% {
     transform: translateX(0) rotate(0);
@@ -269,6 +308,33 @@
   animation: lawn-mower 3s linear forwards;
 }
 
+.animate-lightning {
+  animation: lightning 0.8s infinite;
+}
+
+.animate-electric {
+  animation: electric 1s infinite;
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  75%, 100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
 /* Peashooter recoil animation */
 @keyframes recoil {
   0% {
@@ -290,4 +356,13 @@
 .lawn-mower-lane {
   background-color: #C4A076;
   background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0V0zm10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm20 0a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM10 37a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm10-17h20v20H20V20zm10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14z' fill='%23a08664' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+/* Grid pattern for game area */
+.garden-grid {
+  background-color: #8DB255;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: calc(100% / 9) calc(100% / 5);
 }

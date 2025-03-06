@@ -11,6 +11,7 @@ export const createProjectile = (
   let projectileType = 'pea';
   if (plant.type.id === 'iceshooter') projectileType = 'ice';
   if (plant.type.id === 'fireshooter') projectileType = 'fire';
+  if (plant.type.id === 'lightningshooter') projectileType = 'lightning';
   
   return {
     id: `proj-${Date.now()}-${Math.random()}`,
@@ -24,7 +25,7 @@ export const createProjectile = (
 
 export const updateProjectiles = (projectiles: ProjectileType[]): ProjectileType[] => {
   return projectiles.map(proj => {
-    const newProgress = proj.progress + 0.1;
+    const newProgress = proj.progress + (proj.type === 'lightning' ? 0.2 : 0.1); // Lightning travels faster
     if (newProgress >= 1) {
       return null; // Remove completed projectiles
     }
@@ -50,15 +51,29 @@ export const applyProjectileEffects = (enemy: EnemyType, projectileType: string)
       break;
       
     case 'fire':
-      // Apply burning effect
+      // Apply burning effect - with more damage over time
       updatedEnemy.isBurning = true;
-      updatedEnemy.burnDamage = 2; // 2 damage per tick
+      updatedEnemy.burnDamage = 3; // Increased damage per tick
       
-      // Set a timeout to remove the burning effect after 3 seconds
+      // Set a timeout to remove the burning effect after 4 seconds
       setTimeout(() => {
         updatedEnemy.isBurning = false;
         updatedEnemy.burnDamage = 0;
-      }, 3000);
+      }, 4000);
+      break;
+      
+    case 'lightning':
+      // Apply electrified effect
+      updatedEnemy.isElectrified = true;
+      updatedEnemy.electricDamage = 5; // High damage per tick
+      updatedEnemy.speed = updatedEnemy.speed * 0.3; // Significant slow effect
+      
+      // Set a timeout to remove the electrified effect after 2 seconds
+      setTimeout(() => {
+        updatedEnemy.isElectrified = false;
+        updatedEnemy.electricDamage = 0;
+        updatedEnemy.speed = updatedEnemy.speed / 0.3; // Restore original speed
+      }, 2000);
       break;
       
     default:

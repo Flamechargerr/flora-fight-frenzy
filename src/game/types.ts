@@ -1,3 +1,4 @@
+
 export interface PlantType {
   id: string;
   name: string;
@@ -22,6 +23,8 @@ export interface EnemyType {
   isFrozen?: boolean;
   isBurning?: boolean;
   burnDamage?: number;
+  isElectrified?: boolean;
+  electricDamage?: number;
 }
 
 export interface PlantInstance {
@@ -52,6 +55,24 @@ export interface SunResource {
   id: string;
   x: number;
   y: number;
+}
+
+export interface PowerupType {
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
+  icon: string;
+  effectType: 'lightning' | 'freeze' | 'burn' | 'boost';
+  cooldown: number;
+}
+
+export interface ActivePowerup {
+  id: string;
+  type: PowerupType;
+  startTime: number;
+  endTime: number;
+  isActive: boolean;
 }
 
 export interface UseGameStateProps {

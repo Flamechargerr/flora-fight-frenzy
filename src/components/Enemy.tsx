@@ -14,6 +14,8 @@ interface EnemyProps {
     isFrozen?: boolean;
     isBurning?: boolean;
     burnDamage?: number;
+    isElectrified?: boolean;
+    electricDamage?: number;
   };
   gridDimensions: {
     rows: number;
@@ -55,6 +57,7 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
   
   // Enhanced burning animation
   const [burnIntensity, setBurnIntensity] = useState(0.5);
+  const [electricPulse, setElectricPulse] = useState(0.7);
   
   useEffect(() => {
     if (enemy.isBurning) {
@@ -64,6 +67,16 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
       return () => clearInterval(intervalId);
     }
   }, [enemy.isBurning]);
+  
+  // Electric effect animation
+  useEffect(() => {
+    if (enemy.isElectrified) {
+      const intervalId = setInterval(() => {
+        setElectricPulse(prev => prev === 0.7 ? 0.9 : 0.7);
+      }, 100);
+      return () => clearInterval(intervalId);
+    }
+  }, [enemy.isElectrified]);
   
   return (
     <div 
@@ -96,12 +109,12 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
           </div>
         )}
         
-        {/* Burning effect overlay - enhanced */}
+        {/* Burning effect overlay - enhanced with more particles */}
         {enemy.isBurning && (
           <div className="absolute inset-0 z-20 rounded-full overflow-hidden">
             <div className={`absolute inset-0 bg-red-500/30 animate-pulse`} style={{ opacity: burnIntensity }}></div>
             
-            {/* Fire particles with shadow */}
+            {/* Fire particles with improved animation */}
             <div className="absolute bottom-0 left-[10%] w-[20%] h-[60%] animate-flame">
               <div className="absolute inset-0 bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 rounded-t-full"></div>
               <div className="absolute inset-0 bg-yellow-300/30 rounded-t-full blur-sm"></div>
@@ -117,13 +130,76 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
               <div className="absolute inset-0 bg-yellow-300/30 rounded-t-full blur-sm"></div>
             </div>
             
-            {/* Ember particles */}
+            {/* Smoke effect */}
+            <div className="absolute w-[30%] h-[30%] top-[10%] left-[35%] opacity-40 animate-float" style={{ animationDuration: '3s' }}>
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-700/80 to-gray-500/0 rounded-full blur-sm"></div>
+            </div>
+            
+            {/* Ember particles with improved movement */}
             <div className="absolute w-[5%] h-[5%] bg-yellow-300 rounded-full animate-float" 
                  style={{ top: `${Math.random() * 50 + 10}%`, left: `${Math.random() * 60 + 20}%`, opacity: 0.8 }}></div>
             <div className="absolute w-[3%] h-[3%] bg-orange-400 rounded-full animate-float" 
                  style={{ top: `${Math.random() * 40 + 20}%`, left: `${Math.random() * 70 + 15}%`, opacity: 0.7, animationDelay: '0.3s' }}></div>
             <div className="absolute w-[4%] h-[4%] bg-red-500 rounded-full animate-float" 
                  style={{ top: `${Math.random() * 30 + 30}%`, left: `${Math.random() * 50 + 25}%`, opacity: 0.9, animationDelay: '0.7s' }}></div>
+          </div>
+        )}
+        
+        {/* NEW: Lightning/Electric effect overlay */}
+        {enemy.isElectrified && (
+          <div className="absolute inset-0 z-25 rounded-full overflow-hidden pointer-events-none">
+            {/* Base electric glow */}
+            <div className={`absolute inset-0 bg-blue-400/40`} style={{ opacity: electricPulse }}></div>
+            
+            {/* Electricity arcs - randomly positioned */}
+            <div className="absolute inset-0">
+              {/* Lightning bolt 1 */}
+              <svg className="absolute w-full h-full" viewBox="0 0 100 100" style={{ opacity: electricPulse }}>
+                <path d="M50,20 L60,40 L45,45 L55,80" 
+                      stroke="#4fc3f7" 
+                      strokeWidth="2" 
+                      fill="none" 
+                      strokeLinecap="round" 
+                      strokeDasharray="1 3"
+                      className="animate-pulse"
+                />
+              </svg>
+              
+              {/* Lightning bolt 2 */}
+              <svg className="absolute w-full h-full" viewBox="0 0 100 100" style={{ opacity: electricPulse, animationDelay: '0.2s' }}>
+                <path d="M40,30 L30,50 L50,60 L40,75" 
+                      stroke="#4fc3f7" 
+                      strokeWidth="2" 
+                      fill="none" 
+                      strokeLinecap="round" 
+                      strokeDasharray="1 2"
+                      className="animate-pulse"
+                />
+              </svg>
+              
+              {/* Lightning arc connecting parts */}
+              <svg className="absolute w-full h-full" viewBox="0 0 100 100" style={{ opacity: electricPulse, animationDelay: '0.1s' }}>
+                <path d="M30,40 C50,20 70,50 60,70" 
+                      stroke="#90caf9" 
+                      strokeWidth="1.5" 
+                      fill="none" 
+                      strokeLinecap="round" 
+                      strokeDasharray="1 2"
+                      className="animate-pulse"
+                />
+              </svg>
+            </div>
+            
+            {/* Electric orbs - blinking randomly */}
+            <div className="absolute w-[8%] h-[8%] bg-blue-300 rounded-full animate-ping" 
+                style={{ top: '20%', left: '70%', opacity: 0.8, animationDuration: '0.8s' }}></div>
+            <div className="absolute w-[6%] h-[6%] bg-blue-400 rounded-full animate-ping" 
+                style={{ top: '60%', left: '30%', opacity: 0.7, animationDuration: '1s', animationDelay: '0.3s' }}></div>
+            <div className="absolute w-[7%] h-[7%] bg-blue-200 rounded-full animate-ping" 
+                style={{ top: '40%', left: '20%', opacity: 0.9, animationDuration: '0.7s', animationDelay: '0.1s' }}></div>
+                
+            {/* Halo effect */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-300/0 to-blue-300/30 animate-pulse"></div>
           </div>
         )}
         
@@ -242,16 +318,24 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
         />
       </div>
       
-      {/* Status indicators */}
+      {/* Enhanced status indicators */}
       <div className="absolute -top-4 left-0 flex space-x-1">
         {enemy.isFrozen && (
-          <div className="bg-blue-500 text-white px-1 text-xs rounded-sm shadow-md">
-            ❄️
+          <div className="bg-blue-500 text-white px-1 text-xs rounded-sm shadow-md flex items-center">
+            <span className="mr-1">❄️</span>
+            <span className="text-[10px]">-50%</span>
           </div>
         )}
         {enemy.isBurning && (
-          <div className="bg-red-500 text-white px-1 text-xs rounded-sm shadow-md">
-            🔥
+          <div className="bg-red-500 text-white px-1 text-xs rounded-sm shadow-md flex items-center">
+            <span className="mr-1">🔥</span>
+            <span className="text-[10px]">-3HP</span>
+          </div>
+        )}
+        {enemy.isElectrified && (
+          <div className="bg-blue-400 text-white px-1 text-xs rounded-sm shadow-md flex items-center">
+            <span className="mr-1">⚡</span>
+            <span className="text-[10px]">-5HP</span>
           </div>
         )}
       </div>
