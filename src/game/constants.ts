@@ -58,6 +58,57 @@ export const PLANT_TYPES: PlantType[] = [
     color: 'bg-red-500',
     icon: '🔥' 
   },
+  // New plant variations
+  { 
+    id: 'cherrybomb', 
+    name: 'Cherry Bomb', 
+    cost: 150, 
+    damage: 100, // High damage in area
+    range: 150, // Small area effect
+    cooldown: 0, // One-time use
+    color: 'bg-red-600',
+    icon: '🍒' 
+  },
+  { 
+    id: 'repeatershooter', 
+    name: 'Repeater', 
+    cost: 200, 
+    damage: 40, // Double damage of peashooter
+    range: 900, 
+    cooldown: 1400, // Slightly faster than peashooter
+    color: 'bg-green-600',
+    icon: '🌿' 
+  },
+  { 
+    id: 'threepeater', 
+    name: 'Threepeater', 
+    cost: 325, 
+    damage: 20, // Same as peashooter but hits 3 lanes
+    range: 900, 
+    cooldown: 1600,
+    color: 'bg-green-700',
+    icon: '☘️' 
+  },
+  { 
+    id: 'spikeweed', 
+    name: 'Spikeweed', 
+    cost: 100, 
+    damage: 10, // Continuous damage to zombies walking over it
+    range: 100,
+    cooldown: 1000,
+    color: 'bg-lime-600',
+    icon: '🌵' 
+  },
+  { 
+    id: 'torchwood', 
+    name: 'Torchwood', 
+    cost: 175, 
+    damage: 5, // Converts normal peas to fire peas
+    range: 100,
+    cooldown: 0, // Passive effect
+    color: 'bg-orange-700',
+    icon: '🪵' 
+  }
 ];
 
 // Initial plant health values
@@ -66,7 +117,12 @@ export const PLANT_HEALTH = {
   peashooter: 300,
   wallnut: 1000,
   iceshooter: 300,
-  fireshooter: 300
+  fireshooter: 300,
+  cherrybomb: 200,
+  repeatershooter: 300,
+  threepeater: 400,
+  spikeweed: 500,
+  torchwood: 600
 };
 
 // Zombie damage values

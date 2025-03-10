@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -296,6 +295,30 @@
   }
 }
 
+/* Sweat drop animation */
+@keyframes sweatDrop {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(200%) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* Particle animation for lawn mower */
+@keyframes particle {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(100px, -20px) rotate(180deg);
+    opacity: 0;
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-out forwards;
 }
@@ -322,6 +345,22 @@
 
 .animate-ping {
   animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-sweatDrop {
+  animation: sweatDrop 2s ease-in infinite;
+}
+
+.animate-particle {
+  animation: particle 1s ease-out forwards;
+}
+
+.animate-flame {
+  animation: flame 2s ease-in-out infinite;
+}
+
+.animate-mouthOpen {
+  animation: mouthOpen 1s ease-in-out infinite;
 }
 
 @keyframes ping {
