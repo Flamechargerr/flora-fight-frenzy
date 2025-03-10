@@ -25,14 +25,7 @@ export const createProjectile = (
 
 export const updateProjectiles = (projectiles: ProjectileType[]): ProjectileType[] => {
   return projectiles.map(proj => {
-    // PVZ-like projectile speeds - lightning is fastest, fire is slowest
-    let speedMultiplier = 0.1; // base pea speed
-    
-    if (proj.type === 'lightning') speedMultiplier = 0.25; // lightning travels much faster
-    else if (proj.type === 'fire') speedMultiplier = 0.08; // fire travels slower
-    else if (proj.type === 'ice') speedMultiplier = 0.12; // ice is slightly faster than peas
-    
-    const newProgress = proj.progress + speedMultiplier;
+    const newProgress = proj.progress + (proj.type === 'lightning' ? 0.2 : 0.1); // Lightning travels faster
     if (newProgress >= 1) {
       return null; // Remove completed projectiles
     }
@@ -40,57 +33,51 @@ export const updateProjectiles = (projectiles: ProjectileType[]): ProjectileType
   }).filter(Boolean) as ProjectileType[];
 };
 
-// Apply projectile effects to enemies with more PVZ-like behavior
+// Apply projectile effects to enemies
 export const applyProjectileEffects = (enemy: EnemyType, projectileType: string): EnemyType => {
   let updatedEnemy = { ...enemy };
   
   switch (projectileType) {
     case 'ice':
-      // Ice slows zombies significantly - more like PVZ
+      // Apply freezing effect
       updatedEnemy.isFrozen = true;
-      updatedEnemy.speed = updatedEnemy.speed * 0.4; // Slow the zombie by 60%
+      updatedEnemy.speed = updatedEnemy.speed * 0.5; // Slow the zombie by 50%
       
-      // Ice effect lasts longer in PVZ
+      // Set a timeout to remove the frozen effect after 5 seconds
       setTimeout(() => {
-        if (updatedEnemy.isFrozen) {
-          updatedEnemy.isFrozen = false;
-          updatedEnemy.speed = updatedEnemy.speed / 0.4; // Restore original speed
-        }
-      }, 6000); // 6 seconds of slow
+        updatedEnemy.isFrozen = false;
+        updatedEnemy.speed = updatedEnemy.speed * 2; // Restore original speed
+      }, 5000);
       break;
       
     case 'fire':
-      // Fire causes continuous damage - like Jalapeno in PVZ
+      // Apply burning effect - with more damage over time
       updatedEnemy.isBurning = true;
-      updatedEnemy.burnDamage = 4; // Higher damage per tick
+      updatedEnemy.burnDamage = 3; // Increased damage per tick
       
-      // Fire effect in PVZ is shorter but more damaging
+      // Set a timeout to remove the burning effect after 4 seconds
       setTimeout(() => {
-        if (updatedEnemy.isBurning) {
-          updatedEnemy.isBurning = false;
-          updatedEnemy.burnDamage = 0;
-        }
-      }, 3000); // 3 seconds of burn
+        updatedEnemy.isBurning = false;
+        updatedEnemy.burnDamage = 0;
+      }, 4000);
       break;
       
     case 'lightning':
-      // Lightning stuns and damages - similar to Lightning Reed in PVZ
+      // Apply electrified effect
       updatedEnemy.isElectrified = true;
-      updatedEnemy.electricDamage = 6; // Higher damage
-      updatedEnemy.speed = updatedEnemy.speed * 0.2; // Significant slow/stun effect
+      updatedEnemy.electricDamage = 5; // High damage per tick
+      updatedEnemy.speed = updatedEnemy.speed * 0.3; // Significant slow effect
       
-      // Lightning effect is short but powerful
+      // Set a timeout to remove the electrified effect after 2 seconds
       setTimeout(() => {
-        if (updatedEnemy.isElectrified) {
-          updatedEnemy.isElectrified = false;
-          updatedEnemy.electricDamage = 0;
-          updatedEnemy.speed = updatedEnemy.speed / 0.2; // Restore original speed
-        }
-      }, 1500); // 1.5 seconds of electrification
+        updatedEnemy.isElectrified = false;
+        updatedEnemy.electricDamage = 0;
+        updatedEnemy.speed = updatedEnemy.speed / 0.3; // Restore original speed
+      }, 2000);
       break;
       
     default:
-      // Regular pea - standard damage but no special effects
+      // Regular pea - no special effects
       break;
   }
   
