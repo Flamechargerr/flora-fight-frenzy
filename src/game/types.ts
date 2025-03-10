@@ -1,4 +1,3 @@
-
 export interface PlantType {
   id: string;
   name: string;
@@ -8,6 +7,11 @@ export interface PlantType {
   cooldown: number;
   color: string;
   icon: string;
+  image?: string;
+  isAreaEffect?: boolean;
+  isPassive?: boolean;
+  isPeaConverter?: boolean;
+  affectsLanes?: number;
 }
 
 export interface EnemyType {

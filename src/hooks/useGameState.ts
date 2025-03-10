@@ -4,7 +4,7 @@ import type {
   WaveConfigMap
 } from '../game/types';
 import { 
-  ROWS, COLS, DEFAULT_GAME_AREA, PLANT_TYPES, PLANT_HEALTH, ZOMBIE_DAMAGE, WAVE_CONFIG 
+  ROWS, COLS, DEFAULT_GAME_AREA, PLANT_TYPES, PLANT_HEALTH, ZOMBIE_DAMAGE, WAVE_CONFIG, STARTING_SUN
 } from '../game/constants';
 import { useWaveManagement } from '../game/hooks/useWaveManagement';
 import { usePlantActions } from '../game/hooks/usePlantActions';
@@ -24,7 +24,7 @@ export interface UseGameStateProps {
 }
 
 export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStateProps) => {
-  const [sunAmount, setSunAmount] = useState(150);
+  const [sunAmount, setSunAmount] = useState(STARTING_SUN);
   const [currentWave, setCurrentWave] = useState(1);
   const [waveProgress, setWaveProgress] = useState(0);
   const [sunResources, setSunResources] = useState<SunResource[]>([]);
