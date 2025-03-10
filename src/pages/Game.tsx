@@ -63,43 +63,98 @@ const Game = () => {
       {/* Loading Screen */}
       {isLoading && (
         <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center">
-          <div className="w-full max-w-md mb-10">
-            <h1 className="text-4xl md:text-5xl font-bold text-garden text-center mb-2 animate-pulse">
-              Flora Fight Frenzy
+          <div className="w-full max-w-md mb-10 relative">
+            {/* Danger warning pulses */}
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-40 h-40 bg-red-600/20 rounded-full animate-pulse opacity-30"></div>
+            <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-32 h-32 bg-red-800/30 rounded-full animate-pulse opacity-40" style={{animationDelay: '0.5s'}}></div>
+            
+            {/* Title with intense styling */}
+            <h1 className="text-5xl md:text-6xl font-bold text-garden text-center mb-2 relative">
+              <span className="absolute -inset-1 blur-lg text-red-600 opacity-70">
+                Flora Fight Frenzy
+              </span>
+              <span className="relative z-10 bg-gradient-to-r from-garden-dark via-garden to-garden-dark bg-clip-text text-transparent animate-pulse">
+                Flora Fight Frenzy
+              </span>
             </h1>
-            <div className="text-center text-gray-400 text-sm">The battle for botanical survival begins</div>
+            
+            <div className="text-center text-gray-400 text-sm relative">
+              <span className="text-red-500 font-bold">THE BATTLE FOR BOTANICAL SURVIVAL BEGINS</span>
+            </div>
+            
+            {/* Danger warning tape */}
+            <div className="w-full flex overflow-hidden mt-4 h-6">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div 
+                  key={`warning-${i}`} 
+                  className="h-full flex-1 bg-yellow-400"
+                  style={{ 
+                    transform: i % 2 === 0 ? 'skewX(45deg)' : 'skewX(-45deg)',
+                    margin: '0 2px',
+                    opacity: i % 2 === 0 ? 0.8 : 0.4,
+                  }}
+                />
+              ))}
+            </div>
           </div>
           
-          <div className="flex items-center space-x-8 mb-12">
+          <div className="flex items-center space-x-12 mb-12 relative">
+            {/* Chaotic pulse effect behind combatants */}
+            <div className="absolute inset-0 bg-black/50 blur-xl"></div>
+            
             {/* Plant side */}
-            <div className="w-32 h-32 flex items-center justify-center">
+            <div className="w-32 h-32 flex items-center justify-center relative">
+              <div className="absolute inset-0 bg-green-900/30 blur-xl rounded-full animate-pulse"></div>
               <div className="relative w-20 h-20 animate-bounce" style={{ animationDuration: '2s' }}>
                 <div className="absolute inset-0 bg-green-700 rounded-full"></div>
                 <div className="absolute inset-[15%] bg-green-500 rounded-full flex items-center justify-center">
                   <div className="text-2xl">🌱</div>
                 </div>
+                
+                {/* Plant energy glow */}
+                <div className="absolute -inset-4 bg-green-500/20 rounded-full animate-pulse"></div>
               </div>
             </div>
             
             {/* VS */}
-            <div className="text-3xl font-bold text-red-500 animate-pulse">VS</div>
+            <div className="relative z-10">
+              <div className="absolute inset-0 text-3xl font-bold text-red-600 blur-sm animate-pulse">VS</div>
+              <div className="text-3xl font-bold text-red-500 animate-pulse">VS</div>
+            </div>
             
             {/* Zombie side */}
-            <div className="w-32 h-32 flex items-center justify-center">
+            <div className="w-32 h-32 flex items-center justify-center relative">
+              <div className="absolute inset-0 bg-red-900/30 blur-xl rounded-full animate-pulse"></div>
               <div className="relative w-20 h-20 animate-bounce" style={{ animationDuration: '2.2s', animationDelay: '0.1s' }}>
                 <div className="absolute inset-0 bg-gray-700 rounded-full"></div>
                 <div className="absolute inset-[15%] bg-gray-600 rounded-full flex items-center justify-center">
                   <div className="text-2xl">🧟</div>
                 </div>
+                
+                {/* Zombie energy glow */}
+                <div className="absolute -inset-4 bg-red-500/20 rounded-full animate-pulse"></div>
               </div>
             </div>
           </div>
           
-          {/* Loading bar */}
-          <div className="w-full max-w-md h-3 bg-gray-800 rounded-full overflow-hidden mb-3">
-            <div className="h-full bg-garden animate-[growWidth_3s_ease-in-out_forwards]"></div>
+          {/* Loading bar with intense styling */}
+          <div className="w-full max-w-md relative">
+            <div className="absolute inset-0 blur-md bg-red-500/20 rounded-full"></div>
+            <div className="relative z-10 h-3 bg-gray-800 rounded-full overflow-hidden mb-3">
+              <div className="h-full bg-gradient-to-r from-red-600 via-garden to-red-600 animate-[growWidth_3s_ease-in-out_forwards]"></div>
+            </div>
           </div>
-          <div className="text-gray-400 text-sm">Loading game assets...</div>
+          
+          <div className="text-gray-400 text-sm mt-2 flex items-center">
+            <span className="mr-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+            Loading combat systems...
+          </div>
+          
+          {/* Emergency classification */}
+          <div className="absolute bottom-8 left-8 border-2 border-red-700 rounded px-3 py-1">
+            <div className="text-red-500 text-xs font-mono">CLASSIFIED INFORMATION</div>
+            <div className="text-xs text-gray-400 font-mono">SECURITY LEVEL: MAXIMUM</div>
+          </div>
         </div>
       )}
 
@@ -114,23 +169,42 @@ const Game = () => {
       {/* Story Intro */}
       {!isLoading && !showCinematic && showIntro && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-8 animate-fadeIn">
-          <div className="max-w-2xl glass p-6 rounded-xl text-left">
-            <h2 className="text-2xl font-bold text-garden mb-4">The Last Garden</h2>
-            <p className="mb-3 text-white">
-              As zombie hordes approach your precious garden, the ancient Plant Stars have awakened to defend their realm. 
-            </p>
-            <p className="mb-3 text-white">
-              "For centuries we have lived in peace," whispers the elder Sunflower, "but now the undead threaten our existence."
-            </p>
-            <p className="mb-3 text-white">
-              You must help the Plant Stars survive five waves of zombies. Collect sunlight to grow your defenses and stop the zombies before they cross your garden!
-            </p>
-            <button 
-              onClick={() => setShowIntro(false)}
-              className="mt-4 bg-garden px-4 py-2 rounded-lg text-white font-bold hover:bg-garden-dark transition-colors"
-            >
-              Begin Defense!
-            </button>
+          <div className="max-w-2xl glass p-6 rounded-xl text-left relative overflow-hidden">
+            {/* Digital scan lines overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-10 z-0"
+              style={{
+                backgroundImage: 'linear-gradient(0deg, transparent 50%, rgba(255, 255, 255, 0.1) 50%)',
+                backgroundSize: '4px 4px'
+              }}
+            ></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-2xl font-bold text-garden mb-4 flex items-center">
+                <span className="w-2 h-2 bg-garden rounded-full animate-ping mr-2"></span>
+                The Last Garden
+              </h2>
+              <p className="mb-3 text-white">
+                As zombie hordes approach your precious garden, the ancient Plant Stars have awakened to defend their realm. 
+              </p>
+              <p className="mb-3 text-white">
+                "For centuries we have lived in peace," whispers the elder Sunflower, "but now the undead threaten our existence."
+              </p>
+              <p className="mb-3 text-white">
+                You must help the Plant Stars survive five waves of zombies. Collect sunlight to grow your defenses and stop the zombies before they cross your garden!
+              </p>
+              <button 
+                onClick={() => setShowIntro(false)}
+                className="mt-4 bg-garden hover:bg-garden-dark px-6 py-3 rounded-lg text-white font-bold relative overflow-hidden group"
+              >
+                <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
+                <span className="relative">Begin Defense!</span>
+              </button>
+            </div>
+            
+            {/* Classified stamp */}
+            <div className="absolute top-3 right-3 text-red-600 border-2 border-red-600 rounded px-2 py-1 text-xs transform rotate-12">
+              URGENT
+            </div>
           </div>
         </div>
       )}

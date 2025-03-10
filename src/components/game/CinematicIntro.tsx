@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Play, AlertTriangle, Skull } from 'lucide-react';
+import { Play, AlertTriangle, Skull, Zap, Flame, Shield, BadgeX } from 'lucide-react';
 
 interface CinematicIntroProps {
   onComplete: () => void;
@@ -195,53 +195,173 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
     );
   });
   
+  // Generate random lightning flashes
+  const renderLightningFlashes = () => {
+    return Array.from({ length: 10 }).map((_, index) => (
+      <div 
+        key={`lightning-${index}`}
+        className="absolute animate-lightning"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          width: `${Math.random() * 80 + 20}px`,
+          height: `${Math.random() * 150 + 50}px`,
+          background: 'linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,162,255,0.4))',
+          transform: `rotate(${Math.random() * 90 - 45}deg)`,
+          opacity: 0,
+          zIndex: 5,
+          animationDelay: `${Math.random() * 10}s`,
+          animationDuration: '0.5s'
+        }}
+      />
+    ));
+  };
+  
   return (
     <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-      {/* Background atmosphere - animated particles */}
+      {/* Dynamic background with intense elements */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Flickering emergency lights on top */}
-        <div className="absolute top-0 left-0 w-full h-16 flex justify-around">
-          {[...Array(5)].map((_, i) => (
+        {/* Animated backdrop with glitch effects */}
+        <div className="absolute inset-0 bg-black">
+          {/* Matrix-like digital rain */}
+          <div className="absolute inset-0 opacity-30" 
+            style={{
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'4\' height=\'4\' viewBox=\'0 0 4 4\'%3E%3Cpath fill=\'%2300ff00\' d=\'M1 3h1v1H1V3zm2-2h1v1H3V1z\'%3E%3C/path%3E%3C/svg%3E")',
+              backgroundSize: '4px',
+              animation: 'scroll 20s linear infinite'
+            }}
+          ></div>
+          
+          {/* Red alert overlay */}
+          <div className="absolute inset-0 bg-red-900/20 animate-pulse"></div>
+          
+          {/* Lightning flashes */}
+          {renderLightningFlashes()}
+          
+          {/* Danger warning pulses */}
+          <div className="absolute top-10 left-10 animate-pulse opacity-40">
+            <BadgeX className="text-red-600 w-24 h-24" style={{animationDuration: '2.5s'}} />
+          </div>
+          <div className="absolute bottom-20 right-20 animate-pulse opacity-40">
+            <Shield className="text-yellow-600 w-20 h-20" style={{animationDuration: '3s'}} />
+          </div>
+          <div className="absolute top-1/3 right-1/4 animate-pulse opacity-30">
+            <Flame className="text-orange-600 w-16 h-16" style={{animationDuration: '1.5s'}} />
+          </div>
+        </div>
+        
+        {/* Intense background elements */}
+        <div className="absolute top-0 w-full h-16 bg-gradient-to-b from-red-900/80 to-transparent"></div>
+        <div className="absolute bottom-0 w-full h-16 bg-gradient-to-t from-red-900/80 to-transparent"></div>
+        <div className="absolute left-0 h-full w-16 bg-gradient-to-r from-red-900/80 to-transparent"></div>
+        <div className="absolute right-0 h-full w-16 bg-gradient-to-l from-red-900/80 to-transparent"></div>
+        
+        {/* Warning stripes at top and bottom */}
+        <div className="absolute top-0 w-full flex">
+          {Array.from({ length: 20 }).map((_, i) => (
             <div 
-              key={i} 
-              className="w-20 h-8 bg-red-600 rounded-b-lg opacity-75 animate-pulse"
-              style={{ animationDelay: `${i * 0.2}s` }}
+              key={`warning-top-${i}`} 
+              className="h-6 flex-1 bg-yellow-400"
+              style={{ 
+                transform: i % 2 === 0 ? 'skewX(45deg)' : 'skewX(-45deg)',
+                margin: '0 2px',
+                opacity: i % 2 === 0 ? 0.8 : 0.3,
+                animation: 'pulse 1.5s infinite',
+                animationDelay: `${i * 0.1}s`
+              }}
             />
           ))}
         </div>
         
-        {/* Plant forces on the left - more militaristic */}
-        <div className="absolute -left-10 bottom-0 w-1/3 h-2/3 opacity-30">
-          <div className="absolute bottom-0 left-[5%] w-[20%] h-[60%] bg-green-900 rounded-t-md"></div>
-          <div className="absolute bottom-0 left-[15%] w-[25%] h-[70%] bg-green-800 rounded-t-md"></div>
-          <div className="absolute bottom-0 left-[30%] w-[20%] h-[50%] bg-green-900 rounded-t-md"></div>
-          <div className="absolute bottom-0 left-[45%] w-[30%] h-[80%] bg-green-800 rounded-t-md"></div>
-          <div className="absolute bottom-0 left-[65%] w-[25%] h-[65%] bg-green-900 rounded-t-md"></div>
+        <div className="absolute bottom-0 w-full flex">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div 
+              key={`warning-bottom-${i}`} 
+              className="h-6 flex-1 bg-yellow-400"
+              style={{ 
+                transform: i % 2 === 0 ? 'skewX(-45deg)' : 'skewX(45deg)',
+                margin: '0 2px',
+                opacity: i % 2 === 0 ? 0.8 : 0.3,
+                animation: 'pulse 1.5s infinite',
+                animationDelay: `${i * 0.1}s`
+              }}
+            />
+          ))}
         </div>
         
-        {/* Zombie hordes on the right - more menacing */}
-        <div className="absolute -right-10 bottom-0 w-1/3 h-2/3 opacity-30">
-          <div className="absolute bottom-0 right-[5%] w-[15%] h-[85%] bg-gray-800 rounded-t-sm"></div>
-          <div className="absolute bottom-0 right-[15%] w-[20%] h-[70%] bg-gray-900 rounded-t-sm"></div>
-          <div className="absolute bottom-0 right-[30%] w-[15%] h-[90%] bg-gray-800 rounded-t-sm"></div>
-          <div className="absolute bottom-0 right-[40%] w-[20%] h-[75%] bg-gray-900 rounded-t-sm"></div>
-          <div className="absolute bottom-0 right-[55%] w-[15%] h-[85%] bg-gray-800 rounded-t-sm"></div>
-          <div className="absolute bottom-0 right-[65%] w-[25%] h-[80%] bg-gray-900 rounded-t-sm"></div>
+        {/* Random glitching elements */}
+        <div className="absolute h-screen w-screen pointer-events-none">
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div 
+              key={`glitch-${i}`}
+              className="absolute bg-red-500/20"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: `${Math.random() * 200 + 50}px`,
+                height: `${Math.random() * 5 + 2}px`,
+                transform: `rotate(${Math.random() * 180}deg)`,
+                opacity: 0,
+                animation: 'glitch 0.2s forwards',
+                animationDelay: `${Math.random() * 10}s`,
+                animationIterationCount: 'infinite'
+              }}
+            />
+          ))}
         </div>
         
-        {/* Random warning flashes */}
-        <div className="absolute top-20 right-40 animate-pulse opacity-30" style={{ animationDuration: '2s' }}>
-          <Skull className="text-red-600 w-20 h-20" />
-        </div>
-        <div className="absolute bottom-40 left-30 animate-pulse opacity-30" style={{ animationDuration: '3s', animationDelay: '1s' }}>
-          <AlertTriangle className="text-yellow-500 w-20 h-20" />
+        {/* Zombie silhouettes in background */}
+        <div className="absolute bottom-0 right-0 w-2/3 h-1/3 opacity-20">
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div 
+              key={`zombie-${i}`} 
+              className="absolute bottom-0"
+              style={{
+                right: `${i * 8 + Math.random() * 10}%`,
+                width: '40px',
+                height: `${80 + Math.random() * 40}px`,
+                background: 'linear-gradient(to top, #374151, transparent)',
+                borderRadius: '5px 5px 0 0',
+                transform: `skewX(${Math.random() * 10 - 5}deg)`,
+                animation: 'zombieApproach 30s linear infinite',
+                animationDelay: `${i * 0.5}s`
+              }}
+            >
+              <div 
+                className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[30px] h-[30px] rounded-full"
+                style={{
+                  background: 'radial-gradient(circle, #374151 60%, transparent)'
+                }}
+              />
+            </div>
+          ))}
         </div>
         
-        {/* Random floating particles - debris from battle */}
-        <div className="absolute top-[20%] left-[30%] w-3 h-3 bg-gray-500 rounded-full animate-float" style={{ animationDuration: '7s' }}></div>
-        <div className="absolute top-[50%] left-[70%] w-2 h-2 bg-red-500 rounded-full animate-float" style={{ animationDuration: '5s', animationDelay: '1s' }}></div>
-        <div className="absolute top-[70%] left-[20%] w-4 h-4 bg-gray-600 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '2s' }}></div>
-        <div className="absolute top-[30%] left-[80%] w-3 h-3 bg-gray-700 rounded-full animate-float" style={{ animationDuration: '6s', animationDelay: '3s' }}></div>
+        {/* Plant defenders silhouettes on left */}
+        <div className="absolute bottom-0 left-0 w-2/3 h-1/3 opacity-20">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div 
+              key={`plant-${i}`} 
+              className="absolute bottom-0"
+              style={{
+                left: `${i * 8 + Math.random() * 5}%`,
+                width: '30px',
+                height: `${50 + Math.random() * 20}px`,
+                background: 'linear-gradient(to top, #065f46, transparent)',
+                borderRadius: '0 0 5px 5px',
+                animation: 'plantDefense 2s ease-in-out infinite',
+                animationDelay: `${i * 0.2}s`
+              }}
+            >
+              <div 
+                className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[25px] h-[25px] rounded-full"
+                style={{
+                  background: 'radial-gradient(circle, #065f46 60%, transparent)'
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
       
       {/* Content container */}
@@ -249,32 +369,64 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
         {/* Title Phase */}
         <div className={`transition-all duration-1000 ${phase === 'title' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-16 absolute'}`}>
           <div className="relative">
-            <div className="absolute inset-0 blur-md opacity-70 flex items-center justify-center">
-              <h1 className="text-5xl font-bold text-center text-red-600">
-                {story.title}
+            {/* Title with shadow effect */}
+            <div className="mb-2 relative">
+              <div className="absolute inset-0 blur-xl opacity-70 flex items-center justify-center">
+                <h1 className="text-6xl font-bold text-center text-red-600">
+                  {story.title}
+                </h1>
+              </div>
+              <h1 className="text-6xl font-bold text-center text-red-500 tracking-widest relative z-10">
+                {titleElements}
               </h1>
+              {/* Digital distortion overlay */}
+              <div className="absolute inset-0 pointer-events-none opacity-30"
+                style={{
+                  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ff0000\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M5 0h1L0 5v1H0V0h5z\'/%3E%3C/g%3E%3C/svg%3E")'
+                }}
+              ></div>
             </div>
-            <h1 className="text-5xl font-bold text-center text-red-500 mb-4 tracking-widest">
-              {titleElements}
-            </h1>
+            
+            <div className="w-full max-w-lg mx-auto h-2 bg-gradient-to-r from-transparent via-red-600 to-transparent"></div>
           </div>
-          <div className="w-full max-w-lg mx-auto h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent"></div>
           
-          {/* Warning signs */}
-          <div className="flex justify-between mt-4">
-            <div className="w-16 h-8 bg-yellow-600 flex items-center justify-center rounded animate-pulse">
-              <span className="text-xs text-black font-bold">WARNING</span>
+          {/* Intense warning indicators */}
+          <div className="flex justify-between mt-6">
+            <div className="flex items-center">
+              <div className="w-16 h-8 bg-red-600 animate-pulse flex items-center justify-center rounded-sm">
+                <span className="text-xs text-white font-bold">DANGER</span>
+              </div>
+              <Skull className="ml-2 text-red-500 w-6 h-6 animate-pulse" />
             </div>
-            <div className="w-16 h-8 bg-yellow-600 flex items-center justify-center rounded animate-pulse" style={{ animationDelay: '0.5s' }}>
-              <span className="text-xs text-black font-bold">DANGER</span>
+            <div className="flex items-center">
+              <Zap className="mr-2 text-yellow-500 w-6 h-6 animate-pulse" />
+              <div className="w-16 h-8 bg-yellow-600 animate-pulse flex items-center justify-center rounded-sm">
+                <span className="text-xs text-black font-bold">WARNING</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Emergency alert bar */}
+          <div className="mt-6 w-full h-10 bg-red-800/70 flex items-center justify-center overflow-hidden relative">
+            <div className="absolute inset-0 border-t border-b border-red-600 opacity-50"></div>
+            <div className="whitespace-nowrap text-white font-mono animate-marquee">
+              EMERGENCY ALERT ★ ZOMBIE OUTBREAK IN PROGRESS ★ ALL PLANT PERSONNEL REPORT TO DEFENSIVE POSITIONS ★ THIS IS NOT A DRILL ★ REPEAT: THIS IS NOT A DRILL
             </div>
           </div>
         </div>
         
         {/* Dialogue 1 Phase */}
         <div className={`transition-all duration-1000 delay-300 ${phase === 'dialogue1' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-16 absolute'}`}>
-          <div className="bg-black/70 border-2 border-green-900 rounded-xl p-6 mb-8 backdrop-blur-sm">
-            <div className="flex items-start">
+          <div className="bg-black/80 border-2 border-green-900 rounded-xl p-6 mb-8 backdrop-blur-sm relative overflow-hidden">
+            {/* Digital scan lines overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-10 z-0"
+              style={{
+                backgroundImage: 'linear-gradient(0deg, transparent 50%, rgba(32, 128, 32, 0.2) 50%)',
+                backgroundSize: '4px 4px'
+              }}
+            ></div>
+            
+            <div className="flex items-start relative z-10">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-900 flex items-center justify-center text-2xl border border-green-700">
                 {story.dialogue1.avatar}
               </div>
@@ -286,13 +438,28 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
                 <p className="text-gray-200 leading-relaxed font-bold">{story.dialogue1.text}</p>
               </div>
             </div>
+            
+            {/* Connection static */}
+            <div className="absolute right-3 top-3 flex items-center">
+              <div className="w-1 h-3 bg-green-500 rounded-sm mx-px animate-pulse"></div>
+              <div className="w-1 h-5 bg-green-500 rounded-sm mx-px animate-pulse" style={{animationDelay: '0.1s'}}></div>
+              <div className="w-1 h-7 bg-green-500 rounded-sm mx-px animate-pulse" style={{animationDelay: '0.2s'}}></div>
+              <div className="w-1 h-4 bg-green-500 rounded-sm mx-px animate-pulse" style={{animationDelay: '0.3s'}}></div>
+            </div>
           </div>
         </div>
         
         {/* Dialogue 2 Phase */}
         <div className={`transition-all duration-1000 delay-300 ${phase === 'dialogue2' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-16 absolute'}`}>
-          <div className="bg-black/70 border-2 border-red-900 rounded-xl p-6 mb-8 backdrop-blur-sm">
-            <div className="flex items-start">
+          <div className="bg-black/80 border-2 border-red-900 rounded-xl p-6 mb-8 backdrop-blur-sm relative overflow-hidden">
+            {/* Digital noise overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-10 z-0"
+              style={{
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%\' height=\'100%\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")'
+              }}
+            ></div>
+            
+            <div className="flex items-start relative z-10">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-2xl border border-red-900">
                 {story.dialogue2.avatar}
               </div>
@@ -304,13 +471,28 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
                 <p className="text-gray-300 leading-relaxed font-bold">{story.dialogue2.text}</p>
               </div>
             </div>
+            
+            {/* Evil presence indicators */}
+            <div className="absolute right-3 top-3 flex items-center">
+              <div className="w-6 h-6 rounded-full border border-red-600 flex items-center justify-center animate-pulse">
+                <div className="w-4 h-4 rounded-full bg-red-800 animate-pulse" style={{animationDelay: '0.2s'}}></div>
+              </div>
+            </div>
           </div>
         </div>
         
         {/* Finale Phase */}
         <div className={`transition-all duration-1000 delay-300 ${phase === 'finale' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-16 absolute'}`}>
-          <div className="bg-black/70 border-2 border-yellow-900 rounded-xl p-6 mb-8 backdrop-blur-sm">
-            <div className="flex items-start">
+          <div className="bg-black/80 border-2 border-yellow-900 rounded-xl p-6 mb-8 backdrop-blur-sm relative overflow-hidden">
+            {/* Battle map grid */}
+            <div className="absolute inset-0 pointer-events-none opacity-10 z-0"
+              style={{
+                backgroundImage: 'linear-gradient(to right, rgba(251, 191, 36, 0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(251, 191, 36, 0.2) 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }}
+            ></div>
+            
+            <div className="flex items-start relative z-10">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-900 flex items-center justify-center text-2xl border border-yellow-700">
                 {story.finale.avatar}
               </div>
@@ -322,6 +504,13 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
                 <p className="text-white leading-relaxed font-bold">{story.finale.text}</p>
               </div>
             </div>
+            
+            {/* Strategic indicators */}
+            <div className="absolute right-3 top-3 flex items-center space-x-1">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping" style={{animationDelay: '0s'}}></div>
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping" style={{animationDelay: '0.2s'}}></div>
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
+            </div>
           </div>
         </div>
         
@@ -329,10 +518,22 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
         <div className={`transition-all duration-1000 text-center mt-8 ${skipEnabled ? 'opacity-100' : 'opacity-0'}`}>
           <button 
             onClick={handleSkip}
-            className="bg-red-700 hover:bg-red-800 px-6 py-3 rounded-lg text-white font-bold flex items-center mx-auto transition-colors border border-red-500"
+            className="relative bg-red-700 hover:bg-red-800 px-8 py-4 rounded-lg text-white font-bold flex items-center mx-auto transition-colors border-2 border-red-500 animate-pulse overflow-hidden"
+            style={{animationDuration: '2s'}}
           >
+            {/* Button internal glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 via-red-600/30 to-red-600/0 animate-pulse"></div>
+            
             <Play className="w-5 h-5 mr-2" />
-            {phase === 'finale' ? 'DEPLOY PLANTS NOW!' : 'SKIP BRIEFING'}
+            <span className="relative z-10">
+              {phase === 'finale' ? 'DEPLOY PLANTS NOW!' : 'SKIP BRIEFING'}
+            </span>
+            
+            {/* Warning corners */}
+            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-yellow-400"></div>
+            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-yellow-400"></div>
+            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-yellow-400"></div>
+            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-yellow-400"></div>
           </button>
         </div>
       </div>

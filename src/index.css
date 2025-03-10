@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -319,6 +320,78 @@
   }
 }
 
+/* Crazy intro animations */
+@keyframes glitch {
+  0% {
+    opacity: 0;
+  }
+  10%, 15% {
+    opacity: 0.6;
+    transform: translate(10px, 0);
+  }
+  20% {
+    opacity: 0;
+  }
+  25%, 30% {
+    opacity: 0.4;
+    transform: translate(-10px, 0);
+  }
+  35% {
+    opacity: 0;
+  }
+  40%, 45% {
+    opacity: 0.8;
+    transform: translate(0, 5px);
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes zombieApproach {
+  0% {
+    transform: translateX(-200px) skewX(5deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) skewX(-5deg);
+    opacity: 1;
+  }
+}
+
+@keyframes plantDefense {
+  0% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.1);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes scroll {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 1000px;
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-out forwards;
 }
@@ -361,6 +434,10 @@
 
 .animate-mouthOpen {
   animation: mouthOpen 1s ease-in-out infinite;
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
 }
 
 @keyframes ping {
@@ -418,3 +495,4 @@
 .animate-flicker {
   animation: flicker 2s linear infinite;
 }
+
