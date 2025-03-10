@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Play } from 'lucide-react';
+import { Play, AlertTriangle, Skull } from 'lucide-react';
 
 interface CinematicIntroProps {
   onComplete: () => void;
@@ -16,102 +16,102 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
     switch(level) {
       case 1:
         return {
-          title: "The First Defense",
+          title: "THE INVASION BEGINS",
           dialogue1: {
-            speaker: "Elder Sunflower",
+            speaker: "Commander Sunflower",
             avatar: "🌻",
-            text: "For centuries, we Plant Stars have lived in harmony with the earth. But now, the undead threaten our very existence."
+            text: "EMERGENCY ALERT! Zombies have breached the perimeter! They're coming for our brains! We need to defend the house at all costs!"
           },
           dialogue2: {
-            speaker: "Zombie Commander",
+            speaker: "Zombie General",
             avatar: "🧟",
-            text: "Braaaaains... Plants... Destroy... Garden..."
+            text: "BRAAAINS... MUST... EAT... BRAINS... DESTROY... PLANTS..."
           },
           finale: {
-            speaker: "Minister Peashooter",
+            speaker: "Tactical Peashooter",
             avatar: "🌱",
-            text: "Brave defender, position us strategically. We must hold the line against these creatures. Our survival depends on you!"
+            text: "All defensive plants report to battle stations! We are initiating emergency protocol DEFEND-GARDEN! This is NOT a drill!"
           }
         };
       case 2:
         return {
-          title: "The Laboratory Awakening",
+          title: "MUTANT ZOMBIES APPROACHING",
           dialogue1: {
             speaker: "Dr. Snapdragon",
             avatar: "🔬",
-            text: "My research shows these zombies have evolved since the first wave. They're more resilient now."
+            text: "WARNING! Our sensors detect genetically modified zombies with enhanced capabilities! Standard defenses may be ineffective!"
           },
           dialogue2: {
-            speaker: "General Rotbrain",
+            speaker: "Elite Zombie",
             avatar: "🧠",
-            text: "First attack... failure. Now we bring... stronger zombies... special zombies..."
+            text: "STRONGER... FASTER... MORE BRAINS... CRUSH... PLANTS..."
           },
           finale: {
-            speaker: "Minister Peashooter",
+            speaker: "Defense Minister",
             avatar: "🌱",
-            text: "Our defense systems are evolving too. Look for the special powerups! They'll help us push back the horde."
+            text: "Deploy frost plants to slow their advance! Utilize explosive plants for area damage! We cannot let them reach the house!"
           }
         };
       case 3:
         return {
-          title: "Thunderstorm of the Undead",
+          title: "CODE RED: MASSIVE HORDE INBOUND",
           dialogue1: {
-            speaker: "Captain Walnut",
-            avatar: "🌰",
-            text: "They're bringing reinforcements from the east graveyard. I've sent scouts to monitor their movements."
+            speaker: "Scout Cherry",
+            avatar: "🍒",
+            text: "CRITICAL ALERT! Zombie numbers exceeding all previous encounters! They've broken through the outer perimeter!"
           },
           dialogue2: {
-            speaker: "The Bucket Commander",
+            speaker: "Zombie Commander",
             avatar: "🪣",
-            text: "We... unstoppable. Lawn mowers... useless. My armor... strong. Plants... weak."
+            text: "TOO MANY... UNSTOPPABLE... HOUSE SOON... FALL... BRAINS MINE..."
           },
           finale: {
-            speaker: "Lightning Reed",
+            speaker: "Tactical Officer",
             avatar: "⚡",
-            text: "I've perfected the lightning technology! Deploy me to chain electricity through multiple zombies at once. Let's electrify them!"
+            text: "All plants to battle stations! Activate emergency reserves! Layer your defenses! We MUST hold the line!"
           }
         };
       case 4:
         return {
-          title: "The Winter Offensive",
+          title: "LAST STAND: THE HORDE ADVANCES",
           dialogue1: {
-            speaker: "Ice Queen",
-            avatar: "❄️",
-            text: "The zombies are adapting to our normal attacks. We need to use the freezing powers of my ice plants to slow them down."
+            speaker: "General Walnut",
+            avatar: "🥜",
+            text: "CRITICAL SITUATION! Our outer defenses have fallen! The zombies are too numerous! Prepare for close-quarters battle!"
           },
           dialogue2: {
             speaker: "Zombie King",
             avatar: "👑",
-            text: "Brains... almost ours. Plant kingdom... falling. Final push... begins now."
+            text: "VICTORY... SOON... PLANTS DYING... BRAINS... ALMOST MINE..."
           },
           finale: {
-            speaker: "Minister Peashooter",
-            avatar: "🌱",
-            text: "This is our darkest hour. Use every plant at your disposal. Combine fire and ice strategically. We must not fail!"
+            speaker: "Strategic Command",
+            avatar: "🌿",
+            text: "Activate all emergency protocols! Use every plant at your disposal! The fate of all living beings depends on our stand here!"
           }
         };
       case 5:
         return {
-          title: "Final Stand of the Garden",
+          title: "FINAL DEFENSE: EXTINCTION EVENT",
           dialogue1: {
-            speaker: "Elder Sunflower",
+            speaker: "High Command",
             avatar: "🌻",
-            text: "The ancient texts speak of a final confrontation. If we survive this wave, the zombie threat will be eliminated for a generation."
+            text: "THIS IS NOT A DRILL! The main zombie army has arrived! If we fail here, humanity falls. Deploy all available defenses IMMEDIATELY!"
           },
           dialogue2: {
             speaker: "Dr. Zomboss",
-            avatar: "🧪",
-            text: "My ultimate creation... unstoppable. Your pitiful plants... will wither. Your garden... will be mine!"
+            avatar: "💀",
+            text: "RESISTANCE... FUTILE... HOUSE... WILL FALL... BRAINS... WILL BE CONSUMED..."
           },
           finale: {
-            speaker: "The Plant Council",
+            speaker: "Plant Coalition",
             avatar: "🌿",
-            text: "Defender, the future of all plant life is in your hands. We bestow upon you our most powerful plants. May they serve you well in this final battle."
+            text: "This is our FINAL STAND! Every plant to battle stations! The survival of all life depends on what we do in the next few minutes!"
           }
         };
       default:
         return {
-          title: "Plants vs. Zombies",
+          title: "PLANTS VS. ZOMBIES",
           dialogue1: {
             speaker: "Sunflower",
             avatar: "🌻",
@@ -181,51 +181,109 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
     }
   };
   
+  // Random flicker effect for the title
+  const flickerClass = "animate-flicker inline-block";
+  
+  // Split the title to apply flicker to some letters
+  const titleElements = story.title.split('').map((letter, index) => {
+    // Apply flicker animation to some letters randomly but consistently
+    const shouldFlicker = (index * 7) % 3 === 0;
+    return (
+      <span key={index} className={shouldFlicker ? flickerClass : ""}>
+        {letter}
+      </span>
+    );
+  });
+  
   return (
     <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
       {/* Background atmosphere - animated particles */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Plant silhouettes on the left */}
-        <div className="absolute -left-10 bottom-0 w-1/4 h-2/3 opacity-30">
-          <div className="absolute bottom-0 left-[10%] w-[40%] h-[80%] bg-garden-dark rounded-t-full"></div>
-          <div className="absolute bottom-0 left-[30%] w-[30%] h-[60%] bg-garden-dark rounded-t-full"></div>
-          <div className="absolute bottom-0 left-[50%] w-[35%] h-[70%] bg-garden-dark rounded-t-full"></div>
+        {/* Flickering emergency lights on top */}
+        <div className="absolute top-0 left-0 w-full h-16 flex justify-around">
+          {[...Array(5)].map((_, i) => (
+            <div 
+              key={i} 
+              className="w-20 h-8 bg-red-600 rounded-b-lg opacity-75 animate-pulse"
+              style={{ animationDelay: `${i * 0.2}s` }}
+            />
+          ))}
         </div>
         
-        {/* Zombie silhouettes on the right */}
-        <div className="absolute -right-10 bottom-0 w-1/4 h-2/3 opacity-30">
-          <div className="absolute bottom-0 right-[10%] w-[30%] h-[90%] bg-gray-800 rounded-t-sm"></div>
-          <div className="absolute bottom-0 right-[30%] w-[25%] h-[75%] bg-gray-800 rounded-t-sm"></div>
-          <div className="absolute bottom-0 right-[50%] w-[35%] h-[85%] bg-gray-800 rounded-t-sm"></div>
+        {/* Plant forces on the left - more militaristic */}
+        <div className="absolute -left-10 bottom-0 w-1/3 h-2/3 opacity-30">
+          <div className="absolute bottom-0 left-[5%] w-[20%] h-[60%] bg-green-900 rounded-t-md"></div>
+          <div className="absolute bottom-0 left-[15%] w-[25%] h-[70%] bg-green-800 rounded-t-md"></div>
+          <div className="absolute bottom-0 left-[30%] w-[20%] h-[50%] bg-green-900 rounded-t-md"></div>
+          <div className="absolute bottom-0 left-[45%] w-[30%] h-[80%] bg-green-800 rounded-t-md"></div>
+          <div className="absolute bottom-0 left-[65%] w-[25%] h-[65%] bg-green-900 rounded-t-md"></div>
         </div>
         
-        {/* Random floating particles */}
-        <div className="absolute top-[20%] left-[30%] w-3 h-3 bg-green-500/30 rounded-full animate-float" style={{ animationDuration: '7s' }}></div>
-        <div className="absolute top-[50%] left-[70%] w-2 h-2 bg-yellow-500/30 rounded-full animate-float" style={{ animationDuration: '5s', animationDelay: '1s' }}></div>
-        <div className="absolute top-[70%] left-[20%] w-4 h-4 bg-blue-500/30 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '2s' }}></div>
-        <div className="absolute top-[30%] left-[80%] w-3 h-3 bg-red-500/30 rounded-full animate-float" style={{ animationDuration: '6s', animationDelay: '3s' }}></div>
+        {/* Zombie hordes on the right - more menacing */}
+        <div className="absolute -right-10 bottom-0 w-1/3 h-2/3 opacity-30">
+          <div className="absolute bottom-0 right-[5%] w-[15%] h-[85%] bg-gray-800 rounded-t-sm"></div>
+          <div className="absolute bottom-0 right-[15%] w-[20%] h-[70%] bg-gray-900 rounded-t-sm"></div>
+          <div className="absolute bottom-0 right-[30%] w-[15%] h-[90%] bg-gray-800 rounded-t-sm"></div>
+          <div className="absolute bottom-0 right-[40%] w-[20%] h-[75%] bg-gray-900 rounded-t-sm"></div>
+          <div className="absolute bottom-0 right-[55%] w-[15%] h-[85%] bg-gray-800 rounded-t-sm"></div>
+          <div className="absolute bottom-0 right-[65%] w-[25%] h-[80%] bg-gray-900 rounded-t-sm"></div>
+        </div>
+        
+        {/* Random warning flashes */}
+        <div className="absolute top-20 right-40 animate-pulse opacity-30" style={{ animationDuration: '2s' }}>
+          <Skull className="text-red-600 w-20 h-20" />
+        </div>
+        <div className="absolute bottom-40 left-30 animate-pulse opacity-30" style={{ animationDuration: '3s', animationDelay: '1s' }}>
+          <AlertTriangle className="text-yellow-500 w-20 h-20" />
+        </div>
+        
+        {/* Random floating particles - debris from battle */}
+        <div className="absolute top-[20%] left-[30%] w-3 h-3 bg-gray-500 rounded-full animate-float" style={{ animationDuration: '7s' }}></div>
+        <div className="absolute top-[50%] left-[70%] w-2 h-2 bg-red-500 rounded-full animate-float" style={{ animationDuration: '5s', animationDelay: '1s' }}></div>
+        <div className="absolute top-[70%] left-[20%] w-4 h-4 bg-gray-600 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '2s' }}></div>
+        <div className="absolute top-[30%] left-[80%] w-3 h-3 bg-gray-700 rounded-full animate-float" style={{ animationDuration: '6s', animationDelay: '3s' }}></div>
       </div>
       
       {/* Content container */}
       <div className="relative z-10 max-w-3xl w-full px-6">
         {/* Title Phase */}
         <div className={`transition-all duration-1000 ${phase === 'title' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-16 absolute'}`}>
-          <h1 className="text-5xl font-bold text-center text-garden bg-gradient-to-r from-garden-dark to-garden bg-clip-text text-transparent mb-4">
-            {story.title}
-          </h1>
-          <div className="w-full max-w-lg mx-auto h-1 bg-gradient-to-r from-transparent via-garden to-transparent"></div>
+          <div className="relative">
+            <div className="absolute inset-0 blur-md opacity-70 flex items-center justify-center">
+              <h1 className="text-5xl font-bold text-center text-red-600">
+                {story.title}
+              </h1>
+            </div>
+            <h1 className="text-5xl font-bold text-center text-red-500 mb-4 tracking-widest">
+              {titleElements}
+            </h1>
+          </div>
+          <div className="w-full max-w-lg mx-auto h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent"></div>
+          
+          {/* Warning signs */}
+          <div className="flex justify-between mt-4">
+            <div className="w-16 h-8 bg-yellow-600 flex items-center justify-center rounded animate-pulse">
+              <span className="text-xs text-black font-bold">WARNING</span>
+            </div>
+            <div className="w-16 h-8 bg-yellow-600 flex items-center justify-center rounded animate-pulse" style={{ animationDelay: '0.5s' }}>
+              <span className="text-xs text-black font-bold">DANGER</span>
+            </div>
+          </div>
         </div>
         
         {/* Dialogue 1 Phase */}
         <div className={`transition-all duration-1000 delay-300 ${phase === 'dialogue1' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-16 absolute'}`}>
-          <div className="bg-black/70 border border-garden/30 rounded-xl p-6 mb-8 backdrop-blur-sm">
+          <div className="bg-black/70 border-2 border-green-900 rounded-xl p-6 mb-8 backdrop-blur-sm">
             <div className="flex items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-garden flex items-center justify-center text-2xl">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-900 flex items-center justify-center text-2xl border border-green-700">
                 {story.dialogue1.avatar}
               </div>
               <div className="ml-4">
-                <h3 className="font-bold text-garden-light text-lg">{story.dialogue1.speaker}</h3>
-                <p className="text-white leading-relaxed">{story.dialogue1.text}</p>
+                <h3 className="font-bold text-green-500 text-lg uppercase flex items-center">
+                  {story.dialogue1.speaker}
+                  <span className="ml-2 w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                </h3>
+                <p className="text-gray-200 leading-relaxed font-bold">{story.dialogue1.text}</p>
               </div>
             </div>
           </div>
@@ -233,14 +291,17 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
         
         {/* Dialogue 2 Phase */}
         <div className={`transition-all duration-1000 delay-300 ${phase === 'dialogue2' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-16 absolute'}`}>
-          <div className="bg-black/70 border border-red-800/30 rounded-xl p-6 mb-8 backdrop-blur-sm">
+          <div className="bg-black/70 border-2 border-red-900 rounded-xl p-6 mb-8 backdrop-blur-sm">
             <div className="flex items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-2xl">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-2xl border border-red-900">
                 {story.dialogue2.avatar}
               </div>
               <div className="ml-4">
-                <h3 className="font-bold text-red-400 text-lg">{story.dialogue2.speaker}</h3>
-                <p className="text-gray-300 leading-relaxed">{story.dialogue2.text}</p>
+                <h3 className="font-bold text-red-500 text-lg uppercase flex items-center">
+                  {story.dialogue2.speaker}
+                  <span className="ml-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+                </h3>
+                <p className="text-gray-300 leading-relaxed font-bold">{story.dialogue2.text}</p>
               </div>
             </div>
           </div>
@@ -248,14 +309,17 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
         
         {/* Finale Phase */}
         <div className={`transition-all duration-1000 delay-300 ${phase === 'finale' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-16 absolute'}`}>
-          <div className="bg-black/70 border border-yellow-600/30 rounded-xl p-6 mb-8 backdrop-blur-sm">
+          <div className="bg-black/70 border-2 border-yellow-900 rounded-xl p-6 mb-8 backdrop-blur-sm">
             <div className="flex items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-800 flex items-center justify-center text-2xl">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-900 flex items-center justify-center text-2xl border border-yellow-700">
                 {story.finale.avatar}
               </div>
               <div className="ml-4">
-                <h3 className="font-bold text-yellow-400 text-lg">{story.finale.speaker}</h3>
-                <p className="text-white leading-relaxed">{story.finale.text}</p>
+                <h3 className="font-bold text-yellow-500 text-lg uppercase flex items-center">
+                  {story.finale.speaker}
+                  <span className="ml-2 w-2 h-2 bg-yellow-500 rounded-full animate-ping"></span>
+                </h3>
+                <p className="text-white leading-relaxed font-bold">{story.finale.text}</p>
               </div>
             </div>
           </div>
@@ -265,10 +329,10 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
         <div className={`transition-all duration-1000 text-center mt-8 ${skipEnabled ? 'opacity-100' : 'opacity-0'}`}>
           <button 
             onClick={handleSkip}
-            className="bg-garden px-6 py-3 rounded-lg text-white font-bold flex items-center mx-auto hover:bg-garden-dark transition-colors"
+            className="bg-red-700 hover:bg-red-800 px-6 py-3 rounded-lg text-white font-bold flex items-center mx-auto transition-colors border border-red-500"
           >
             <Play className="w-5 h-5 mr-2" />
-            {phase === 'finale' ? 'Start Battle' : 'Skip Intro'}
+            {phase === 'finale' ? 'DEPLOY PLANTS NOW!' : 'SKIP BRIEFING'}
           </button>
         </div>
       </div>
