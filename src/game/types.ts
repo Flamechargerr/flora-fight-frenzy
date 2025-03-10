@@ -25,10 +25,6 @@ export interface EnemyType {
   burnDamage?: number;
   isElectrified?: boolean;
   electricDamage?: number;
-  // New PVZ-like properties
-  isSlowed?: boolean;
-  isStunned?: boolean;
-  armor?: number;
 }
 
 export interface PlantInstance {
@@ -39,10 +35,6 @@ export interface PlantInstance {
   lastFired: number;
   health?: number;
   maxHealth?: number;
-  // New PVZ-like properties
-  isAsleep?: boolean;
-  isBoosted?: boolean;
-  plantAge?: number;
 }
 
 export interface ProjectileType {
@@ -63,7 +55,6 @@ export interface SunResource {
   id: string;
   x: number;
   y: number;
-  value?: number; // Different sun values like in PVZ
 }
 
 export interface PowerupType {
@@ -72,9 +63,8 @@ export interface PowerupType {
   description: string;
   duration: number;
   icon: string;
-  effectType: 'lightning' | 'freeze' | 'burn' | 'boost' | 'shovel' | 'bomb';
+  effectType: 'lightning' | 'freeze' | 'burn' | 'boost';
   cooldown: number;
-  cost?: number; // Some powerups cost sun in PVZ
 }
 
 export interface ActivePowerup {
@@ -83,8 +73,6 @@ export interface ActivePowerup {
   startTime: number;
   endTime: number;
   isActive: boolean;
-  targetRow?: number; // For row-specific powerups like in PVZ
-  targetCol?: number; // For column-specific powerups
 }
 
 export interface UseGameStateProps {
@@ -101,20 +89,4 @@ export interface WaveConfig {
 
 export interface WaveConfigMap {
   [key: number]: WaveConfig;
-}
-
-// New PVZ-like types
-export interface Achievements {
-  id: string;
-  name: string;
-  description: string;
-  isUnlocked: boolean;
-  icon: string;
-}
-
-export interface PlayerStats {
-  sunCollected: number;
-  zombiesKilled: number;
-  plantsPlanted: number;
-  levelsCompleted: number;
 }
