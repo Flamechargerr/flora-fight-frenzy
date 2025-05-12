@@ -1,7 +1,6 @@
 # Welcome to your Lovable project
 
 
-
 ## How can I edit this code?
 
 There are several ways of editing your application.
