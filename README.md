@@ -1,12 +1,9 @@
 # Welcome to your Lovable project
-
-
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
 **Use Lovable**
-
 Simply visit the [Lovable Project](https://lovable.dev/projects/2c7635fb-3ff1-4dcb-b8db-6174c2e05c18) and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
