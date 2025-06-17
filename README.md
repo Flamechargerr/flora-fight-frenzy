@@ -1,10 +1,4 @@
-Sure Anamay! Here's **everything you need** in one clean message — the **complete README.md** for your `flora-fight-frenzy` project, just like the design in your reference image. Follow the instructions at the end to upload it.
 
----
-
-### ✅ Copy-Paste This Entire Code into `README.md`
-
-````markdown
 # FLORA-FIGHT-FRENZY
 
 *Defend biodiversity, battle the invasive — one click at a time.*
