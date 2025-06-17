@@ -1,63 +1,42 @@
-# Welcome to your Lovable project
-## How can I edit this code?
+# FLORA-FIGHT-FRENZY
 
-There are several ways of editing your application.
+*Defend biodiversity, battle the invasive — one click at a time.*
 
-**Use Lovable**
-Simply visit the [Lovable Project](https://lovable.dev/projects/2c7635fb-3ff1-4dcb-b8db-6174c2e05c18) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+![Last Commit](https://img.shields.io/github/last-commit/Flamechargerr/flora-fight-frenzy)
+![Top Language](https://img.shields.io/github/languages/top/Flamechargerr/flora-fight-frenzy)
+![Languages Count](https://img.shields.io/github/languages/count/Flamechargerr/flora-fight-frenzy)
 
-*Use your preferred IDE*
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🔧 Built with the tools and technologies:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+![HTML](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Phaser.js](https://img.shields.io/badge/Phaser.js-2B2D42?style=for-the-badge&logoColor=white)
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🧠 About the Project
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+**Flora Fight Frenzy** is a fun and educational browser game that raises awareness about invasive plant species.  
+Players must protect native flora by quickly identifying and removing harmful invaders — with escalating challenge.
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## 🕹️ Features
 
-**Edit a file directly in GitHub**
+- 🎮 Fast-paced, browser-based gameplay  
+- 🌱 Highlights real-world biodiversity concerns  
+- 📈 Score system and increasing difficulty  
+- 💡 Simple, accessible HTML/CSS/JS implementation
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 🛠️ How to Run Locally
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Its simple,just open [Lovable](https://lovable.dev/projects/2c7635fb-3ff1-4dcb-b8db-6174c2e05c18) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+1. **Clone this repo**:
+   ```bash
+   git clone https://github.com/Flamechargerr/flora-fight-frenzy.git
