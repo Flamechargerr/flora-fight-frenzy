@@ -483,6 +483,11 @@
   background-size: calc(100% / 9) calc(100% / 5);
 }
 
+/* Custom grid for 20 columns */
+.grid-cols-20 {
+  grid-template-columns: repeat(20, minmax(0, 1fr));
+}
+
 @keyframes flicker {
   0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
     opacity: 1;

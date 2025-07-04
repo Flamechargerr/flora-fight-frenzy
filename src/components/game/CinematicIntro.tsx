@@ -20,7 +20,7 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
           dialogue1: {
             speaker: "Commander Sunflower",
             avatar: "🌻",
-            text: "EMERGENCY ALERT! Zombies have breached the perimeter! They're coming for our brains! We need to defend the house at all costs!"
+            text: "EMERGENCY ALERT! Zombies have breached the perimeter! They're coming for our brains! All defensive positions must hold the line!"
           },
           dialogue2: {
             speaker: "Zombie General",
@@ -49,7 +49,7 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
           finale: {
             speaker: "Defense Minister",
             avatar: "🌱",
-            text: "Deploy frost plants to slow their advance! Utilize explosive plants for area damage! We cannot let them reach the house!"
+            text: "Deploy frost plants to slow their advance! Utilize explosive plants for area damage! We cannot let them break through!"
           }
         };
       case 3:
@@ -63,7 +63,7 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
           dialogue2: {
             speaker: "Zombie Commander",
             avatar: "🪣",
-            text: "TOO MANY... UNSTOPPABLE... HOUSE SOON... FALL... BRAINS MINE..."
+            text: "TOO MANY... UNSTOPPABLE... DEFENSES WILL... FALL... BRAINS MINE..."
           },
           finale: {
             speaker: "Tactical Officer",
@@ -101,7 +101,7 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete, level }) =>
           dialogue2: {
             speaker: "Dr. Zomboss",
             avatar: "💀",
-            text: "RESISTANCE... FUTILE... HOUSE... WILL FALL... BRAINS... WILL BE CONSUMED..."
+            text: "RESISTANCE... FUTILE... GARDEN... WILL FALL... BRAINS... WILL BE CONSUMED..."
           },
           finale: {
             speaker: "Plant Coalition",
