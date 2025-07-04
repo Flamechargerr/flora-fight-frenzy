@@ -89,35 +89,63 @@
 
 @layer components {
   .glass {
-    @apply bg-gray-900/80 backdrop-blur-md border border-gray-800/70 shadow-lg;
+    @apply bg-card/95 backdrop-blur-lg border border-border/50 shadow-2xl;
+  }
+  
+  .glass-dark {
+    @apply bg-gray-900/95 backdrop-blur-lg border border-gray-700/50 shadow-2xl;
   }
   
   .plant-card {
-    @apply relative w-full h-full rounded-md overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95;
+    @apply relative w-full h-full rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-95 border-2 border-transparent;
+  }
+  
+  .plant-card-selected {
+    @apply border-primary ring-2 ring-primary/30 shadow-primary/20;
+  }
+  
+  .plant-card-disabled {
+    @apply opacity-60 cursor-not-allowed grayscale-[0.3];
+  }
+  
+  .plant-card-affordable {
+    @apply cursor-pointer hover:border-primary/50 transition-all duration-200;
   }
   
   .sun-resource {
-    @apply absolute cursor-pointer w-12 h-12 bg-sun rounded-full shadow-lg transform transition-all duration-200 flex items-center justify-center text-yellow-800 font-bold animate-float hover:scale-110 active:scale-90;
+    @apply absolute cursor-pointer w-12 h-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full shadow-lg transform transition-all duration-200 flex items-center justify-center text-yellow-900 font-bold animate-float hover:scale-110 active:scale-90 border-2 border-yellow-400;
   }
   
   .enemy {
-    @apply absolute rounded-full flex items-center justify-center shadow-lg;
+    @apply absolute rounded-full flex items-center justify-center shadow-lg border-2;
   }
   
   .plant {
-    @apply absolute rounded-full shadow-md flex items-center justify-center;
+    @apply absolute rounded-full shadow-md flex items-center justify-center border-2;
   }
   
   .grid-cell {
-    @apply relative flex items-center justify-center transition-all duration-200;
+    @apply relative flex items-center justify-center transition-all duration-200 rounded-sm;
   }
   
   .grid-cell.available {
-    @apply cursor-pointer hover:brightness-110;
+    @apply cursor-pointer hover:bg-primary/10 hover:scale-105 border-2 border-primary/30;
   }
   
   .grid-cell.unavailable {
-    @apply cursor-not-allowed;
+    @apply cursor-not-allowed opacity-75;
+  }
+  
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .game-button {
+    @apply bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-95 border border-primary/20;
+  }
+  
+  .game-button-secondary {
+    @apply bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary text-secondary-foreground font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-95 border border-secondary/20;
   }
 }
 

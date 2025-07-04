@@ -124,14 +124,14 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     }
   }, [gameWon, score, onLevelComplete]);
   
-  // Set container height based on window size
+  // Set container height based on window size with mobile optimization
   useEffect(() => {
     const updateHeight = () => {
       const viewportHeight = window.innerHeight;
-      const minHeight = 500;
-      const maxHeight = 700;
+      const minHeight = window.innerWidth < 768 ? 400 : 500; // Smaller min height on mobile
+      const maxHeight = window.innerWidth < 768 ? 600 : 700; // Smaller max height on mobile
       
-      const calculatedHeight = Math.min(maxHeight, Math.max(minHeight, viewportHeight * 0.6));
+      const calculatedHeight = Math.min(maxHeight, Math.max(minHeight, viewportHeight * 0.5));
       setContainerHeight(calculatedHeight);
     };
     
@@ -147,7 +147,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
   };
   
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col max-w-7xl mx-auto">
       {/* Game Header with resources display */}
       <GameHeader 
         sunAmount={sunAmount} 
@@ -157,33 +157,41 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         level={level}
       />
       
-      {/* Game container with grid and panel */}
-      <div 
-        className="flex flex-col md:flex-row gap-4 mb-4"
-        style={{ minHeight: `${containerHeight}px` }}
-      >
-        {/* Plant selection panel - moved to left side */}
-        <PlantSelectionPanel 
-          plantTypes={plantTypes}
-          selectedPlant={selectedPlant}
-          onSelectPlant={setSelectedPlant}
-          sunAmount={sunAmount}
-          containerHeight={containerHeight}
-        />
-        
-        {/* Main game grid */}
-        <GameGrid 
-          gameArea={{ ...gameArea, height: containerHeight }}
-          plants={plants}
-          enemies={enemies}
-          projectiles={projectiles}
-          sunResources={sunResources}
-          selectedPlant={selectedPlant}
-          debugMessage={debugMessage}
-          onPlacePlant={placePlant}
-          onCollectSun={collectSun}
-          lawnMowers={lawnMowers}
-        />
+      {/* Plant selection panel - Mobile first approach */}
+      <PlantSelectionPanel 
+        plantTypes={plantTypes}
+        selectedPlant={selectedPlant}
+        onSelectPlant={setSelectedPlant}
+        sunAmount={sunAmount}
+        containerHeight={containerHeight}
+      />
+      
+      {/* Game container with grid */}
+      <div className="flex-1 min-h-0">
+        <div 
+          className="w-full h-full rounded-xl overflow-hidden shadow-2xl border border-border/50"
+          style={{ 
+            minHeight: `${Math.min(containerHeight, window.innerHeight * 0.5)}px`,
+            maxHeight: `${containerHeight}px`
+          }}
+        >
+          {/* Main game grid */}
+          <GameGrid 
+            gameArea={{ 
+              ...gameArea, 
+              height: Math.min(containerHeight, window.innerHeight * 0.6)
+            }}
+            plants={plants}
+            enemies={enemies}
+            projectiles={projectiles}
+            sunResources={sunResources}
+            selectedPlant={selectedPlant}
+            debugMessage={debugMessage}
+            onPlacePlant={placePlant}
+            onCollectSun={collectSun}
+            lawnMowers={lawnMowers}
+          />
+        </div>
       </div>
       
       {/* Wave announcements and countdown */}

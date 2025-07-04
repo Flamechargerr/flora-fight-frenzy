@@ -59,7 +59,7 @@ const Game = () => {
   }, [isLoading]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-garden-light/30 to-garden/20 p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/10 p-2 sm:p-4 md:p-6 lg:p-8">
       {/* Loading Screen */}
       {isLoading && (
         <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center overflow-hidden">
@@ -438,56 +438,59 @@ const Game = () => {
       {/* Game Header */}
       {!isLoading && !showCinematic && (
         <>
-          <div className="glass mb-6 p-4 rounded-xl flex items-center justify-between animate-fadeIn">
-            <Link 
-              to="/" 
-              className="flex items-center text-garden-dark hover:text-garden transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 mr-1" />
-              <span>Back to Home</span>
-            </Link>
-            
-            <div className="flex flex-col items-center">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-garden-dark to-garden bg-clip-text text-transparent">
-                Flora Fight Frenzy
-              </h1>
-              <p className="text-sm text-garden-dark">Level {currentLevel} of 5</p>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => setIsMuted(!isMuted)}
-                className="text-gray-600 hover:text-garden-dark transition-colors"
-              >
-                {isMuted ? (
-                  <VolumeX className="w-5 h-5" />
-                ) : (
-                  <Volume2 className="w-5 h-5" />
-                )}
-              </button>
-              
+          <div className="glass mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl animate-fadeIn">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <Link 
-                to="/leaderboard" 
-                className="flex items-center text-garden-dark hover:text-garden transition-colors"
+                to="/" 
+                className="flex items-center text-muted-foreground hover:text-foreground transition-colors mobile-touch-target"
               >
-                <Trophy className="w-5 h-5 mr-1" />
-                <span>Leaderboard</span>
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
+                <span className="text-sm sm:text-base">Back to Home</span>
               </Link>
+              
+              <div className="flex flex-col items-center text-center">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                  Flora Fight Frenzy
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">Level {currentLevel} of 5</p>
+              </div>
+              
+              <div className="flex items-center gap-2 sm:gap-4">
+                <button 
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="text-muted-foreground hover:text-foreground transition-colors mobile-touch-target p-2 rounded-lg hover:bg-muted/50"
+                  aria-label={isMuted ? "Unmute" : "Mute"}
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" />
+                  ) : (
+                    <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  )}
+                </button>
+                
+                <Link 
+                  to="/leaderboard" 
+                  className="flex items-center text-muted-foreground hover:text-foreground transition-colors mobile-touch-target p-2 rounded-lg hover:bg-muted/50"
+                >
+                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
+                  <span className="hidden sm:inline text-sm">Leaderboard</span>
+                </Link>
+              </div>
             </div>
           </div>
           
           {/* Game Content */}
-          <div className="w-full max-w-6xl mx-auto animate-fadeIn">
+          <div className="w-full animate-fadeIn">
             {!gameStarted ? (
-              <div className="glass p-8 rounded-xl text-center">
-                <h2 className="text-2xl font-bold text-garden-dark mb-4">Ready to Defend Your Garden?</h2>
-                <p className="mb-6 text-gray-700">
+              <div className="glass p-4 sm:p-6 md:p-8 rounded-xl text-center max-w-2xl mx-auto">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Ready to Defend Your Garden?</h2>
+                <p className="mb-6 text-sm sm:text-base text-muted-foreground leading-relaxed">
                   Place your plants strategically to defend against the zombie horde. 
                   Collect sun to plant more defenders. Don't let zombies reach the left side of your garden!
                 </p>
                 <button 
                   onClick={() => setGameStarted(true)}
-                  className="bg-garden hover:bg-garden-dark text-white font-bold py-3 px-8 rounded-lg text-lg flex items-center mx-auto transition-colors"
+                  className="game-button text-lg flex items-center mx-auto"
                 >
                   <Play className="w-5 h-5 mr-2" />
                   Start Defending!
