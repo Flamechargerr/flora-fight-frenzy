@@ -1,5 +1,4 @@
-
-import { PlantType, WaveConfigMap } from './types';
+import { PlantType, WaveConfigMap, PowerupType } from './types';
 
 // Game board dimensions
 export const ROWS = 5;
@@ -17,7 +16,7 @@ export const PLANT_TYPES: PlantType[] = [
     range: 0, 
     cooldown: 5000,
     color: 'bg-yellow-400',
-    icon: '🌻',
+    icon: '☀️',
     image: '/plants/sunflower.png'
   },
   { 
@@ -39,7 +38,7 @@ export const PLANT_TYPES: PlantType[] = [
     range: 0, 
     cooldown: 0,
     color: 'bg-amber-800',
-    icon: '🥜',
+    icon: '🛡️',
     image: '/plants/wallnut.png'
   },
   { 
@@ -123,6 +122,46 @@ export const PLANT_TYPES: PlantType[] = [
     color: 'bg-orange-700',
     icon: '🪵',
     image: '/plants/torchwood.png'
+  }
+];
+
+// Power-ups definition
+export const POWERUP_TYPES: PowerupType[] = [
+  {
+    id: 'lightning_storm',
+    name: 'Lightning Storm',
+    description: 'Strikes all zombies with lightning',
+    duration: 3000,
+    icon: '⚡',
+    effectType: 'lightning',
+    cooldown: 45000
+  },
+  {
+    id: 'ice_age',
+    name: 'Ice Age',
+    description: 'Freezes all zombies for 5 seconds',
+    duration: 5000,
+    icon: '🧊',
+    effectType: 'freeze',
+    cooldown: 60000
+  },
+  {
+    id: 'solar_flare',
+    name: 'Solar Flare',
+    description: 'Burns all zombies over time',
+    duration: 8000,
+    icon: '🌞',
+    effectType: 'burn',
+    cooldown: 50000
+  },
+  {
+    id: 'plant_boost',
+    name: 'Plant Boost',
+    description: 'Doubles plant damage for 10 seconds',
+    duration: 10000,
+    icon: '💪',
+    effectType: 'boost',
+    cooldown: 40000
   }
 ];
 

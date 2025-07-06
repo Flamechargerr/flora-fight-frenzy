@@ -62,56 +62,21 @@ const Game = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/10 p-2 sm:p-4 md:p-6 lg:p-8">
       {/* Loading Screen */}
       {isLoading && (
-        <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center overflow-hidden">
-          {/* Explosive chaos background */}
+        <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 z-50 flex flex-col items-center justify-center overflow-hidden">
+          {/* Professional background */}
           <div className="absolute inset-0">
-            {/* Matrix rain effect */}
-            <div className="absolute inset-0 opacity-20"
+            {/* Subtle animated grid */}
+            <div className="absolute inset-0 opacity-10"
               style={{
-                backgroundImage: 'linear-gradient(0deg, transparent 50%, rgba(0, 255, 0, 0.15) 50%)',
-                backgroundSize: '2px 8px',
-                animation: 'scroll 0.8s linear infinite'
+                backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+                backgroundSize: '50px 50px',
+                animation: 'scroll 20s linear infinite'
               }}
             ></div>
             
-            {/* Nuclear explosion glow */}
-            <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-red-600/30 rounded-full blur-3xl animate-pulse opacity-60"></div>
-            <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-orange-500/40 rounded-full blur-2xl animate-pulse opacity-40" style={{animationDelay: '0.7s'}}></div>
-            
-            {/* Electric storm effects */}
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div 
-                key={`spark-${i}`}
-                className="absolute animate-lightning"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  width: '3px',
-                  height: `${Math.random() * 200 + 50}px`,
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(0,162,255,0.6))',
-                  transform: `rotate(${Math.random() * 360}deg)`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: '0.3s'
-                }}
-              />
-            ))}
-            
-            {/* Floating debris */}
-            {Array.from({ length: 15 }).map((_, i) => (
-              <div 
-                key={`debris-${i}`}
-                className="absolute bg-gray-600 opacity-40"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  width: `${Math.random() * 20 + 5}px`,
-                  height: `${Math.random() * 20 + 5}px`,
-                  transform: `rotate(${Math.random() * 360}deg)`,
-                  animation: `float ${Math.random() * 4 + 3}s ease-in-out infinite`,
-                  animationDelay: `${Math.random() * 2}s`
-                }}
-              />
-            ))}
+            {/* Ambient lighting */}
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-green-500/20 rounded-full blur-3xl"></div>
           </div>
 
           <div className="w-full max-w-2xl mb-10 relative z-10">
@@ -120,41 +85,16 @@ const Game = () => {
             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-48 h-48 border-4 border-orange-500/60 rounded-full animate-ping opacity-40" style={{animationDelay: '0.3s'}}></div>
             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-32 h-32 border-4 border-yellow-400/70 rounded-full animate-ping opacity-50" style={{animationDelay: '0.6s'}}></div>
             
-            {/* Epic title with multiple effects */}
+          {/* Professional title */}
             <div className="relative text-center mb-8">
-              {/* Background glow layers */}
-              <div className="absolute inset-0 blur-3xl opacity-50">
-                <h1 className="text-7xl md:text-8xl font-black text-red-600 tracking-wider">
-                  FLORA FIGHT FRENZY
-                </h1>
-              </div>
-              <div className="absolute inset-0 blur-xl opacity-70">
-                <h1 className="text-7xl md:text-8xl font-black text-orange-500 tracking-wider">
-                  FLORA FIGHT FRENZY
-                </h1>
-              </div>
-              
-              {/* Main title with glitch effect */}
-              <h1 className="text-7xl md:text-8xl font-black text-center tracking-wider relative z-10">
-                <span className="bg-gradient-to-r from-red-500 via-yellow-400 to-orange-600 bg-clip-text text-transparent animate-pulse">
-                  FLORA FIGHT FRENZY
+              <h1 className="text-6xl md:text-7xl font-bold text-center tracking-wide text-white mb-4">
+                <span className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
+                  PLANT DEFENSE
                 </span>
               </h1>
-              
-              {/* Digital distortion overlay */}
-              <div className="absolute inset-0 pointer-events-none opacity-20 z-20"
-                style={{
-                  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ff0000\' fill-opacity=\'0.6\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M5 0h1L0 5v1H0V0h5z\'/%3E%3C/g%3E%3C/svg%3E")'
-                }}
-              ></div>
-            </div>
-            
-            {/* Apocalyptic subtitle */}
-            <div className="text-center relative mb-6">
-              <div className="absolute inset-0 blur-md">
-                <span className="text-2xl font-bold text-red-400">APOCALYPTIC BOTANICAL WARFARE</span>
+              <div className="text-xl md:text-2xl font-semibold text-gray-300">
+                Strategic Tower Defense
               </div>
-              <span className="text-2xl font-bold text-red-300 relative z-10">APOCALYPTIC BOTANICAL WARFARE</span>
             </div>
             
             {/* Intense warning stripes */}
@@ -174,123 +114,86 @@ const Game = () => {
             </div>
           </div>
           
-          {/* Epic battle arena visualization */}
-          <div className="flex items-center justify-center space-x-16 mb-12 relative">
-            {/* Battlefield explosion effect */}
-            <div className="absolute inset-0 bg-gradient-radial from-red-900/40 via-transparent to-transparent blur-2xl"></div>
-            
-            {/* Plant army formation */}
-            <div className="relative">
-              <div className="absolute -inset-8 bg-green-500/20 blur-2xl rounded-full animate-pulse"></div>
-              <div className="grid grid-cols-3 gap-2">
-                {Array.from({ length: 9 }).map((_, i) => (
+          {/* Professional game preview */}
+          <div className="flex items-center justify-center space-x-12 mb-12 relative">
+            {/* Plant defenders preview */}
+            <div className="relative bg-green-900/20 rounded-xl p-6 border border-green-700/30">
+              <div className="grid grid-cols-3 gap-3">
+                {['☀️', '🌱', '🛡️'].map((icon, i) => (
                   <div 
                     key={`plant-${i}`}
-                    className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm animate-bounce"
+                    className="w-10 h-10 bg-green-600/30 rounded-lg flex items-center justify-center text-lg border border-green-500/50 backdrop-blur-sm"
                     style={{ 
-                      animationDelay: `${i * 0.1}s`,
-                      animationDuration: `${1.5 + Math.random()}s`
+                      animationDelay: `${i * 0.2}s`
                     }}
                   >
-                    🌱
+                    {icon}
                   </div>
                 ))}
               </div>
-              <div className="text-center mt-2 text-green-400 font-bold text-sm">PLANT DEFENDERS</div>
+              <div className="text-center mt-3 text-green-300 font-semibold text-sm">Plant Defense</div>
             </div>
             
-            {/* Explosive VS with lightning */}
-            <div className="relative z-10">
-              <div className="absolute -inset-4 bg-yellow-400/30 blur-lg animate-pulse"></div>
-              <div className="relative">
-                <div className="absolute inset-0 text-6xl font-black text-red-600 blur-sm animate-pulse">⚡VS⚡</div>
-                <div className="text-6xl font-black text-yellow-300 animate-pulse">⚡VS⚡</div>
-              </div>
+            {/* VS indicator */}
+            <div className="text-4xl font-bold text-white bg-slate-700/50 rounded-full w-16 h-16 flex items-center justify-center border border-slate-500">
+              VS
             </div>
             
-            {/* Zombie horde formation */}
-            <div className="relative">
-              <div className="absolute -inset-8 bg-red-500/20 blur-2xl rounded-full animate-pulse"></div>
-              <div className="grid grid-cols-3 gap-2">
-                {Array.from({ length: 9 }).map((_, i) => (
+            {/* Zombie threat preview */}
+            <div className="relative bg-red-900/20 rounded-xl p-6 border border-red-700/30">
+              <div className="grid grid-cols-3 gap-3">
+                {['🧟', '🧠', '💀'].map((icon, i) => (
                   <div 
                     key={`zombie-${i}`}
-                    className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-sm animate-bounce"
+                    className="w-10 h-10 bg-red-600/30 rounded-lg flex items-center justify-center text-lg border border-red-500/50 backdrop-blur-sm"
                     style={{ 
-                      animationDelay: `${i * 0.15}s`,
-                      animationDuration: `${1.8 + Math.random()}s`
+                      animationDelay: `${i * 0.2}s`
                     }}
                   >
-                    🧟
+                    {icon}
                   </div>
                 ))}
               </div>
-              <div className="text-center mt-2 text-red-400 font-bold text-sm">ZOMBIE HORDE</div>
+              <div className="text-center mt-3 text-red-300 font-semibold text-sm">Zombie Horde</div>
             </div>
           </div>
           
-          {/* Epic loading system */}
+          {/* Professional loading system */}
           <div className="w-full max-w-lg relative">
-            {/* Multiple loading bars for different systems */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-4 mb-6">
               <div className="relative">
-                <div className="absolute inset-0 blur-sm bg-red-500/30 rounded-full"></div>
-                <div className="relative z-10 h-4 bg-gray-900 rounded-full overflow-hidden border border-red-700">
-                  <div className="h-full bg-gradient-to-r from-red-600 via-orange-500 to-red-600 animate-[growWidth_3s_ease-in-out_forwards] relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+                <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-green-500 animate-[growWidth_3s_ease-out_forwards] relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
                   </div>
                 </div>
-                <div className="text-xs text-red-400 mt-1 font-mono">DEFENSE SYSTEMS: ONLINE</div>
+                <div className="text-xs text-slate-300 mt-2 font-medium">Initializing Game Engine...</div>
               </div>
               
               <div className="relative">
-                <div className="absolute inset-0 blur-sm bg-green-500/30 rounded-full"></div>
-                <div className="relative z-10 h-4 bg-gray-900 rounded-full overflow-hidden border border-green-700">
-                  <div className="h-full bg-gradient-to-r from-green-600 via-lime-500 to-green-600 animate-[growWidth_3s_ease-in-out_forwards] relative" style={{animationDelay: '0.5s'}}>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+                <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-green-500 to-yellow-500 animate-[growWidth_3s_ease-out_forwards] relative" style={{animationDelay: '0.8s'}}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
                   </div>
                 </div>
-                <div className="text-xs text-green-400 mt-1 font-mono">PLANT ARSENAL: LOADED</div>
+                <div className="text-xs text-slate-300 mt-2 font-medium">Loading Plant Database...</div>
               </div>
               
               <div className="relative">
-                <div className="absolute inset-0 blur-sm bg-yellow-500/30 rounded-full"></div>
-                <div className="relative z-10 h-4 bg-gray-900 rounded-full overflow-hidden border border-yellow-700">
-                  <div className="h-full bg-gradient-to-r from-yellow-600 via-orange-400 to-yellow-600 animate-[growWidth_3s_ease-in-out_forwards] relative" style={{animationDelay: '1s'}}>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+                <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-purple-500 to-blue-500 animate-[growWidth_3s_ease-out_forwards] relative" style={{animationDelay: '1.6s'}}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
                   </div>
                 </div>
-                <div className="text-xs text-yellow-400 mt-1 font-mono">COMBAT PROTOCOLS: ACTIVE</div>
+                <div className="text-xs text-slate-300 mt-2 font-medium">Preparing Battlefield...</div>
               </div>
             </div>
           </div>
           
-          <div className="text-red-400 text-lg mt-4 flex items-center justify-center font-mono">
-            <span className="mr-3 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
-            <span className="animate-pulse">INITIALIZING BOTANICAL WARFARE...</span>
-            <span className="ml-3 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
-          </div>
-          
-          {/* Military classification stamps */}
-          <div className="absolute bottom-8 left-8 space-y-2">
-            <div className="border-2 border-red-700 rounded px-3 py-1 bg-black/80 transform -rotate-12">
-              <div className="text-red-500 text-xs font-mono font-bold">TOP SECRET</div>
-              <div className="text-xs text-gray-400 font-mono">PROJECT: FLORA DEFENSE</div>
-            </div>
-            <div className="border-2 border-yellow-600 rounded px-3 py-1 bg-black/80 transform rotate-6">
-              <div className="text-yellow-500 text-xs font-mono font-bold">OPERATION: GARDEN WAR</div>
-              <div className="text-xs text-gray-400 font-mono">CLEARANCE: ALPHA</div>
-            </div>
-          </div>
-          
-          {/* Additional warning indicators */}
-          <div className="absolute top-8 right-8 space-y-2">
-            <div className="bg-red-900/80 border-2 border-red-600 rounded-lg px-4 py-2 animate-pulse">
-              <div className="text-red-400 text-sm font-mono font-bold">⚠ DEFCON 1 ⚠</div>
-            </div>
-            <div className="bg-yellow-900/80 border-2 border-yellow-600 rounded-lg px-4 py-2 animate-pulse" style={{animationDelay: '0.5s'}}>
-              <div className="text-yellow-400 text-sm font-mono font-bold">🚨 ALERT 🚨</div>
-            </div>
+          <div className="text-slate-300 text-lg mt-6 flex items-center justify-center">
+            <div className="mr-3 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span>Loading Game Assets...</span>
+            <div className="ml-3 w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
           </div>
         </div>
       )}

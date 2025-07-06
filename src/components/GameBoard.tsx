@@ -4,7 +4,10 @@ import { useGameState } from '../hooks/useGameState';
 import GameHeader from './game/GameHeader';
 import GameGrid from './game/GameGrid';
 import PlantSelectionPanel from './game/PlantSelectionPanel';
+import PowerupPanel from './game/PowerupPanel';
 import GameMessages from './game/GameMessages';
+import { POWERUP_TYPES } from '../game/constants';
+import { PowerupType, ActivePowerup } from '../game/types';
 
 interface GameBoardProps {
   onGameOver: () => void;
@@ -15,6 +18,8 @@ interface GameBoardProps {
 const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBoardProps) => {
   const [containerHeight, setContainerHeight] = useState(500);
   const [lawnMowers, setLawnMowers] = useState<Array<{row: number; activated: boolean; position: number}>>([]);
+  const [activePowerups, setActivePowerups] = useState<ActivePowerup[]>([]);
+  const [powerupCooldowns, setPowerupCooldowns] = useState<{ [key: string]: number }>({});
   
   // Initialize game state
   const { 
@@ -117,12 +122,54 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     }
   }, [lawnMowers, gameArea.width, enemies, handleZombieCollisions]);
   
-  // Handle level win condition
-  useEffect(() => {
-    if (gameWon && onLevelComplete) {
-      onLevelComplete(score);
+  // Handle powerup usage
+  const handleUsePowerup = useCallback((powerup: PowerupType) => {
+    const now = Date.now();
+    const newActivePowerup: ActivePowerup = {
+      id: `${powerup.id}-${now}`,
+      type: powerup,
+      startTime: now,
+      endTime: now + powerup.duration,
+      isActive: true
+    };
+
+    setActivePowerups(prev => [...prev, newActivePowerup]);
+    setPowerupCooldowns(prev => ({ ...prev, [powerup.id]: powerup.cooldown }));
+
+    // Apply powerup effects
+    if (powerup.effectType === 'lightning') {
+      enemies.forEach(enemy => removeEnemy(enemy.id));
+    } else if (powerup.effectType === 'freeze') {
+      // Freeze logic would go here - for now just slow them
+      console.log('Freezing all zombies');
+    } else if (powerup.effectType === 'burn') {
+      console.log('Burning all zombies');
     }
-  }, [gameWon, score, onLevelComplete]);
+
+    // Remove powerup when duration expires
+    setTimeout(() => {
+      setActivePowerups(prev => prev.filter(p => p.id !== newActivePowerup.id));
+    }, powerup.duration);
+  }, [enemies, removeEnemy]);
+
+  // Update powerup cooldowns
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPowerupCooldowns(prev => {
+        const updated = { ...prev };
+        let hasChanges = false;
+        Object.keys(updated).forEach(key => {
+          if (updated[key] > 0) {
+            updated[key] = Math.max(0, updated[key] - 100);
+            hasChanges = true;
+          }
+        });
+        return hasChanges ? updated : prev;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
   
   // Set container height based on window size with mobile optimization
   useEffect(() => {
@@ -147,65 +194,92 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
   };
   
   return (
-    <div className="w-full flex flex-col max-w-7xl mx-auto">
-      {/* Game Header with resources display */}
-      <GameHeader 
-        sunAmount={sunAmount} 
-        currentWave={currentWave} 
-        waveProgress={waveProgress} 
-        score={score}
-        level={level}
-      />
-      
-      {/* Plant selection panel - Mobile first approach */}
-      <PlantSelectionPanel 
-        plantTypes={plantTypes}
-        selectedPlant={selectedPlant}
-        onSelectPlant={setSelectedPlant}
-        sunAmount={sunAmount}
-        containerHeight={containerHeight}
-      />
-      
-      {/* Game container with grid */}
-      <div className="flex-1 min-h-0">
-        <div 
-          className="w-full h-full rounded-xl overflow-hidden shadow-2xl border border-border/50"
-          style={{ 
-            minHeight: `${Math.min(containerHeight, window.innerHeight * 0.5)}px`,
-            maxHeight: `${containerHeight}px`
-          }}
-        >
-          {/* Main game grid */}
-          <GameGrid 
-            gameArea={{ 
-              ...gameArea, 
-              height: Math.min(containerHeight, window.innerHeight * 0.6)
-            }}
-            plants={plants}
-            enemies={enemies}
-            projectiles={projectiles}
-            sunResources={sunResources}
+    <div className="w-full flex flex-col lg:flex-row max-w-[1920px] mx-auto gap-4">
+      {/* Left Panel - Desktop only */}
+      <div className="hidden lg:flex lg:flex-col lg:w-[160px] flex-shrink-0 gap-4">
+        <PlantSelectionPanel 
+          plantTypes={plantTypes}
+          selectedPlant={selectedPlant}
+          onSelectPlant={setSelectedPlant}
+          sunAmount={sunAmount}
+          containerHeight={containerHeight}
+        />
+        <PowerupPanel 
+          powerups={POWERUP_TYPES}
+          activePowerups={activePowerups}
+          onUsePowerup={handleUsePowerup}
+          powerupCooldowns={powerupCooldowns}
+        />
+      </div>
+
+      {/* Main Game Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Game Header */}
+        <GameHeader 
+          sunAmount={sunAmount} 
+          currentWave={currentWave} 
+          waveProgress={waveProgress} 
+          score={score}
+          level={level}
+        />
+        
+        {/* Mobile panels */}
+        <div className="lg:hidden">
+          <PlantSelectionPanel 
+            plantTypes={plantTypes}
             selectedPlant={selectedPlant}
-            debugMessage={debugMessage}
-            onPlacePlant={placePlant}
-            onCollectSun={collectSun}
-            lawnMowers={lawnMowers}
+            onSelectPlant={setSelectedPlant}
+            sunAmount={sunAmount}
+            containerHeight={containerHeight}
+          />
+          <PowerupPanel 
+            powerups={POWERUP_TYPES}
+            activePowerups={activePowerups}
+            onUsePowerup={handleUsePowerup}
+            powerupCooldowns={powerupCooldowns}
           />
         </div>
+        
+        {/* Game Grid Container */}
+        <div className="flex-1 min-h-0">
+          <div 
+            className="w-full h-full rounded-xl overflow-hidden shadow-2xl border border-border/50"
+            style={{ 
+              minHeight: `${Math.min(containerHeight, window.innerHeight * 0.4)}px`,
+              maxHeight: `${containerHeight}px`
+            }}
+          >
+            <GameGrid 
+              gameArea={{ 
+                ...gameArea, 
+                height: Math.min(containerHeight, window.innerHeight * 0.5)
+              }}
+              plants={plants}
+              enemies={enemies}
+              projectiles={projectiles}
+              sunResources={sunResources}
+              selectedPlant={selectedPlant}
+              debugMessage={debugMessage}
+              onPlacePlant={placePlant}
+              onCollectSun={collectSun}
+              lawnMowers={lawnMowers}
+            />
+          </div>
+        </div>
+        
+        {/* Game Messages */}
+        <GameMessages 
+          showWaveMessage={showWaveMessage}
+          waveMessage={waveMessage}
+          waveCompleted={waveCompleted}
+          countdown={countdown}
+          gameWon={gameWon}
+          isGameOver={isGameOver}
+          currentWave={currentWave}
+          score={score}
+          onRestart={handleRestart}
+        />
       </div>
-      
-      {/* Wave announcements and countdown */}
-      <GameMessages 
-        showWaveMessage={showWaveMessage}
-        waveMessage={waveMessage}
-        waveCompleted={waveCompleted}
-        countdown={countdown}
-        gameWon={gameWon}
-        isGameOver={isGameOver}
-        currentWave={currentWave}
-        score={score}
-        onRestart={handleRestart}
-      />
     </div>
   );
 };
