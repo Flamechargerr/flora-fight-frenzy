@@ -115,6 +115,55 @@
   .sun-resource {
     @apply absolute cursor-pointer w-12 h-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full shadow-lg transform transition-all duration-200 flex items-center justify-center text-yellow-900 font-bold animate-float hover:scale-110 active:scale-90 border-2 border-yellow-400;
   }
+
+  /* Enhanced visual effects */
+  @keyframes sparkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  @keyframes bounce-in {
+    0% { transform: scale(0.3) translateY(-50px); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 5px hsl(var(--primary) / 0.5); }
+    50% { box-shadow: 0 0 20px hsl(var(--primary) / 0.8), 0 0 30px hsl(var(--primary) / 0.6); }
+  }
+
+  @keyframes powerup-flash {
+    0%, 100% { background: transparent; }
+    50% { background: radial-gradient(circle, hsl(var(--primary) / 0.3) 0%, transparent 70%); }
+  }
+
+  .sparkle-effect {
+    animation: sparkle 2s ease-in-out infinite;
+  }
+
+  .bounce-in {
+    animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .shake-effect {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  .glow-effect {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .powerup-active {
+    animation: powerup-flash 1.5s ease-in-out infinite;
+  }
   
   .enemy {
     @apply absolute rounded-full flex items-center justify-center shadow-lg border-2;

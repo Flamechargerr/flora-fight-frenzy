@@ -253,11 +253,13 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
 
   return {
     sunAmount,
+    setSunAmount,
     currentWave,
     waveProgress,
     sunResources,
     enemies,
     plants,
+    setPlants,
     projectiles,
     selectedPlant,
     setSelectedPlant,

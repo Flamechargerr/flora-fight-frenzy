@@ -23,10 +23,12 @@ interface GameGridProps {
   projectiles: ProjectileType[];
   sunResources: SunResourceType[];
   selectedPlant: PlantType | null;
+  shovelSelected?: boolean;
   debugMessage: string;
   lawnMowers: { row: number; activated: boolean; position: number }[];
   onPlacePlant: (row: number, col: number) => void;
   onCollectSun: (id: string) => void;
+  onRemovePlant?: (row: number, col: number) => void;
 }
 
 const GameGrid: React.FC<GameGridProps> = ({
@@ -36,11 +38,24 @@ const GameGrid: React.FC<GameGridProps> = ({
   projectiles,
   sunResources,
   selectedPlant,
+  shovelSelected = false,
   debugMessage,
   lawnMowers,
   onPlacePlant,
   onCollectSun,
+  onRemovePlant,
 }) => {
+  // Handle cell clicks for planting or removing
+  const handleCellClick = (row: number, col: number) => {
+    const existingPlant = plants.some(p => p.row === row && p.col === col);
+    
+    if (shovelSelected && existingPlant && onRemovePlant) {
+      onRemovePlant(row, col);
+    } else if (selectedPlant && !existingPlant) {
+      onPlacePlant(row, col);
+    }
+  };
+
   // Render grid cells with mobile optimization
   const renderGrid = () => {
     const cells = [];
@@ -51,6 +66,7 @@ const GameGrid: React.FC<GameGridProps> = ({
       for (let col = 0; col < COLS; col++) {
         const isOccupied = plants.some(p => p.row === row && p.col === col);
         const isAvailable = !isOccupied && selectedPlant !== null;
+        const canRemove = isOccupied && shovelSelected;
         
         // Create checkerboard pattern with better contrast
         const isEvenCell = (row + col) % 2 === 0;
@@ -58,26 +74,28 @@ const GameGrid: React.FC<GameGridProps> = ({
         cells.push(
           <div 
             key={`cell-${row}-${col}`}
-            className={`grid-cell mobile-touch-target ${isAvailable ? 'available' : ''} ${isOccupied ? 'unavailable' : ''}`}
+            className={`grid-cell mobile-touch-target ${isAvailable ? 'available' : ''} ${canRemove ? 'removable' : ''} ${isOccupied ? 'unavailable' : ''}`}
             style={{ 
               width: `${cellWidth}%`, 
               height: `${cellHeight}%`,
               position: 'absolute',
               left: `${col * cellWidth}%`,
               top: `${row * cellHeight}%`,
-              backgroundColor: isEvenCell ? 'rgba(139, 195, 74, 0.4)' : 'rgba(104, 159, 56, 0.4)',
-              border: '1px solid rgba(76, 175, 80, 0.3)',
+              backgroundColor: canRemove ? 'rgba(239, 68, 68, 0.3)' : 
+                             isEvenCell ? 'rgba(139, 195, 74, 0.4)' : 'rgba(104, 159, 56, 0.4)',
+              border: canRemove ? '2px solid rgba(239, 68, 68, 0.6)' : '1px solid rgba(76, 175, 80, 0.3)',
               minHeight: '44px', // Ensure touch targets are large enough
-              borderRadius: '4px'
+              borderRadius: '4px',
+              cursor: (isAvailable || canRemove) ? 'pointer' : 'default'
             }}
-            onClick={() => isAvailable && onPlacePlant(row, col)}
+            onClick={() => handleCellClick(row, col)}
             role="button"
-            tabIndex={isAvailable ? 0 : -1}
-            aria-label={`Grid cell row ${row + 1}, column ${col + 1}${isOccupied ? ' (occupied)' : ''}${isAvailable ? ' (available for planting)' : ''}`}
+            tabIndex={(isAvailable || canRemove) ? 0 : -1}
+            aria-label={`Grid cell row ${row + 1}, column ${col + 1}${isOccupied ? ' (occupied)' : ''}${isAvailable ? ' (available for planting)' : ''}${canRemove ? ' (click to remove)' : ''}`}
             onKeyDown={(e) => {
-              if ((e.key === 'Enter' || e.key === ' ') && isAvailable) {
+              if ((e.key === 'Enter' || e.key === ' ') && (isAvailable || canRemove)) {
                 e.preventDefault();
-                onPlacePlant(row, col);
+                handleCellClick(row, col);
               }
             }}
           >
@@ -85,6 +103,13 @@ const GameGrid: React.FC<GameGridProps> = ({
             {selectedPlant && !isOccupied && (
               <div className="absolute inset-0 bg-primary/20 flex items-center justify-center rounded border-2 border-primary/40 animate-pulse">
                 <span className="text-lg sm:text-2xl opacity-70 filter drop-shadow-sm">{selectedPlant.icon}</span>
+              </div>
+            )}
+            
+            {/* Show shovel indicator for removable plants */}
+            {shovelSelected && isOccupied && (
+              <div className="absolute inset-0 bg-destructive/20 flex items-center justify-center rounded border-2 border-destructive/40 animate-pulse">
+                <span className="text-lg sm:text-2xl opacity-70">🪣</span>
               </div>
             )}
           </div>

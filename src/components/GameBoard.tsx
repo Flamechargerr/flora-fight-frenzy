@@ -5,9 +5,11 @@ import GameHeader from './game/GameHeader';
 import GameGrid from './game/GameGrid';
 import PlantSelectionPanel from './game/PlantSelectionPanel';
 import PowerupPanel from './game/PowerupPanel';
+import ShovelTool from './game/ShovelTool';
 import GameMessages from './game/GameMessages';
 import { POWERUP_TYPES } from '../game/constants';
 import { PowerupType, ActivePowerup } from '../game/types';
+import { useToast } from '../hooks/use-toast';
 
 interface GameBoardProps {
   onGameOver: () => void;
@@ -20,11 +22,13 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
   const [lawnMowers, setLawnMowers] = useState<Array<{row: number; activated: boolean; position: number}>>([]);
   const [activePowerups, setActivePowerups] = useState<ActivePowerup[]>([]);
   const [powerupCooldowns, setPowerupCooldowns] = useState<{ [key: string]: number }>({});
+  const [shovelSelected, setShovelSelected] = useState(false);
+  const { toast } = useToast();
   
   // Initialize game state
   const { 
-    sunAmount, currentWave, waveProgress, 
-    sunResources, enemies, plants, projectiles, 
+    sunAmount, setSunAmount, currentWave, waveProgress, 
+    sunResources, enemies, plants, setPlants, projectiles, 
     selectedPlant, setSelectedPlant, score, 
     showWaveMessage, waveMessage, waveCompleted, countdown, 
     gameWon, isGameOver, debugMessage, placePlant, collectSun, gameArea, 
@@ -136,21 +140,91 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     setActivePowerups(prev => [...prev, newActivePowerup]);
     setPowerupCooldowns(prev => ({ ...prev, [powerup.id]: powerup.cooldown }));
 
-    // Apply powerup effects
+    // Apply powerup effects with visual feedback
     if (powerup.effectType === 'lightning') {
       enemies.forEach(enemy => removeEnemy(enemy.id));
+      toast({
+        title: "⚡ Lightning Storm!",
+        description: "All zombies have been electrocuted!",
+        duration: 2000,
+      });
     } else if (powerup.effectType === 'freeze') {
-      // Freeze logic would go here - for now just slow them
-      console.log('Freezing all zombies');
+      // Apply freeze effect to all enemies
+      enemies.forEach(enemy => {
+        enemy.isFrozen = true;
+        enemy.speed = enemy.speed * 0.1; // Slow to 10% speed
+      });
+      toast({
+        title: "🧊 Ice Age!",
+        description: "All zombies are frozen!",
+        duration: 2000,
+      });
     } else if (powerup.effectType === 'burn') {
-      console.log('Burning all zombies');
+      // Apply burn effect to all enemies
+      enemies.forEach(enemy => {
+        enemy.isBurning = true;
+        enemy.burnDamage = 5;
+      });
+      toast({
+        title: "🌞 Solar Flare!",
+        description: "All zombies are burning!",
+        duration: 2000,
+      });
+    } else if (powerup.effectType === 'boost') {
+      toast({
+        title: "💪 Plant Boost!",
+        description: "All plants deal double damage!",
+        duration: 2000,
+      });
     }
 
     // Remove powerup when duration expires
     setTimeout(() => {
       setActivePowerups(prev => prev.filter(p => p.id !== newActivePowerup.id));
+      
+      // Remove effects when powerup expires
+      if (powerup.effectType === 'freeze') {
+        enemies.forEach(enemy => {
+          enemy.isFrozen = false;
+          enemy.speed = enemy.speed * 10; // Restore speed
+        });
+      } else if (powerup.effectType === 'burn') {
+        enemies.forEach(enemy => {
+          enemy.isBurning = false;
+          enemy.burnDamage = 0;
+        });
+      }
     }, powerup.duration);
-  }, [enemies, removeEnemy]);
+  }, [enemies, removeEnemy, toast]);
+
+  // Handle shovel selection
+  const handleShovelSelect = useCallback(() => {
+    setShovelSelected(!shovelSelected);
+    if (!shovelSelected) {
+      setSelectedPlant(null); // Deselect plant when shovel is selected
+    }
+  }, [shovelSelected, setSelectedPlant]);
+
+  // Handle plant removal with shovel
+  const handlePlantRemoval = useCallback((row: number, col: number) => {
+    if (shovelSelected) {
+      const plantToRemove = plants.find(p => p.row === row && p.col === col);
+      if (plantToRemove) {
+        // Remove plant and refund 80% of cost
+        const refund = Math.floor(plantToRemove.type.cost * 0.8);
+        setSunAmount(prev => prev + refund);
+        setPlants(prev => prev.filter(p => p.id !== plantToRemove.id));
+        
+        toast({
+          title: "🪣 Plant Removed",
+          description: `Refunded ${refund} sun (80% of ${plantToRemove.type.cost})`,
+          duration: 2000,
+        });
+        
+        setShovelSelected(false); // Auto-deselect shovel after use
+      }
+    }
+  }, [shovelSelected, plants, toast]);
 
   // Update powerup cooldowns
   useEffect(() => {
@@ -200,9 +274,16 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         <PlantSelectionPanel 
           plantTypes={plantTypes}
           selectedPlant={selectedPlant}
-          onSelectPlant={setSelectedPlant}
+          onSelectPlant={(plant) => {
+            setSelectedPlant(plant);
+            if (plant) setShovelSelected(false); // Deselect shovel when plant is selected
+          }}
           sunAmount={sunAmount}
           containerHeight={containerHeight}
+        />
+        <ShovelTool 
+          isSelected={shovelSelected}
+          onSelect={handleShovelSelect}
         />
         <PowerupPanel 
           powerups={POWERUP_TYPES}
@@ -228,9 +309,16 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
           <PlantSelectionPanel 
             plantTypes={plantTypes}
             selectedPlant={selectedPlant}
-            onSelectPlant={setSelectedPlant}
+            onSelectPlant={(plant) => {
+              setSelectedPlant(plant);
+              if (plant) setShovelSelected(false); // Deselect shovel when plant is selected
+            }}
             sunAmount={sunAmount}
             containerHeight={containerHeight}
+          />
+          <ShovelTool 
+            isSelected={shovelSelected}
+            onSelect={handleShovelSelect}
           />
           <PowerupPanel 
             powerups={POWERUP_TYPES}
@@ -259,9 +347,11 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
               projectiles={projectiles}
               sunResources={sunResources}
               selectedPlant={selectedPlant}
+              shovelSelected={shovelSelected}
               debugMessage={debugMessage}
               onPlacePlant={placePlant}
               onCollectSun={collectSun}
+              onRemovePlant={handlePlantRemoval}
               lawnMowers={lawnMowers}
             />
           </div>

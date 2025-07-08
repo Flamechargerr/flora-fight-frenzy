@@ -16,7 +16,7 @@ export const PLANT_TYPES: PlantType[] = [
     range: 0, 
     cooldown: 5000,
     color: 'bg-yellow-400',
-    icon: '☀️',
+    icon: '🌻',
     image: '/plants/sunflower.png'
   },
   { 
@@ -27,7 +27,7 @@ export const PLANT_TYPES: PlantType[] = [
     range: 900, 
     cooldown: 1500,
     color: 'bg-green-500',
-    icon: '🌱',
+    icon: '🌿',
     image: '/plants/peashooter.png'
   },
   { 
@@ -38,7 +38,7 @@ export const PLANT_TYPES: PlantType[] = [
     range: 0, 
     cooldown: 0,
     color: 'bg-amber-800',
-    icon: '🛡️',
+    icon: '🥜',
     image: '/plants/wallnut.png'
   },
   { 
