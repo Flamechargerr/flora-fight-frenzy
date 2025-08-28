@@ -6,10 +6,8 @@ import svgr from 'vite-plugin-svgr';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Use environment variable to determine base path
-  // For Vercel, we want the base to be '/' instead of '/flora-fight-frenzy/'
-  base: process.env.DEPLOY_TARGET === 'vercel' ? '/' : 
-        mode === 'production' ? '/flora-fight-frenzy/' : '/',
+  // Always use relative paths
+  base: "./",
   server: {
     host: "::",
     port: 8080,
@@ -30,9 +28,16 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     chunkSizeWarningLimit: 1000,
     assetsDir: 'assets',
+    // Ensure CSS is extracted properly
+    cssCodeSplit: true,
+    // Simplify output for compatibility with Vercel
     rollupOptions: {
       output: {
-        manualChunks: undefined, // Simplify chunking for better compatibility
+        manualChunks: undefined,
+        // Ensure asset filenames are simple and predictable
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     }
   },
