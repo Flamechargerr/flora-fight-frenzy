@@ -63,4 +63,239 @@ const PlantCard = memo<{
     <div
       className={cardClasses}
       onClick={handleClick}
-      role=\"button\"\n      tabIndex={canAfford ? 0 : -1}\n      aria-label={`${plant.name} - Cost: ${plant.cost} sun ${canAfford ? '' : '(not affordable)'}`}\n      onKeyDown={(e) => {\n        if ((e.key === 'Enter' || e.key === ' ') && canAfford) {\n          e.preventDefault();\n          handleClick();\n        }\n      }}\n    >\n      {/* Plant Icon */}\n      <div className=\"text-center mb-2\">\n        <div className={`text-3xl ${isMobile ? 'text-4xl' : ''}`}>{plant.icon}</div>\n      </div>\n      \n      {/* Plant Info */}\n      <div className=\"text-center\">\n        <div className={`font-semibold ${isMobile ? 'text-sm' : 'text-xs'} text-gray-800 mb-1`}>\n          {plant.name}\n        </div>\n        <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600 mb-1`}>\n          \u2600\ufe0f {plant.cost}\n        </div>\n        {plant.damage > 0 && (\n          <div className={`${isMobile ? 'text-xs' : 'text-[10px]'} text-red-600`}>\n            \u2694\ufe0f {plant.damage}\n          </div>\n        )}\n      </div>\n      \n      {/* Selection Indicator */}\n      {isSelected && (\n        <div className=\"absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center\">\n          <span className=\"text-white text-xs font-bold\">\u2713</span>\n        </div>\n      )}\n      \n      {/* Cooldown Indicator (if needed) */}\n      {!canAfford && (\n        <div className=\"absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg\">\n          <span className=\"text-red-600 font-bold text-xs\">Need {plant.cost - sunAmount} more</span>\n        </div>\n      )}\n    </div>\n  );\n});\n\nPlantCard.displayName = 'PlantCard';\n\nconst MobilePlantSelectionPanel: React.FC<MobilePlantSelectionPanelProps> = memo(({\n  plantTypes,\n  selectedPlant,\n  onSelectPlant,\n  sunAmount,\n  containerHeight,\n  isMobile = false\n}) => {\n  const [isExpanded, setIsExpanded] = useState(false);\n  const scrollContainerRef = useRef<HTMLDivElement>(null);\n  \n  // Mobile swipe handling for plant selection\n  const { attachTouchHandlers } = useMobileTouch({\n    onDrag: (startX, startY, endX, endY) => {\n      const deltaX = endX - startX;\n      if (Math.abs(deltaX) > 50 && scrollContainerRef.current) {\n        // Horizontal swipe - scroll plant selection\n        const scrollAmount = deltaX > 0 ? -100 : 100;\n        scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });\n      }\n    }\n  });\n  \n  // Attach swipe handlers to scroll container\n  useEffect(() => {\n    if (scrollContainerRef.current && isMobile) {\n      return attachTouchHandlers(scrollContainerRef.current);\n    }\n  }, [attachTouchHandlers, isMobile]);\n  \n  // Performance: Memoize plant cards\n  const plantCards = useMemo(() => \n    plantTypes.map(plant => {\n      const canAfford = sunAmount >= plant.cost;\n      const isSelected = selectedPlant?.id === plant.id;\n      \n      return (\n        <PlantCard\n          key={plant.id}\n          plant={plant}\n          isSelected={isSelected}\n          canAfford={canAfford}\n          onSelect={() => {\n            if (isSelected) {\n              onSelectPlant(null); // Deselect if already selected\n            } else {\n              onSelectPlant(plant);\n            }\n          }}\n          isMobile={isMobile}\n        />\n      );\n    }), [plantTypes, sunAmount, selectedPlant, onSelectPlant, isMobile]);\n  \n  // Performance: Memoize container classes\n  const containerClasses = useMemo(() => {\n    const baseClasses = [\n      'glass',\n      'rounded-xl',\n      'shadow-lg',\n      'border',\n      'border-gray-200/50',\n      'backdrop-blur-sm'\n    ];\n    \n    if (isMobile) {\n      if (isExpanded) {\n        baseClasses.push('fixed', 'bottom-0', 'left-0', 'right-0', 'z-50', 'rounded-b-none', 'max-h-[60vh]');\n      } else {\n        baseClasses.push('fixed', 'bottom-4', 'left-4', 'right-4', 'z-40');\n      }\n    } else {\n      baseClasses.push('w-full', 'md:w-64', 'flex-shrink-0');\n    }\n    \n    return baseClasses.join(' ');\n  }, [isMobile, isExpanded]);\n  \n  // Mobile layout\n  if (isMobile) {\n    return (\n      <div className={containerClasses}>\n        {/* Header */}\n        <div \n          className=\"p-4 border-b border-gray-200/50 flex items-center justify-between cursor-pointer\"\n          onClick={() => setIsExpanded(!isExpanded)}\n        >\n          <div className=\"flex items-center gap-3\">\n            <span className=\"text-2xl\">🌱</span>\n            <div>\n              <h3 className=\"font-bold text-gray-800\">Plant Arsenal</h3>\n              <p className=\"text-sm text-gray-600\">\u2600\ufe0f {sunAmount} sun</p>\n            </div>\n          </div>\n          <div className=\"text-gray-400\">\n            {isExpanded ? '⬇️' : '⬆️'}\n          </div>\n        </div>\n        \n        {/* Selected Plant Preview */}\n        {!isExpanded && selectedPlant && (\n          <div className=\"p-3 flex items-center gap-3\">\n            <div className=\"text-2xl\">{selectedPlant.icon}</div>\n            <div className=\"flex-1\">\n              <div className=\"font-semibold text-sm\">{selectedPlant.name}</div>\n              <div className=\"text-xs text-gray-600\">Cost: {selectedPlant.cost} sun</div>\n            </div>\n            <button\n              onClick={(e) => {\n                e.stopPropagation();\n                onSelectPlant(null);\n              }}\n              className=\"text-red-500 hover:text-red-700 p-1\"\n              aria-label=\"Deselect plant\"\n            >\n              ✕\n            </button>\n          </div>\n        )}\n        \n        {/* Expanded Plant Grid */}\n        {isExpanded && (\n          <div className=\"p-4\">\n            {/* Swipe Hint */}\n            <div className=\"text-xs text-gray-500 text-center mb-3\">\n              Swipe left/right to browse • Tap to select\n            </div>\n            \n            <div \n              ref={scrollContainerRef}\n              className=\"flex gap-3 overflow-x-auto pb-2 scrollbar-hide\"\n              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}\n            >\n              {plantCards}\n            </div>\n            \n            {/* Close Button */}\n            <div className=\"mt-4 text-center\">\n              <button\n                onClick={() => setIsExpanded(false)}\n                className=\"bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg text-sm font-semibold transition-colors\"\n              >\n                Close\n              </button>\n            </div>\n          </div>\n        )}\n      </div>\n    );\n  }\n  \n  // Desktop layout\n  return (\n    <div className={containerClasses} style={{ maxHeight: `${containerHeight}px` }}>\n      <div className=\"p-4 border-b border-gray-200/50\">\n        <div className=\"flex items-center gap-2 mb-3\">\n          <span className=\"text-2xl\">🌱</span>\n          <h3 className=\"font-bold text-gray-800\">Plant Arsenal</h3>\n        </div>\n        <div className=\"flex items-center gap-2 text-sm\">\n          <span>\u2600\ufe0f</span>\n          <span className=\"font-semibold text-yellow-600\">{sunAmount}</span>\n          <span className=\"text-gray-600\">sun</span>\n        </div>\n      </div>\n      \n      <div className=\"flex-1 overflow-y-auto p-4\">\n        <div className=\"grid gap-3\">\n          {plantCards}\n        </div>\n      </div>\n      \n      {selectedPlant && (\n        <div className=\"p-4 border-t border-gray-200/50 bg-green-50\">\n          <div className=\"text-sm\">\n            <div className=\"font-semibold text-green-800 mb-1\">Selected: {selectedPlant.name}</div>\n            <div className=\"text-gray-600 mb-2\">{selectedPlant.description || 'Click on the grid to place this plant.'}</div>\n            <button\n              onClick={() => onSelectPlant(null)}\n              className=\"text-red-600 hover:text-red-800 text-sm font-semibold\"\n            >\n              Cancel Selection\n            </button>\n          </div>\n        </div>\n      )}\n    </div>\n  );\n});\n\nMobilePlantSelectionPanel.displayName = 'MobilePlantSelectionPanel';\n\nexport default MobilePlantSelectionPanel;
+      role="button"
+      tabIndex={canAfford ? 0 : -1}
+      aria-label={`${plant.name} - Cost: ${plant.cost} sun ${canAfford ? '' : '(not affordable)'}`}
+    >
+      {/* Plant Icon */}
+      <div className="text-center mb-2">
+        <div className={`text-3xl ${isMobile ? 'text-4xl' : ''}`}>{plant.icon}</div>
+      </div>
+      
+      {/* Plant Info */}
+      <div className="text-center">
+        <div className={`font-semibold ${isMobile ? 'text-sm' : 'text-xs'} text-gray-800 mb-1`}>
+          {plant.name}
+        </div>
+        <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600 mb-1`}>
+          ☀️ {plant.cost}
+        </div>
+        {plant.damage > 0 && (
+          <div className={`${isMobile ? 'text-xs' : 'text-[10px]'} text-red-600`}>
+            ⚔️ {plant.damage}
+          </div>
+        )}
+      </div>
+      
+      {/* Selection Indicator */}
+      {isSelected && (
+        <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+          <span className="text-white text-xs font-bold">✓</span>
+        </div>
+      )}
+      
+      {/* Cooldown Indicator (if needed) */}
+      {!canAfford && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+          <span className="text-red-600 font-bold text-xs">Need {plant.cost - sunAmount} more</span>
+        </div>
+      )}
+    </div>
+  );
+});
+
+PlantCard.displayName = 'PlantCard';
+
+const MobilePlantSelectionPanel: React.FC<MobilePlantSelectionPanelProps> = memo(({
+  plantTypes,
+  selectedPlant,
+  onSelectPlant,
+  sunAmount,
+  containerHeight,
+  isMobile = false
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Mobile swipe handling for plant selection
+  const { attachTouchHandlers } = useMobileTouch({
+    onDrag: (startX, startY, endX, endY) => {
+      const deltaX = endX - startX;
+      if (Math.abs(deltaX) > 50 && scrollContainerRef.current) {
+        // Horizontal swipe - scroll plant selection
+        const scrollAmount = deltaX > 0 ? -100 : 100;
+        scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
+  });
+  
+  // Attach swipe handlers to scroll container
+  useEffect(() => {
+    if (scrollContainerRef.current && isMobile) {
+      return attachTouchHandlers(scrollContainerRef.current);
+    }
+  }, [attachTouchHandlers, isMobile]);
+  
+  // Performance: Memoize plant cards
+  const plantCards = useMemo(() => 
+    plantTypes.map(plant => {
+      const canAfford = sunAmount >= plant.cost;
+      const isSelected = selectedPlant?.id === plant.id;
+      
+      return (
+        <PlantCard
+          key={plant.id}
+          plant={plant}
+          isSelected={isSelected}
+          canAfford={canAfford}
+          onSelect={() => {
+            if (isSelected) {
+              onSelectPlant(null); // Deselect if already selected
+            } else {
+              onSelectPlant(plant);
+            }
+          }}
+          isMobile={isMobile}
+        />
+      );
+    }), [plantTypes, sunAmount, selectedPlant, onSelectPlant, isMobile]);
+  
+  // Performance: Memoize container classes
+  const containerClasses = useMemo(() => {
+    const baseClasses = [
+      'glass',
+      'rounded-xl',
+      'shadow-lg',
+      'border',
+      'border-gray-200/50',
+      'backdrop-blur-sm'
+    ];
+    
+    if (isMobile) {
+      if (isExpanded) {
+        baseClasses.push('fixed', 'bottom-0', 'left-0', 'right-0', 'z-50', 'rounded-b-none', 'max-h-[60vh]');
+      } else {
+        baseClasses.push('fixed', 'bottom-4', 'left-4', 'right-4', 'z-40');
+      }
+    } else {
+      baseClasses.push('w-full', 'md:w-64', 'flex-shrink-0');
+    }
+    
+    return baseClasses.join(' ');
+  }, [isMobile, isExpanded]);
+  
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <div className={containerClasses}>
+        {/* Header */}
+        <div 
+          className="p-4 border-b border-gray-200/50 flex items-center justify-between cursor-pointer"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🌱</span>
+            <div>
+              <h3 className="font-bold text-gray-800">Plant Arsenal</h3>
+              <p className="text-sm text-gray-600">☀️ {sunAmount} sun</p>
+            </div>
+          </div>
+          <div className="text-gray-400">
+            {isExpanded ? '⬇️' : '⬆️'}
+          </div>
+        </div>
+        
+        {/* Selected Plant Preview */}
+        {!isExpanded && selectedPlant && (
+          <div className="p-3 flex items-center gap-3">
+            <div className="text-2xl">{selectedPlant.icon}</div>
+            <div className="flex-1">
+              <div className="font-semibold text-sm">{selectedPlant.name}</div>
+              <div className="text-xs text-gray-600">Cost: {selectedPlant.cost} sun</div>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectPlant(null);
+              }}
+              className="text-red-500 hover:text-red-700 p-1"
+              aria-label="Deselect plant"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        
+        {/* Expanded Plant Grid */}
+        {isExpanded && (
+          <div className="p-4">
+            {/* Swipe Hint */}
+            <div className="text-xs text-gray-500 text-center mb-3">
+              Swipe left/right to browse • Tap to select
+            </div>
+            
+            <div 
+              ref={scrollContainerRef}
+              className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {plantCards}
+            </div>
+            
+            {/* Close Button */}
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+  
+  // Desktop layout
+  return (
+    <div className={containerClasses} style={{ maxHeight: `${containerHeight}px` }}>
+      <div className="p-4 border-b border-gray-200/50">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-2xl">🌱</span>
+          <h3 className="font-bold text-gray-800">Plant Arsenal</h3>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span>☀️</span>
+          <span className="font-semibold text-yellow-600">{sunAmount}</span>
+          <span className="text-gray-600">sun</span>
+        </div>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="grid gap-3">
+          {plantCards}
+        </div>
+      </div>
+      
+      {selectedPlant && (
+        <div className="p-4 border-t border-gray-200/50 bg-green-50">
+          <div className="text-sm">
+            <div className="font-semibold text-green-800 mb-1">Selected: {selectedPlant.name}</div>
+            <div className="text-gray-600 mb-2">{selectedPlant.description || 'Click on the grid to place this plant.'}</div>
+            <button
+              onClick={() => onSelectPlant(null)}
+              className="text-red-600 hover:text-red-800 text-sm font-semibold"
+            >
+              Cancel Selection
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+MobilePlantSelectionPanel.displayName = 'MobilePlantSelectionPanel';
+
+export default MobilePlantSelectionPanel;
