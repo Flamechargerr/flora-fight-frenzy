@@ -1,0 +1,13 @@
+<svg width="400" height="100" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="100" fill="#8DB255"/>
+  <g>
+    <path d="M10 100 Q15 80 20 100 T30 100 T40 100 T50 100 T60 100 T70 100 T80 100 T90 100 T100 100" stroke="#5C913B" stroke-width="4" fill="none"/>
+    <path d="M110 100 Q115 80 120 100 T130 100 T140 100 T150 100 T160 100 T170 100 T180 100 T190 100 T200 100" stroke="#5C913B" stroke-width="4" fill="none"/>
+    <path d="M210 100 Q215 80 220 100 T230 100 T240 100 T250 100 T260 100 T270 100 T280 100 T290 100 T300 100" stroke="#5C913B" stroke-width="4" fill="none"/>
+    <path d="M310 100 Q315 80 320 100 T330 100 T340 100 T350 100 T360 100 T370 100 T380 100 T390 100 T400 100" stroke="#5C913B" stroke-width="4" fill="none"/>
+  </g>
+  <circle cx="60" cy="60" r="3" fill="#A3C76D"/>
+  <circle cx="120" cy="80" r="2" fill="#A3C76D"/>
+  <circle cx="200" cy="70" r="2.5" fill="#A3C76D"/>
+  <circle cx="300" cy="90" r="2" fill="#A3C76D"/>
+</svg> 

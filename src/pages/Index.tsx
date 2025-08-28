@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Bug, Sun, Play } from 'lucide-react';
+import { Leaf, Bug, Sun, Play, Trophy, Target } from 'lucide-react';
 
 const Index = () => {
   const [mounted, setMounted] = useState(false);
@@ -69,12 +69,26 @@ const Index = () => {
             <Play className="mr-2 h-5 w-5" />
             Start Game
           </Link>
-          
           <Link 
-            to="/" 
-            className="text-gray-600 hover:text-garden-dark transition-colors duration-200 text-sm"
+            to="/levels" 
+            className="flex items-center justify-center text-garden-dark bg-yellow-200 hover:bg-yellow-300 py-4 px-8 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-95 border-2 border-yellow-400"
           >
-            How to Play
+            <Sun className="mr-2 h-5 w-5" />
+            Level Select
+          </Link>
+          <Link 
+            to="/achievements" 
+            className="flex items-center justify-center text-white bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-orange-600 hover:to-yellow-600 py-4 px-8 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-95 border-2 border-orange-500"
+          >
+            <Trophy className="mr-2 h-5 w-5" />
+            Achievements
+          </Link>
+          <Link 
+            to="/settings" 
+            className="flex items-center justify-center text-white bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-900 hover:to-gray-700 py-4 px-8 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-95 border-2 border-gray-800"
+          >
+            <Target className="mr-2 h-5 w-5" />
+            Settings
           </Link>
         </div>
       </div>

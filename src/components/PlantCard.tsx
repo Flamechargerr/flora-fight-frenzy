@@ -2,6 +2,8 @@
 import React from 'react';
 import { PlantType } from '../game/types';
 import { Sun } from 'lucide-react';
+import PeashooterSVG from '../assets/plants/Peashooter.svg?react';
+import SunflowerSVG from '../assets/plants/Sunflower.svg?react';
 
 interface PlantCardProps {
   plant: PlantType;
@@ -18,8 +20,12 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant, selected, canAfford, onCli
     >
       <div className="w-full h-full bg-gradient-to-b from-gray-700 to-gray-900 rounded">
         {/* Plant image/icon area */}
-        <div className="relative w-full h-[75%] overflow-hidden bg-gradient-to-b from-gray-600 to-gray-800 rounded-t flex items-center justify-center">
-          {plant.image ? (
+        <div className="relative w-full h-[75%] overflow-hidden bg-gradient-to-b from-green-200 to-green-400 rounded-t flex items-center justify-center border-b-4 border-green-700 shadow-inner">
+          {plant.id === 'peashooter' ? (
+            <PeashooterSVG style={{ width: '70%', height: '70%' }} />
+          ) : plant.id === 'sunflower' ? (
+            <SunflowerSVG style={{ width: '70%', height: '70%' }} />
+          ) : plant.image ? (
             <img 
               src={plant.image} 
               alt={plant.name} 

@@ -1,63 +1,228 @@
-# Welcome to your Lovable project
-## How can I edit this code?
+# 🌱 Flora Fight Frenzy
 
-There are several ways of editing your application.
+[![Deploy](https://github.com/Flamechargerr/flora-fight-frenzy/actions/workflows/deploy.yml/badge.svg)](https://github.com/Flamechargerr/flora-fight-frenzy/actions/workflows/deploy.yml)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-green?style=flat&logo=github)](https://flamechargerr.github.io/flora-fight-frenzy/)
 
-**Use Lovable**
-Simply visit the [Lovable Project](https://lovable.dev/projects/2c7635fb-3ff1-4dcb-b8db-6174c2e05c18) and start prompting.
+A modern tower defense game where you defend your garden from zombie invasion using strategic plant placement. Built with React, TypeScript, and enhanced with immersive audio effects and particle systems.
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🎮 Play Now
 
-*Use your preferred IDE*
+**[🚀 Play Flora Fight Frenzy](https://flamechargerr.github.io/flora-fight-frenzy/)**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## ✨ Features
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🎯 Core Gameplay
+- **5 Challenging Levels**: Progressive difficulty with unique zombie types
+- **Strategic Plant Placement**: 10+ different plant types with unique abilities
+- **Wave-Based Combat**: Survive increasingly difficult zombie waves
+- **Resource Management**: Collect sunlight to fund your defenses
 
-Follow these steps:
+### 🎨 Enhanced Experience  
+- **Immersive Audio**: Procedurally generated sound effects using Web Audio API
+- **Particle Effects**: Dynamic visual feedback for all game interactions
+- **Achievement System**: 15+ achievements across 5 categories
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Smooth Animations**: 60fps gameplay with CSS3 and JavaScript animations
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 🏆 Game Systems
+- **Achievement Tracking**: Combat, Defense, Survival, Collection, and Special achievements
+- **Statistics Dashboard**: Track your progress and performance
+- **Progress Persistence**: Your achievements and stats are saved locally
+- **Multiple Difficulty Modes**: From casual garden defense to intense survival
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛠️ Technologies Used
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Frontend Stack
+- **React 18.3** - Modern UI library with hooks
+- **TypeScript 5.5** - Type-safe development
+- **Vite 5.4** - Lightning-fast build tool
+- **Tailwind CSS 3.4** - Utility-first CSS framework
+- **shadcn/ui** - Beautiful, accessible components
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Game Engine
+- **Custom React Game Loop** - 60fps game state management
+- **Web Audio API** - Procedural sound generation
+- **Canvas2D** - Particle effects and animations
+- **Local Storage** - Save system and achievements
+
+### Deployment
+- **GitHub Actions** - Automated CI/CD
+- **GitHub Pages** - Static site hosting
+- **PWA Ready** - Offline capability support
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm
+- Modern web browser with Web Audio API support
+
+### Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/Flamechargerr/flora-fight-frenzy.git
+
+# Navigate to project directory  
+cd flora-fight-frenzy
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-**Edit a file directly in GitHub**
+### 🎮 How to Play
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Collect Sunlight**: Click on falling sun tokens to gather resources
+2. **Plant Defenders**: Select plants from the panel and place them strategically
+3. **Defend Your Garden**: Stop zombies from reaching the left side of your garden
+4. **Survive Waves**: Each level has multiple waves of increasing difficulty
+5. **Unlock Achievements**: Complete challenges to earn rewards and track progress
 
-**Use GitHub Codespaces**
+### 🌱 Plant Types
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+| Plant | Cost | Ability | Damage |
+|-------|------|---------|--------|
+| 🌻 Sunflower | 50 | Generates sun resources | 0 |
+| 🌱 Peashooter | 100 | Basic projectile attacks | 20 |
+| 🥜 Wall Nut | 50 | High health tank | 0 |
+| ❄️ Ice Shooter | 175 | Slows down enemies | 10 |
+| 🔥 Fire Shooter | 200 | High damage attacks | 50 |
+| 🍒 Cherry Bomb | 150 | Area explosion damage | 100 |
+| 🌿 Repeater | 200 | Double shot attacks | 40 |
+| ☘️ Threepeater | 325 | Triple lane coverage | 20 |
+| 🌵 Spikeweed | 100 | Ground-based passive damage | 10 |
+| 🪵 Torchwood | 175 | Enhances nearby projectiles | 5 |
 
-## What technologies are used for this project?
+## 🏆 Achievement Categories
 
-This project is built with .
+### ⚔️ Combat
+- First Blood, Zombie Slayer, Undead Hunter, Apocalypse Survivor
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### 🛡️ Defense  
+- Green Thumb, Gardener, Master Gardener, Botanical Fortress
 
-## How can I deploy this project?
+### 🎯 Survival
+- Last Stand, Perfect Defense, Marathon Survivor
 
-Its simple,just open [Lovable](https://lovable.dev/projects/2c7635fb-3ff1-4dcb-b8db-6174c2e05c18) and click on Share -> Publish.
+### ☀️ Collection
+- Sun Collector, Solar Powered
 
-## I want to use a custom domain - is that possible?
+### ⭐ Special
+- Speed Runner, High Scorer, Garden Legend
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## 📁 Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── game/           # Game-specific components
+│   └── ui/             # Reusable UI components
+├── game/               # Game logic and systems
+│   ├── hooks/          # Custom React hooks
+│   ├── utils/          # Game utilities
+│   ├── constants.ts    # Game configuration
+│   └── types.ts        # TypeScript definitions
+├── lib/                # Core systems
+│   ├── soundManager.ts     # Audio system
+│   ├── particleSystem.ts   # Visual effects
+│   └── achievementManager.ts # Achievement system
+├── pages/              # Route pages
+└── hooks/              # Global React hooks
+```
+
+## 🎵 Audio System
+
+The game features a custom Web Audio API implementation that generates:
+- **Procedural Sound Effects**: Shooting, planting, collection sounds
+- **Dynamic Audio**: Context-aware audio feedback
+- **No External Assets**: All audio generated in real-time
+- **Customizable Volume**: User-controlled audio settings
+
+## 🎨 Visual Effects
+
+Custom particle system providing:
+- **Explosion Effects**: Enemy defeats and plant abilities
+- **Collection Sparkles**: Sun resource pickup feedback
+- **Floating Text**: Score and damage indicators  
+- **Smoke Trails**: Projectile and impact effects
+- **60fps Performance**: Optimized rendering pipeline
+
+## 🚀 Deployment
+
+The game is automatically deployed to GitHub Pages using GitHub Actions:
+
+1. **Automatic Deployment**: Push to `main` branch triggers deployment
+2. **GitHub Pages**: Hosted at `https://flamechargerr.github.io/flora-fight-frenzy/`
+3. **Custom Domain**: Can be configured in repository settings
+
+### Manual Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Deploy to GitHub Pages (if configured)
+npm run deploy
+```
+
+### Alternative Hosting
+
+- **Netlify**: Drag and drop `dist` folder
+- **Vercel**: Connect GitHub repository
+- **Firebase Hosting**: Use Firebase CLI
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+### 🐛 Bug Reports
+- Use the GitHub Issues tab
+- Include browser version and OS
+- Provide steps to reproduce
+
+### 💡 Feature Requests
+- Suggest new plant types or abilities
+- Propose gameplay mechanics
+- Request quality of life improvements
+
+### 🔨 Development
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### 🎨 Assets & Design
+- Create new plant or zombie sprites
+- Design additional UI components
+- Suggest visual improvements
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Inspired by the classic Plants vs. Zombies game
+- Built with modern web technologies
+- Sound effects generated using Web Audio API
+- UI components from shadcn/ui library
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/Flamechargerr/flora-fight-frenzy/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Flamechargerr/flora-fight-frenzy/discussions)
+- **Email**: Create an issue for direct contact
+
+---
+
+**Enjoy defending your garden! 🌱⚔️🧟**

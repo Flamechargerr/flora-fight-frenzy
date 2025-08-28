@@ -1,9 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import GameBoard from '../components/GameBoard';
 import CinematicIntro from '../components/game/CinematicIntro';
-import { ArrowLeft, Trophy, Volume2, VolumeX, Play, ChevronRight } from 'lucide-react';
+import PowerUpsBar from '../components/game/PowerUpsBar';
+import SoundManager from '../lib/soundManager';
+import AchievementManager from '../lib/achievementManager';
+import { ArrowLeft, Trophy, Volume2, VolumeX, Play, ChevronRight, Settings, Star, Award } from 'lucide-react';
 
 const Game = () => {
   const [isGameOver, setIsGameOver] = useState(false);
@@ -15,14 +18,46 @@ const Game = () => {
   const [currentLevel, setCurrentLevel] = useState(1);
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAchievement, setShowAchievement] = useState<any>(null);
+  const [gameStats, setGameStats] = useState({ startTime: Date.now(), zombiesKilled: 0, plantsPlaced: 0 });
+  
+  const soundManager = useRef(SoundManager.getInstance());
+  const achievementManager = useRef(AchievementManager.getInstance());
+  
+  // Initialize sound and achievement systems
+  useEffect(() => {
+    soundManager.current.initSounds();
+    soundManager.current.setMuted(isMuted);
+    
+    // Listen for achievement unlocks
+    const handleAchievement = (achievement: any) => {
+      setShowAchievement(achievement);
+      soundManager.current.playSound('victory', 0.3);
+      setTimeout(() => setShowAchievement(null), 4000);
+    };
+    
+    achievementManager.current.addAchievementListener(handleAchievement);
+    achievementManager.current.onGameStarted();
+    
+    return () => {
+      achievementManager.current.removeAchievementListener(handleAchievement);
+    };
+  }, [isMuted]);
   
   const handleGameOver = () => {
     console.log("Game over triggered from GameBoard");
+    soundManager.current.playGameOverSound();
+    achievementManager.current.onScoreAchieved(score);
+    const playTime = Math.floor((Date.now() - gameStats.startTime) / 1000);
+    achievementManager.current.onPlayTimeUpdate(playTime);
     setIsGameOver(true);
   };
 
   const handleLevelComplete = (levelScore: number) => {
     setScore(prev => prev + levelScore);
+    soundManager.current.playVictorySound();
+    achievementManager.current.onLevelCompleted();
+    achievementManager.current.onScoreAchieved(levelScore);
     setShowLevelComplete(true);
   };
 
@@ -30,12 +65,20 @@ const Game = () => {
     if (currentLevel < 5) {
       setCurrentLevel(prev => prev + 1);
       setShowLevelComplete(false);
-      setShowCinematic(true); // Show cinematic for the new level
+      setShowCinematic(true);
+      soundManager.current.playWaveStartSound();
     } else {
-      // Final victory screen after beating level 5
+      // Final victory - all levels completed!
       setShowLevelComplete(false);
-      // Show final victory screen
+      achievementManager.current.onScoreAchieved(score * 2); // Bonus for completing all levels
     }
+  };
+
+  // Handle mute toggle
+  const toggleMute = () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    soundManager.current.setMuted(newMutedState);
   };
 
   // Simulate loading screen
@@ -282,6 +325,8 @@ const Game = () => {
                   setScore(0);
                   setGameStarted(true);
                   setShowCinematic(true);
+                  setGameStats({ startTime: Date.now(), zombiesKilled: 0, plantsPlaced: 0 });
+                  achievementManager.current.onGameStarted();
                 }}
                 className="bg-garden hover:bg-garden-dark text-white font-bold py-2 px-6 rounded-lg transition-colors"
               >
@@ -298,8 +343,24 @@ const Game = () => {
         </div>
       )}
 
-      {/* Game Header */}
-      {!isLoading && !showCinematic && (
+      {/* Achievement Notification */}
+      {showAchievement && (
+        <div className="fixed top-4 right-4 z-50 animate-slideIn">
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-4 rounded-lg shadow-lg max-w-sm">
+            <div className="flex items-center gap-3">
+              <div className="text-2xl">{showAchievement.icon}</div>
+              <div>
+                <h3 className="font-bold text-lg">Achievement Unlocked!</h3>
+                <p className="text-sm opacity-90">{showAchievement.title}</p>
+                <p className="text-xs opacity-75">{showAchievement.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Game Header and Board */}
+      {!isLoading && !showCinematic && !showIntro && !showLevelComplete && !isGameOver && (
         <>
           <div className="glass mb-6 p-4 rounded-xl flex items-center justify-between animate-fadeIn">
             <Link 
@@ -319,14 +380,17 @@ const Game = () => {
             
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => setIsMuted(!isMuted)}
-                className="text-gray-600 hover:text-garden-dark transition-colors"
+                onClick={toggleMute}
+                className="text-gray-600 hover:text-garden-dark transition-colors relative group"
               >
                 {isMuted ? (
                   <VolumeX className="w-5 h-5" />
                 ) : (
                   <Volume2 className="w-5 h-5" />
                 )}
+                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                  {isMuted ? 'Unmute' : 'Mute'}
+                </span>
               </button>
               
               <Link 
@@ -349,8 +413,12 @@ const Game = () => {
                   Collect sun to plant more defenders. Don't let zombies reach the left side of your garden!
                 </p>
                 <button 
-                  onClick={() => setGameStarted(true)}
-                  className="bg-garden hover:bg-garden-dark text-white font-bold py-3 px-8 rounded-lg text-lg flex items-center mx-auto transition-colors"
+                  onClick={() => {
+                    setGameStarted(true);
+                    setGameStats({ startTime: Date.now(), zombiesKilled: 0, plantsPlaced: 0 });
+                    soundManager.current.playPlantSound();
+                  }}
+                  className="bg-garden hover:bg-garden-dark text-white font-bold py-3 px-8 rounded-lg text-lg flex items-center mx-auto transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
                 >
                   <Play className="w-5 h-5 mr-2" />
                   Start Defending!
@@ -364,6 +432,7 @@ const Game = () => {
               />
             )}
           </div>
+          <PowerUpsBar />
         </>
       )}
     </div>
