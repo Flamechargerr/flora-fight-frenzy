@@ -629,3 +629,150 @@
   animation: bounceIn 0.6s ease-out forwards;
 }
 
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  /* Improved touch targets */
+  .sun-resource {
+    min-width: 60px;
+    min-height: 60px;
+  }
+  
+  .plant-card {
+    min-height: 80px;
+    padding: 12px;
+  }
+  
+  /* Better mobile game grid */
+  .grid-cell {
+    min-height: 60px;
+    border-width: 1px;
+  }
+  
+  /* Hide scrollbars on mobile */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Mobile-optimized text */
+  .mobile-text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  
+  .mobile-text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  /* Better mobile spacing */
+  .mobile-p-4 {
+    padding: 1rem;
+  }
+  
+  .mobile-gap-3 {
+    gap: 0.75rem;
+  }
+  
+  /* Mobile game optimizations */
+  .mobile-game-container {
+    height: calc(100vh - 200px);
+    max-height: 600px;
+  }
+  
+  /* Touch-friendly buttons */
+  .touch-button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  .grid-cell {
+    min-height: 50px;
+  }
+  
+  .plant-card {
+    min-height: 70px;
+    padding: 8px;
+  }
+  
+  .sun-resource {
+    min-width: 50px;
+    min-height: 50px;
+  }
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-ping {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #000;
+  }
+  
+  .grid-cell {
+    border-color: #000;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-game-container {
+    height: calc(100vh - 120px);
+  }
+  
+  .plant-selection-panel {
+    height: auto;
+    max-height: 50vh;
+  }
+}
+
+/* Touch interaction improvements */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+.touch-pan-x {
+  touch-action: pan-x;
+}
+
+.touch-pan-y {
+  touch-action: pan-y;
+}
+
+/* Better focus states for mobile */
+@media (max-width: 768px) {
+  button:focus,
+  .cursor-pointer:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+/* Loading optimizations for mobile */
+@media (max-width: 768px) {
+  .animate-pulse {
+    animation-duration: 1.5s;
+  }
+  
+  .transition-all {
+    transition-duration: 0.2s;
+  }
+}
+

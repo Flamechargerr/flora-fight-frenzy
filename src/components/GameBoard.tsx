@@ -3,7 +3,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useGameState } from '../hooks/useGameState';
 import GameHeader from './game/GameHeader';
 import GameGrid from './game/GameGrid';
+import MobileGameGrid from './MobileGameGrid';
 import PlantSelectionPanel from './game/PlantSelectionPanel';
+import MobilePlantSelectionPanel from './game/MobilePlantSelectionPanel';
 import GameMessages from './game/GameMessages';
 
 interface GameBoardProps {
@@ -15,6 +17,20 @@ interface GameBoardProps {
 const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBoardProps) => {
   const [containerHeight, setContainerHeight] = useState(500);
   const [lawnMowers, setLawnMowers] = useState<Array<{row: number; activated: boolean; position: number}>>([]);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Initialize game state
   const { 
@@ -124,14 +140,21 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     }
   }, [gameWon, score, onLevelComplete]);
   
-  // Set container height based on window size
+  // Set container height based on window size and mobile status
   useEffect(() => {
     const updateHeight = () => {
       const viewportHeight = window.innerHeight;
-      const minHeight = 500;
-      const maxHeight = 700;
+      const minHeight = isMobile ? 400 : 500;
+      const maxHeight = isMobile ? 600 : 700;
       
-      const calculatedHeight = Math.min(maxHeight, Math.max(minHeight, viewportHeight * 0.6));
+      let calculatedHeight;
+      if (isMobile) {
+        // On mobile, use more of the screen but leave space for UI
+        calculatedHeight = Math.min(maxHeight, Math.max(minHeight, viewportHeight * 0.5));
+      } else {
+        calculatedHeight = Math.min(maxHeight, Math.max(minHeight, viewportHeight * 0.6));
+      }
+      
       setContainerHeight(calculatedHeight);
     };
     
@@ -139,7 +162,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
     window.addEventListener('resize', updateHeight);
     
     return () => window.removeEventListener('resize', updateHeight);
-  }, []);
+  }, [isMobile]);
   
   // Function to handle restart
   const handleRestart = () => {
@@ -147,7 +170,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
   };
   
   return (
-    <div className="w-full flex flex-col">
+    <div className={`w-full flex flex-col ${isMobile ? 'mobile-game-container' : ''}`}>
       {/* Game Header with resources display */}
       <GameHeader 
         sunAmount={sunAmount} 
@@ -155,35 +178,64 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         waveProgress={waveProgress} 
         score={score}
         level={level}
+        isMobile={isMobile}
       />
       
       {/* Game container with grid and panel */}
       <div 
-        className="flex flex-col md:flex-row gap-4 mb-4"
+        className={`flex ${isMobile ? 'flex-col' : 'flex-col md:flex-row'} gap-4 mb-4 flex-1`}
         style={{ minHeight: `${containerHeight}px` }}
       >
-        {/* Plant selection panel - moved to left side */}
-        <PlantSelectionPanel 
-          plantTypes={plantTypes}
-          selectedPlant={selectedPlant}
-          onSelectPlant={setSelectedPlant}
-          sunAmount={sunAmount}
-          containerHeight={containerHeight}
-        />
+        {/* Plant selection panel - responsive positioning */}
+        {isMobile ? (
+          // Mobile: Fixed position panel at bottom
+          <MobilePlantSelectionPanel 
+            plantTypes={plantTypes}
+            selectedPlant={selectedPlant}
+            onSelectPlant={setSelectedPlant}
+            sunAmount={sunAmount}
+            containerHeight={containerHeight}
+            isMobile={true}
+          />
+        ) : (
+          // Desktop: Side panel
+          <PlantSelectionPanel 
+            plantTypes={plantTypes}
+            selectedPlant={selectedPlant}
+            onSelectPlant={setSelectedPlant}
+            sunAmount={sunAmount}
+            containerHeight={containerHeight}
+          />
+        )}
         
-        {/* Main game grid */}
-        <GameGrid 
-          gameArea={{ ...gameArea, height: containerHeight }}
-          plants={plants}
-          enemies={enemies}
-          projectiles={projectiles}
-          sunResources={sunResources}
-          selectedPlant={selectedPlant}
-          debugMessage={debugMessage}
-          onPlacePlant={placePlant}
-          onCollectSun={collectSun}
-          lawnMowers={lawnMowers}
-        />
+        {/* Main game grid - responsive component */}
+        {isMobile ? (
+          <MobileGameGrid 
+            gameArea={{ ...gameArea, height: containerHeight }}
+            plants={plants}
+            enemies={enemies}
+            projectiles={projectiles}
+            sunResources={sunResources}
+            selectedPlant={selectedPlant}
+            debugMessage={debugMessage}
+            onPlacePlant={placePlant}
+            onCollectSun={collectSun}
+            lawnMowers={lawnMowers}
+          />
+        ) : (
+          <GameGrid 
+            gameArea={{ ...gameArea, height: containerHeight }}
+            plants={plants}
+            enemies={enemies}
+            projectiles={projectiles}
+            sunResources={sunResources}
+            selectedPlant={selectedPlant}
+            debugMessage={debugMessage}
+            onPlacePlant={placePlant}
+            onCollectSun={collectSun}
+            lawnMowers={lawnMowers}
+          />
+        )}
       </div>
       
       {/* Wave announcements and countdown */}
@@ -197,6 +249,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         currentWave={currentWave}
         score={score}
         onRestart={handleRestart}
+        isMobile={isMobile}
       />
     </div>
   );

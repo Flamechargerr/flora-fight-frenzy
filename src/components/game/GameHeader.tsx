@@ -8,6 +8,7 @@ interface GameHeaderProps {
   waveProgress: number; // This was "progress" in the error
   score: number;
   level: number; // Make sure this exists
+  isMobile?: boolean;
 }
 
 const GameHeader: React.FC<GameHeaderProps> = ({
@@ -16,9 +17,44 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   waveProgress,
   score,
   level,
+  isMobile = false,
 }) => {
   // For the progress bar, we need to estimate total enemies
   const estimatedTotalEnemies = 10 * currentWave; // Simple estimation
+  
+  if (isMobile) {
+    return (
+      <div className="glass mb-2 p-3 rounded-xl">
+        {/* Top row - Sun and Wave */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="bg-garden-light/50 px-3 py-2 rounded-lg flex items-center">
+            <Sun className="text-yellow-400 w-4 h-4 mr-1" />
+            <span className="font-bold text-sm">{sunAmount}</span>
+          </div>
+          
+          <div className="bg-garden-light/50 px-3 py-2 rounded-lg text-center">
+            <span className="text-xs font-semibold">Wave {currentWave}/5</span>
+          </div>
+          
+          <div className="bg-garden-light/50 px-3 py-2 rounded-lg">
+            <span className="font-bold text-xs">L{level}</span>
+          </div>
+        </div>
+        
+        {/* Wave progress bar */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-600">Progress:</span>
+          <div className="flex-1 h-2 bg-white/50 rounded-full">
+            <div 
+              className="h-full bg-garden rounded-full transition-all duration-200"
+              style={{ width: `${Math.min((waveProgress / estimatedTotalEnemies) * 100, 100)}%` }}
+            />
+          </div>
+          <span className="text-xs font-bold text-gray-700">{score}</span>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="glass mb-4 p-3 rounded-xl flex items-center justify-between">
@@ -33,7 +69,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
           <div className="w-32 h-2 bg-white/50 rounded-full mt-1">
             <div 
               className="h-full bg-garden rounded-full transition-all duration-200"
-              style={{ width: `${(waveProgress / estimatedTotalEnemies) * 100}%` }}
+              style={{ width: `${Math.min((waveProgress / estimatedTotalEnemies) * 100, 100)}%` }}
             />
           </div>
         </div>
