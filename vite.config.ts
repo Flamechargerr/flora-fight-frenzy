@@ -29,5 +29,11 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     sourcemap: false,
     chunkSizeWarningLimit: 1000,
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined, // Simplify chunking for better compatibility
+      }
+    }
   },
 }));
