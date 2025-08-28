@@ -12,6 +12,11 @@ export interface PlantType {
   isPassive?: boolean;
   isPeaConverter?: boolean;
   affectsLanes?: number;
+  // New properties for enhanced plants
+  isNightPlant?: boolean;
+  scared?: boolean;
+  isHypnotize?: boolean;
+  freezeDuration?: number;
 }
 
 export interface EnemyType {
@@ -25,6 +30,7 @@ export interface EnemyType {
   targetPlant?: string;
   damage?: number;
   isFrozen?: boolean;
+  frozenExpiry?: number;
   isBurning?: boolean;
   burnDamage?: number;
   isElectrified?: boolean;
@@ -39,6 +45,10 @@ export interface PlantInstance {
   lastFired: number;
   health?: number;
   maxHealth?: number;
+  // New properties for enhanced plants
+  boosted?: boolean;
+  boostExpiry?: number;
+  isScared?: boolean;
 }
 
 export interface ProjectileType {

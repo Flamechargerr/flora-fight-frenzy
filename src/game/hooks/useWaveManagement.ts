@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback } from 'react';
 import { EnemyType, WaveConfigMap } from '../types';
 import { createEnemy } from '../utils/enemyUtils';
@@ -58,11 +57,28 @@ export const useWaveManagement = ({
   // Spawn a new enemy
   const spawnNewEnemy = useCallback((waveSettings: any) => {
     const newEnemy = createEnemy(waveSettings, gameAreaWidth);
-    setEnemies(prev => [...prev, newEnemy]);
+    
+    // CRITICAL FIX: Validate and ensure the enemy has an exact integer row before adding to state
+    const validatedEnemy = {
+      ...newEnemy,
+      row: Math.floor(newEnemy.row), // Force integer row
+      position: Math.floor(newEnemy.position) // Force integer position
+    };
+    
+    // Additional validation - ensure row is only one of the fixed values
+    if (validatedEnemy.row < 0 || validatedEnemy.row > 4) {
+      console.error(`Invalid row value detected: ${validatedEnemy.row}. Correcting to valid range.`);
+      validatedEnemy.row = Math.min(4, Math.max(0, Math.floor(validatedEnemy.row)));
+    }
+    
+    // Log for debugging
+    console.log(`Spawning zombie at FIXED row: ${validatedEnemy.row}`);
+    
+    setEnemies(prev => [...prev, validatedEnemy]);
     enemiesSpawned.current++;
     activeEnemies.current++;
     setWaveProgress(enemiesSpawned.current);
-    setDebugMessage(`Spawned enemy ${enemiesSpawned.current}/${waveSettings.enemies}, active: ${activeEnemies.current}`);
+    setDebugMessage(`Spawned enemy ${enemiesSpawned.current}/${waveSettings.enemies}, row: ${validatedEnemy.row}, active: ${activeEnemies.current}`);
   }, [gameAreaWidth, setEnemies, setWaveProgress, setDebugMessage]);
 
   // Start a wave
@@ -111,7 +127,10 @@ export const useWaveManagement = ({
     setWaveCompleted(true);
     setScore(prev => prev + (currentWave * 100)); // Bonus for completing wave
     
-    if (currentWave < 5) { 
+    // Check if there are more waves
+    const maxWave = Math.max(...Object.keys(waveConfig).map(Number));
+    
+    if (currentWave < maxWave) { 
       // Start countdown to next wave
       setCountdown(5);
       const timer = setInterval(() => {
@@ -125,10 +144,10 @@ export const useWaveManagement = ({
         });
       }, 1000);
     } else {
-      // Game won after wave 5
+      // Game won after final wave
       setGameWon(true);
     }
-  }, [setWaveCompleted, setScore, currentWave, setCountdown, showWaveAnnouncement, setGameWon]);
+  }, [setWaveCompleted, setScore, currentWave, setCountdown, showWaveAnnouncement, setGameWon, waveConfig]);
 
   // Initialize game
   const initializeGame = useCallback(() => {

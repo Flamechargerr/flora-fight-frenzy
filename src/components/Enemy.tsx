@@ -1,6 +1,6 @@
 
 import { memo, useState, useEffect } from 'react';
-import BasicZombieSVG from '../assets/zombies/BasicZombie.svg?react';
+import BasicZombieSVG from '../assets/zombies/BasicZombie.svg.tsx';
 
 interface EnemyProps {
   enemy: {
@@ -29,9 +29,18 @@ interface EnemyProps {
 }
 
 const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
-  const cellHeight = gameAreaSize.height / gridDimensions.rows;
-  const top = enemy.row * cellHeight + (cellHeight / 2);
-  const size = cellHeight * 0.85;
+  // CRITICAL FIX: Calculate exact row position based on fixed row index
+  const cellHeight = Math.floor(gameAreaSize.height / gridDimensions.rows);
+  const fixedRows = [0, 1, 2, 3, 4]; // Same fixed array as in enemyUtils.ts
+  
+  // CRITICAL FIX: Ensure the enemy's row is one of our fixed values
+  const exactRow = Math.floor(enemy.row);
+  const validRow = Math.min(4, Math.max(0, exactRow)); // Clamp between 0-4
+  
+  // Calculate position precisely using row index
+  const rowOffset = validRow * cellHeight;
+  const centerY = rowOffset + Math.floor(cellHeight / 2);
+  const size = Math.floor(cellHeight * 0.85);
   
   // Health percentage for health bar - adjust for different zombie types
   let maxHealth = 100;
@@ -81,15 +90,39 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
   
   return (
     <div 
-      className={`pvz-zombie ${isEating ? 'eating' : ''} ${enemy.isBurning ? 'damaged' : ''}`}
+      className="pvz-zombie"
       style={{ 
         width: `${size}px`, 
         height: `${size}px`, 
-        top: `${top - (size/2)}px`, 
-        left: `${enemy.position}px`,
-        transition: `left ${movementSpeed}`
+        top: `${centerY - Math.floor(size/2)}px`, 
+        left: `${Math.floor(enemy.position)}px`,
+        transition: `left ${movementSpeed}`,
+        // Add debug outline to visualize zombie hitbox
+        outline: '2px solid rgba(255,0,0,0.5)',
+        zIndex: 20
       }}
+      data-row={validRow}
+      data-position={Math.floor(enemy.position)}
     >
+      {/* Add a more visible row indicator for debugging */}
+      <div 
+        style={{ 
+          position: 'absolute', 
+          top: '-15px', 
+          left: '0', 
+          width: '100%', 
+          textAlign: 'center', 
+          fontSize: '10px', 
+          backgroundColor: 'black', 
+          color: 'white', 
+          padding: '2px',
+          borderRadius: '3px',
+          zIndex: 30
+        }}
+      >
+        Row: {validRow}
+      </div>
+      
       <div className="relative w-full h-full flex items-center justify-center">
         {enemy.type === 'basic' ? (
           <BasicZombieSVG style={{ width: '90%', height: '90%' }} />
@@ -310,40 +343,14 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
             </div>
           </>
         )}
-        
-        {/* Health bar */}
-        <div className="absolute -bottom-5 left-0 w-full h-2 bg-black/60 rounded-full overflow-hidden">
-          <div 
-            className={`h-full transition-all duration-200 ${
-              healthPercentage > 70 ? 'bg-green-500' : 
-              healthPercentage > 30 ? 'bg-yellow-500' : 
-              'bg-red-500'
-            }`}
-            style={{ width: `${healthPercentage}%` }}
-          />
-        </div>
-        
-        {/* Enhanced status indicators */}
-        <div className="absolute -top-4 left-0 flex space-x-1">
-          {enemy.isFrozen && (
-            <div className="bg-blue-500 text-white px-1 text-xs rounded-sm shadow-md flex items-center">
-              <span className="mr-1">❄️</span>
-              <span className="text-[10px]">-50%</span>
-            </div>
-          )}
-          {enemy.isBurning && (
-            <div className="bg-red-500 text-white px-1 text-xs rounded-sm shadow-md flex items-center">
-              <span className="mr-1">🔥</span>
-              <span className="text-[10px]">-3HP</span>
-            </div>
-          )}
-          {enemy.isElectrified && (
-            <div className="bg-blue-400 text-white px-1 text-xs rounded-sm shadow-md flex items-center">
-              <span className="mr-1">⚡</span>
-              <span className="text-[10px]">-5HP</span>
-            </div>
-          )}
-        </div>
+      </div>
+      
+      {/* Health bar */}
+      <div className="absolute -top-4 left-0 w-full h-2 bg-gray-800/50 rounded overflow-hidden">
+        <div 
+          className="h-full bg-gradient-to-r from-red-600 to-red-400" 
+          style={{ width: `${healthPercentage}%` }}
+        />
       </div>
     </div>
   );

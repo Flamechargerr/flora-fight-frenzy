@@ -30,7 +30,7 @@ class SoundManager {
   }
 
   // Create sound effects programmatically using Web Audio API
-  private createSoundEffect(type: string, frequency: number, duration: number, volume: number = 0.3): AudioBuffer | null {
+  private createSoundEffect(type: string, frequency: number, duration: number, volume: number = 0.3, options: any = {}): AudioBuffer | null {
     if (!this.audioContext) return null;
 
     const sampleRate = this.audioContext.sampleRate;
@@ -71,6 +71,34 @@ class SoundManager {
           // Dramatic game over sound
           sample = Math.sin(2 * Math.PI * (frequency - t * 300) * t) * Math.exp(-t * 2) * volume;
           break;
+        // Authentic PvZ sounds
+        case 'peashooter_shoot':
+          // Classic pea shooter sound
+          sample = Math.sin(2 * Math.PI * (frequency + 200) * t) * Math.exp(-t * 15) * volume;
+          break;
+        case 'sunflower_produce':
+          // Gentle sun production sound
+          sample = Math.sin(2 * Math.PI * (frequency - 100) * t) * Math.exp(-t * 6) * volume;
+          break;
+        case 'cherry_bomb':
+          // Explosive sound
+          const explosion = (1 - t / duration) * Math.exp(-t * 5);
+          sample = (Math.random() * 2 - 1) * explosion * volume;
+          break;
+        case 'zombie_groan':
+          // Zombie groaning sound
+          const groanFreq = frequency + Math.sin(t * 2) * 10;
+          sample = Math.sin(2 * Math.PI * groanFreq * t) * Math.exp(-t * 3) * volume;
+          break;
+        case 'lawnmower':
+          // Lawnmower sound
+          const mowerFreq = frequency + Math.sin(t * 50) * 50;
+          sample = Math.sin(2 * Math.PI * mowerFreq * t) * Math.exp(-t * 8) * volume;
+          break;
+        case 'points':
+          // Points sound
+          sample = Math.sin(2 * Math.PI * (frequency + t * 300) * t) * Math.exp(-t * 10) * volume;
+          break;
         default:
           sample = Math.sin(2 * Math.PI * frequency * t) * Math.exp(-t * 5) * volume;
       }
@@ -91,6 +119,13 @@ class SoundManager {
       { name: 'wave_start', frequency: 300, duration: 1.5 },
       { name: 'victory', frequency: 500, duration: 2.0 },
       { name: 'game_over', frequency: 250, duration: 2.0 },
+      // Authentic PvZ sounds
+      { name: 'peashooter_shoot', frequency: 700, duration: 0.15 },
+      { name: 'sunflower_produce', frequency: 500, duration: 0.5 },
+      { name: 'cherry_bomb', frequency: 150, duration: 1.0 },
+      { name: 'zombie_groan', frequency: 100, duration: 1.0 },
+      { name: 'lawnmower', frequency: 300, duration: 1.5 },
+      { name: 'points', frequency: 800, duration: 0.3 },
     ];
 
     soundEffects.forEach(({ name, frequency, duration }) => {
@@ -132,20 +167,42 @@ class SoundManager {
   }
 
   // Play contextual sounds based on game events
-  playPlantSound() {
-    this.playSound('plant', 0.6);
+  playPlantSound(plantType?: string) {
+    if (plantType === 'sunflower') {
+      this.playSound('sunflower_produce', 0.6);
+    } else if (plantType === 'cherrybomb') {
+      this.playSound('cherry_bomb', 0.8);
+    } else {
+      this.playSound('plant', 0.6);
+    }
   }
 
-  playShootSound() {
-    this.playSound('shoot', 0.4);
+  playShootSound(plantType?: string) {
+    if (plantType === 'peashooter' || plantType === 'repeater' || plantType === 'threepeater') {
+      this.playSound('peashooter_shoot', 0.4);
+    } else {
+      this.playSound('shoot', 0.4);
+    }
   }
 
-  playCollectSound() {
-    this.playSound('collect', 0.8);
+  playCollectSound(resourceType?: string) {
+    if (resourceType === 'sun') {
+      this.playSound('collect', 0.8);
+    } else {
+      this.playSound('points', 0.7);
+    }
   }
 
-  playZombieHitSound() {
+  playZombieHitSound(zombieType?: string) {
     this.playSound('zombie_hit', 0.5);
+    // Occasionally play zombie groan for more atmosphere
+    if (Math.random() > 0.7) {
+      this.playSound('zombie_groan', 0.3);
+    }
+  }
+
+  playLawnmowerSound() {
+    this.playSound('lawnmower', 0.9);
   }
 
   playWaveStartSound() {

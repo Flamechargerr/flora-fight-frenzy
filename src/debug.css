@@ -1,0 +1,75 @@
+/* Debug styling to enhance grid visibility */
+
+/* Enhanced grid lines */
+.garden-grid {
+  /* Make grid lines more visible */
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px) !important;
+  background-size: calc(100% / 9) calc(100% / 5) !important;
+}
+
+/* Debug overlay to visualize grid cells */
+.pvz-grid-cell {
+  /* Strong border to clearly define cell boundaries */
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  transition: all 0.2s ease;
+}
+
+.pvz-grid-cell.can-place {
+  /* Very visible highlight for placeable cells */
+  background-color: rgba(0, 255, 0, 0.3) !important;
+  border-color: rgba(0, 255, 0, 0.8) !important;
+  box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.5) !important;
+}
+
+.pvz-grid-cell.is-occupied {
+  /* Highlight occupied cells */
+  background-color: rgba(255, 0, 0, 0.2) !important;
+  border-color: rgba(255, 0, 0, 0.5) !important;
+}
+
+/* Ensure plants stay within grid cells */
+.pvz-plant {
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.7) !important;
+  outline: 2px solid rgba(0, 255, 0, 0.7) !important;
+}
+
+/* Ensure zombies stay on lanes */
+.pvz-zombie {
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.7) !important;
+  outline: 2px solid rgba(255, 0, 0, 0.7) !important;
+}
+
+/* Debug grid overlay */
+.debug-grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Lane markers */
+.lane-marker {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: rgba(255, 255, 0, 0.5);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Column markers */
+.col-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background-color: rgba(255, 255, 0, 0.5);
+  z-index: 1000;
+  pointer-events: none;
+}

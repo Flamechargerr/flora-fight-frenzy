@@ -1,6 +1,7 @@
 
-import React, { useState, useEffect, memo, useMemo } from 'react';
-import SunSVG from '../assets/sun/Sun.svg?react';
+import React, { useState, useEffect, memo, useMemo, CSSProperties } from 'react';
+// Use the new Sun SVG component
+import SunSVG from '../assets/sun/Sun.svg.tsx';
 
 interface SunResourceProps {
   id: string;
@@ -37,17 +38,19 @@ const SunResource: React.FC<SunResourceProps> = memo(({ id, x, y, onCollect, isM
   }, [id, onCollect, isMobile]);
   
   // Performance: Memoize style calculations
-  const sunStyle = useMemo(() => {
+  const sunStyle = useMemo<CSSProperties>(() => {
     const size = isMobile ? 60 : 48; // Larger on mobile for easier tapping
     const offset = size / 2;
     
     return {
-      left: x - offset,
-      top: y - offset,
-      width: size,
-      height: size,
+      position: 'absolute' as const,
+      left: `${x - offset}px`,
+      top: `${y - offset}px`,
+      width: `${size}px`,
+      height: `${size}px`,
       zIndex: 20,
       transition: 'top 0.3s, left 0.3s, transform 0.2s',
+      pointerEvents: 'auto' as const
     };
   }, [x, y, isMobile]);
   
@@ -55,7 +58,6 @@ const SunResource: React.FC<SunResourceProps> = memo(({ id, x, y, onCollect, isM
   const classNames = useMemo(() => {
     const baseClasses = [
       'pvz-sun',
-      'absolute',
       'cursor-pointer',
       'select-none',
       'transform',
@@ -94,7 +96,12 @@ const SunResource: React.FC<SunResourceProps> = memo(({ id, x, y, onCollect, isM
       )}
       
       {/* Glow effect */}
-      <div className="absolute inset-0 bg-yellow-400 rounded-full opacity-20 animate-pulse" />
+      <div className="absolute inset-0 bg-yellow-400 rounded-full opacity-20 animate-pulse" 
+        style={{
+          animation: 'pulse 2s infinite ease-in-out',
+          boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.3)'
+        }}
+      />
     </div>
   );
 });

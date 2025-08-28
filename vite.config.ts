@@ -6,7 +6,10 @@ import svgr from 'vite-plugin-svgr';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/flora-fight-frenzy/' : '/',
+  // Use environment variable to determine base path
+  // For Vercel, we want the base to be '/' instead of '/flora-fight-frenzy/'
+  base: process.env.DEPLOY_TARGET === 'vercel' ? '/' : 
+        mode === 'production' ? '/flora-fight-frenzy/' : '/',
   server: {
     host: "::",
     port: 8080,

@@ -18,8 +18,12 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist",
-    "predeploy": "npm run build"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "deploy:docs": "npm run build && npm run copy-to-docs",
+    "copy-to-docs": "xcopy /E /Y dist\\* docs\\ && copy docs\\index.html docs\\404.html",
+    "update-docs": "update-docs.bat",
+    "deploy:vercel": "vercel --prod"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import LawnMowerSVG from '../assets/plants/LawnMower.svg?react';
+import LawnMowerSVG from '../assets/plants/LawnMower.svg.tsx';
 
 interface LawnMowerProps {
   row: number;

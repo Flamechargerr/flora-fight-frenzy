@@ -7,14 +7,16 @@ import MobileGameGrid from './MobileGameGrid';
 import PlantSelectionPanel from './game/PlantSelectionPanel';
 import MobilePlantSelectionPanel from './game/MobilePlantSelectionPanel';
 import GameMessages from './game/GameMessages';
+import PowerupPanel from './PowerupPanel'; // Import the PowerupPanel
 
 interface GameBoardProps {
   onGameOver: () => void;
   onLevelComplete?: (score: number) => void;
   level?: number;
+  soundManager?: any; // Add sound manager prop
 }
 
-const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBoardProps) => {
+const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1, soundManager }: GameBoardProps) => {
   const [containerHeight, setContainerHeight] = useState(500);
   const [lawnMowers, setLawnMowers] = useState<Array<{row: number; activated: boolean; position: number}>>([]);
   const [isMobile, setIsMobile] = useState(false);
@@ -34,8 +36,8 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
   
   // Initialize game state
   const { 
-    sunAmount, currentWave, waveProgress, 
-    sunResources, enemies, plants, projectiles, 
+    sunAmount, setSunAmount, currentWave, waveProgress, 
+    sunResources, setSunResources, enemies, setEnemies, plants, setPlants, projectiles, 
     selectedPlant, setSelectedPlant, score, 
     showWaveMessage, waveMessage, waveCompleted, countdown, 
     gameWon, isGameOver, debugMessage, placePlant, collectSun, gameArea, 
@@ -43,7 +45,8 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
   } = useGameState({ 
     onGameOver,
     onLevelComplete,
-    level
+    level,
+    soundManager
   });
   
   // Number of rows in the game grid
@@ -88,10 +91,17 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
       const newLawnMowers = [...lawnMowers];
       let mowerActivated = false;
       
-      enemies.forEach(enemy => {
-        // If enemy reaches the lawnmower zone (left 80 pixels) and there's an available mower
+      // Fixed logic: Immediately activate lawn mowers when zombies reach left side
+      for (const enemy of enemies) {
+        // Fix: Increase the activation zone to ensure immediate response when zombies reach left side
+        // Reduced from 80px to 120px from left edge to ensure quicker activation
+        const activationThreshold = 120;
+        
+        // Check if enemy is in a row with an available lawn mower
         const mowerIndex = newLawnMowers.findIndex(
-          m => m.row === enemy.row && !m.activated && enemy.position <= 80
+          m => Math.floor(m.row) === Math.floor(enemy.row) && 
+               !m.activated && 
+               Math.floor(enemy.position) <= activationThreshold
         );
         
         if (mowerIndex !== -1) {
@@ -99,16 +109,21 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
           newLawnMowers[mowerIndex].activated = true;
           mowerActivated = true;
           
+          // Play lawnmower sound
+          if (soundManager) {
+            soundManager.playLawnmowerSound();
+          }
+          
           // Immediately remove the zombie that triggered the mower
           removeEnemy(enemy.id);
         }
-      });
+      }
       
       if (mowerActivated) {
         setLawnMowers(newLawnMowers);
       }
     }
-  }, [enemies, lawnMowers, removeEnemy]);
+  }, [enemies, lawnMowers, removeEnemy, soundManager]);
   
   // Update lawn mower positions when activated and handle zombie collisions
   useEffect(() => {
@@ -119,13 +134,13 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         setLawnMowers(prev => 
           prev.map(mower => {
             if (mower.activated && mower.position < gameArea.width + 100) {
-              // Move the mower faster like in PvZ
-              const updatedMower = { ...mower, position: mower.position + 30 };
+              // Fix: Move the mower even faster for better response
+              const updatedMower = { ...mower, position: mower.position + 40 };
               
-              // Check for collisions with zombies and remove them
+              // Fix: Improved collision detection with larger detection area
               const zombiesInPath = enemies.filter(
-                enemy => enemy.row === mower.row && 
-                       Math.abs(enemy.position - updatedMower.position) < 60
+                enemy => Math.floor(enemy.row) === Math.floor(mower.row) && 
+                       Math.abs(enemy.position - updatedMower.position) < 80
               );
               
               zombiesInPath.forEach(zombie => {
@@ -137,7 +152,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
             return mower;
           })
         );
-      }, 50); // Faster update rate for smooth mower movement
+      }, 40); // Fix: Faster update rate for smoother mower movement
       
       return () => clearInterval(interval);
     }
@@ -247,6 +262,18 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
           />
         )}
       </div>
+      
+      {/* Add PowerupPanel at the bottom of the screen */}
+      <PowerupPanel 
+        sunAmount={sunAmount}
+        setSunAmount={setSunAmount}
+        setEnemies={setEnemies}
+        setPlants={setPlants}
+        setSunResources={setSunResources}
+        gameArea={gameArea}
+        soundManager={soundManager}
+        isMobile={isMobile}
+      />
       
       {/* Wave announcements and countdown */}
       <GameMessages 

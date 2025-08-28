@@ -100,6 +100,11 @@
     @apply absolute cursor-pointer w-12 h-12 bg-sun rounded-full shadow-lg transform transition-all duration-200 flex items-center justify-center text-yellow-800 font-bold animate-float hover:scale-110 active:scale-90;
   }
   
+  .pvz-sun {
+    @apply cursor-pointer rounded-full shadow-lg transform transition-all duration-200 hover:scale-110 active:scale-90;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 150, 0.8));
+  }
+  
   .enemy {
     @apply absolute rounded-full flex items-center justify-center shadow-lg;
   }

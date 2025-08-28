@@ -23,15 +23,15 @@ const PlantSelectionPanel: React.FC<PlantSelectionPanelProps> = ({
 
   return (
     <div 
-      className="w-[120px] rounded-xl flex flex-col gap-2 overflow-y-auto bg-gray-900/90 border border-gray-800 p-2"
+      className="pvz-seed-packet w-[120px] rounded-xl flex flex-col gap-2 overflow-y-auto bg-gradient-to-b from-green-800 to-green-900 border-4 border-yellow-800 p-2 shadow-lg"
       style={containerHeight ? { maxHeight: `${containerHeight}px` } : {}}
     >
-      <div className="w-full text-center bg-gray-800 rounded py-1 mb-1 border-b border-gray-700">
-        <span className="text-xs text-gray-300 font-bold">PLANTS</span>
+      <div className="w-full text-center bg-gradient-to-b from-yellow-600 to-yellow-700 rounded py-1 mb-1 border-2 border-yellow-900 shadow-inner">
+        <span className="pvz-title text-sm text-yellow-100 font-bold tracking-wider">PLANTS</span>
       </div>
       
       {availablePlants.map(plant => (
-        <div key={plant.id} className="h-[60px]">
+        <div key={plant.id} className="h-[70px] mb-1">
           <PlantCard
             plant={plant}
             selected={selectedPlant?.id === plant.id}

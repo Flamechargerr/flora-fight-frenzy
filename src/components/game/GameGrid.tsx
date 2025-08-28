@@ -1,12 +1,13 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Plant from '../Plant';
 import Enemy from '../Enemy';
 import SunResource from '../SunResource';
 import LawnMower from '../LawnMower';
-import GrassBG from '../../assets/grass/GrassBG.svg?react';
-import Flower1 from '../../assets/grass/Flower1.svg?react';
-import Flower2 from '../../assets/grass/Flower2.svg?react';
+import GrassBG from '../../assets/grass/GrassBG.svg.tsx';
+import Flower1 from '../../assets/grass/Flower1.svg.tsx';
+import Flower2 from '../../assets/grass/Flower2.svg.tsx';
+import DebugGridOverlay from '../DebugGridOverlay'; // Import the debug overlay
 import { 
   PlantType, 
   PlantInstance, 
@@ -44,6 +45,21 @@ const GameGrid: React.FC<GameGridProps> = ({
   onPlacePlant,
   onCollectSun,
 }) => {
+  // Add debug state
+  const [showDebug, setShowDebug] = useState(true);
+  
+  // Toggle debug overlay with 'D' key
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'd') {
+        setShowDebug(prev => !prev);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
   // Render grid cells
   const renderGrid = () => {
     const cells = [];
@@ -52,10 +68,13 @@ const GameGrid: React.FC<GameGridProps> = ({
     
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
-        const isOccupied = plants.some(p => p.row === row && p.col === col);
+        // CRITICAL FIX: Use strict integer equality for occupied check
+        const isOccupied = plants.some(p => 
+          Math.floor(p.row) === row && Math.floor(p.col) === col
+        );
         const isAvailable = !isOccupied && selectedPlant !== null;
         
-        // Create checkerboard pattern - alternate colors
+        // Create checkerboard pattern for improved visibility
         const isEvenCell = (row + col) % 2 === 0;
         
         cells.push(
@@ -67,15 +86,49 @@ const GameGrid: React.FC<GameGridProps> = ({
               height: `${cellHeight}%`,
               position: 'absolute',
               left: `${col * cellWidth}%`,
-              top: `${row * cellHeight}%`
+              top: `${row * cellHeight}%`,
+              // Enhanced visibility with clear borders and background
+              background: isEvenCell 
+                ? 'rgba(90, 140, 65, 0.3)' 
+                : 'rgba(80, 130, 55, 0.3)',
+              border: '2px solid rgba(255, 255, 255, 0.4)',
+              // Highlight available placement cells
+              boxShadow: isAvailable 
+                ? 'inset 0 0 0 4px rgba(72, 187, 120, 0.8)' 
+                : 'none',
+              zIndex: 5, // Ensure cells are above background but below plants
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
-            onClick={() => isAvailable && onPlacePlant(row, col)}
+            onClick={(e) => {
+              // CRITICAL FIX: Ensure precise click handling
+              e.stopPropagation();
+              if (isAvailable) {
+                console.log(`Placing plant at EXACT row: ${row}, col: ${col}`);
+                onPlacePlant(row, col);
+              }
+            }}
+            data-row={row}
+            data-col={col}
           >
-            {/* Show visual indicator when placing plants */}
+            {/* Show visual indicator when placing plants with improved visibility */}
             {selectedPlant && !isOccupied && (
-              <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center rounded-sm">
-                <span className="text-2xl opacity-50">{selectedPlant.icon}</span>
+              <div className="absolute inset-0 bg-green-500/40 flex items-center justify-center rounded-sm animate-pulse">
+                <div className="transform scale-75">
+                  <span className="text-3xl">{selectedPlant.icon}</span>
+                </div>
               </div>
+            )}
+            
+            {/* Show grid coordinates */}
+            <div className="text-[10px] text-white/60 font-bold select-none pointer-events-none">
+              {row},{col}
+            </div>
+            
+            {/* Show occupied indicator */}
+            {isOccupied && (
+              <div className="absolute inset-0 rounded-sm border-2 border-red-500/50"></div>
             )}
           </div>
         );
@@ -180,7 +233,11 @@ const GameGrid: React.FC<GameGridProps> = ({
           {enemies.map((enemy) => (
             <Enemy
               key={enemy.id}
-              enemy={enemy}
+              enemy={{
+                ...enemy,
+                row: Math.floor(enemy.row), // Ensure integer row
+                position: Math.floor(enemy.position) // Ensure integer position
+              }}
               gridDimensions={{ rows: ROWS, cols: COLS }}
               gameAreaSize={gameArea}
             />
@@ -197,9 +254,19 @@ const GameGrid: React.FC<GameGridProps> = ({
             />
           ))}
           
-          {/* Debug indicator */}
-          <div className="absolute bottom-2 left-2 text-xs bg-black/70 text-white px-2 py-1 rounded">
-            Zombies: {enemies.length} | Active Mowers: {lawnMowers.filter(m => m.activated).length}
+          {/* Render the debug grid overlay when enabled */}
+          {showDebug && (
+            <DebugGridOverlay 
+              rows={ROWS} 
+              cols={COLS} 
+              width={gameArea.width} 
+              height={gameArea.height} 
+            />
+          )}
+          
+          {/* Debug indicator with more detailed info */}
+          <div className="absolute bottom-2 left-2 text-xs bg-black/80 text-white px-2 py-1 rounded z-50">
+            Zombies: {enemies.length} | Plants: {plants.length} | Grid: {ROWS}x{COLS} | Debug: {showDebug ? 'ON' : 'OFF'} (Press D)
           </div>
         </div>
       </div>

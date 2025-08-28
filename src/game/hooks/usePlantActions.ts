@@ -15,6 +15,7 @@ interface UsePlantActionsProps {
   setScore: React.Dispatch<React.SetStateAction<number>>;
   setSelectedPlant: React.Dispatch<React.SetStateAction<PlantType | null>>;
   activeEnemies: React.MutableRefObject<number>;
+  soundManager?: any; // Add sound manager
 }
 
 export const usePlantActions = ({
@@ -26,20 +27,30 @@ export const usePlantActions = ({
   setEnemies,
   setScore,
   setSelectedPlant,
-  activeEnemies
+  activeEnemies,
+  soundManager
 }: UsePlantActionsProps) => {
 
   // Fire a projectile
   const fireProjectile = useCallback((plant: PlantInstance, targetEnemy: EnemyType) => {
     const cellWidth = gameArea.width / 9; // Using 9 as COLS
     
+    // Fix: Use precise integer calculations
+    const plantCol = Math.floor(plant.col);
+    const plantPosition = Math.floor((plantCol + 1) * cellWidth);
+    const targetPosition = Math.floor(targetEnemy.position);
+    
     // Handle Torchwood pea conversion - check for torchwoods in the path
     let projectileType = 'pea';
     if (plant.type.id === 'iceshooter') projectileType = 'ice';
     if (plant.type.id === 'fireshooter') projectileType = 'fire';
     
-    // Create the projectile
-    const newProjectile = createProjectile(plant, targetEnemy.position, cellWidth);
+    // Create the projectile with precise position values
+    const newProjectile = createProjectile(
+      { ...plant, row: Math.floor(plant.row), col: plantCol },
+      targetPosition, 
+      Math.floor(cellWidth)
+    );
     
     // Check if projectile passes through a torchwood
     setPlants(prevPlants => {
@@ -83,25 +94,52 @@ export const usePlantActions = ({
     if (!selectedPlant) return;
     if (sunAmount < selectedPlant.cost) return;
     
-    // Check if there's already a plant at this position
-    const plantExists = plants.some(p => p.row === row && p.col === col);
-    if (plantExists) return;
+    // CRITICAL FIX: Force row and col to be exact integers
+    const exactRow = Math.floor(Number(row));
+    const exactCol = Math.floor(Number(col));
+    
+    console.log(`PLACING PLANT at EXACT grid position: [${exactRow},${exactCol}]`);
+    
+    // Check if position is valid (within grid bounds)
+    if (exactRow < 0 || exactRow >= 5 || exactCol < 0 || exactCol >= 9) {
+      console.error(`Invalid grid position: [${exactRow},${exactCol}]`);
+      return;
+    }
+    
+    // Check for existing plants using strict integer comparison
+    const plantExists = plants.some(p => 
+      Math.floor(p.row) === exactRow && Math.floor(p.col) === exactCol
+    );
+    
+    if (plantExists) {
+      console.log(`Cannot place plant - position [${exactRow},${exactCol}] already occupied`);
+      return;
+    }
     
     const maxHealth = PLANT_HEALTH[selectedPlant.id as keyof typeof PLANT_HEALTH] || 300;
     
+    // Create plant with guaranteed integer positions
     const newPlant = {
-      id: `plant-${Date.now()}`,
+      id: `plant-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       type: selectedPlant,
-      row,
-      col,
+      row: exactRow, // Force integer row
+      col: exactCol, // Force integer column
       lastFired: 0,
       health: maxHealth,
       maxHealth
     };
     
+    // Log for debugging
+    console.log(`Created new plant:`, JSON.stringify(newPlant, null, 2));
+    
     setPlants(prev => [...prev, newPlant]);
     setSunAmount(prev => prev - selectedPlant.cost);
     setSelectedPlant(null);
+    
+    // Play plant sound
+    if (soundManager) {
+      soundManager.playPlantSound(selectedPlant.id);
+    }
     
     // Immediately trigger cherry bomb if there are zombies in range
     if (selectedPlant.id === 'cherrybomb') {
@@ -163,22 +201,64 @@ export const usePlantActions = ({
     const now = Date.now();
     
     plants.forEach(plant => {
-      // Sunflower generates sun
-      if (plant.type.id === 'sunflower' && now - plant.lastFired > plant.type.cooldown) {
+      // Calculate cooldown reduction if plant is boosted
+      const cooldownMultiplier = plant.boosted ? 0.5 : 1; // 50% cooldown reduction when boosted
+      const effectiveCooldown = plant.type.cooldown * cooldownMultiplier;
+      
+      // Sunflower generates sun - generates more sun when boosted
+      if (plant.type.id === 'sunflower' && now - plant.lastFired > effectiveCooldown) {
         plant.lastFired = now;
         
-        // Generate sun near this sunflower
-        const cellWidth = gameArea.width / 9;
-        const cellHeight = gameArea.height / 5;
-        const x = (plant.col * cellWidth) + (cellWidth / 2);
-        const y = (plant.row * cellHeight) + (cellHeight / 2);
+        // Generate sun near this sunflower with precise positioning
+        const cellWidth = Math.floor(gameArea.width / 9);
+        const cellHeight = Math.floor(gameArea.height / 5);
+        const x = Math.floor((plant.col * cellWidth) + (cellWidth / 2));
+        const y = Math.floor((plant.row * cellHeight) + (cellHeight / 2));
         
-        const newSun = generateSunNearPlant(x, y);
-        setSunResources(prev => [...prev, newSun]);
+        // Generate multiple suns if boosted
+        const sunCount = plant.boosted ? 3 : 1; // Increased to 3 when boosted
+        
+        for (let i = 0; i < sunCount; i++) {
+          const offset = i * 20; // Space out multiple suns
+          const newSun = generateSunNearPlant(x + offset, y);
+          setSunResources(prev => [...prev, newSun]);
+        }
+        
+        // Play sunflower sound
+        if (soundManager) {
+          soundManager.playPlantSound('sunflower');
+        }
+      }
+      
+      // Puff-shroom generates sun - generates sun when boosted
+      if (plant.type.id === 'puffshroom' && now - plant.lastFired > effectiveCooldown) {
+        plant.lastFired = now;
+        
+        // Generate sun near this puff-shroom with precise positioning
+        const cellWidth = Math.floor(gameArea.width / 9);
+        const cellHeight = Math.floor(gameArea.height / 5);
+        const x = Math.floor((plant.col * cellWidth) + (cellWidth / 2));
+        const y = Math.floor((plant.row * cellHeight) + (cellHeight / 2));
+        
+        // Generate sun only when boosted
+        if (plant.boosted) {
+          const sunCount = 2; // Generate 2 suns when boosted
+          
+          for (let i = 0; i < sunCount; i++) {
+            const offset = i * 20; // Space out multiple suns
+            const newSun = generateSunNearPlant(x + offset, y);
+            setSunResources(prev => [...prev, newSun]);
+          }
+        }
+        
+        // Play puff-shroom sound
+        if (soundManager) {
+          soundManager.playPlantSound('puffshroom');
+        }
       }
       
       // Spikeweed passive damage to zombies walking over it
-      if (plant.type.id === 'spikeweed' && plant.type.isPassive && now - plant.lastFired > plant.type.cooldown) {
+      if (plant.type.id === 'spikeweed' && plant.type.isPassive && now - plant.lastFired > effectiveCooldown) {
         const cellWidth = gameArea.width / 9;
         const plantPosition = (plant.col + 0.5) * cellWidth;
         
@@ -192,10 +272,13 @@ export const usePlantActions = ({
           plant.lastFired = now;
           
           // Apply damage to all zombies walking over it
+          // Increased damage when boosted
+          const damageFactor = plant.boosted ? 3 : 1; // Triple damage when boosted
+          
           setEnemies(prevEnemies => {
             return prevEnemies.map(enemy => {
               if (zombiesOverSpikeweed.some(z => z.id === enemy.id)) {
-                const newHealth = enemy.health - plant.type.damage;
+                const newHealth = enemy.health - (plant.type.damage * damageFactor);
                 
                 if (newHealth <= 0) {
                   setScore(prev => prev + 10);
@@ -211,18 +294,184 @@ export const usePlantActions = ({
         }
       }
       
+      // Scaredy-shroom hides when zombies approach
+      if (plant.type.id === 'scaredyshroom' && plant.type.scared) {
+        const cellWidth = gameArea.width / 9;
+        const plantPosition = (plant.col + 0.5) * cellWidth;
+        
+        // Check if zombies are near
+        const zombiesNearby = enemies.some(enemy => 
+          enemy.row === plant.row && 
+          Math.abs(enemy.position - plantPosition) < 100
+        );
+        
+        // Set scared state
+        plant.isScared = zombiesNearby;
+        
+        // Only attack if not scared
+        if (!zombiesNearby && now - plant.lastFired > effectiveCooldown) {
+          // Find enemies in the same row
+          const enemiesInRange = enemies.filter(enemy => {
+            const cellWidth = gameArea.width / 9;
+            const plantPosition = Math.floor((plant.col + 1) * cellWidth);
+            
+            // Fix: Use precise integer row matching
+            const exactRowMatch = Math.floor(enemy.row) === Math.floor(plant.row);
+            // Fix: More precise range calculation
+            const inRange = Math.floor(enemy.position) < plantPosition + plant.type.range;
+            
+            return exactRowMatch && inRange;
+          });
+          
+          // Sort enemies by position to always attack the closest one first
+          const sortedEnemies = [...enemiesInRange].sort((a, b) => a.position - b.position);
+          
+          if (sortedEnemies.length > 0) {
+            plant.lastFired = now;
+            
+            // Damage modifier for boosted plants
+            const damageFactor = plant.boosted ? 2 : 1; // Double damage when boosted
+            
+            // Attack the first enemy
+            const targetEnemy = sortedEnemies[0];
+            
+            // Fire a visual projectile
+            fireProjectile(plant, targetEnemy);
+                      
+            // Play shoot sound
+            if (soundManager) {
+              soundManager.playShootSound(plant.type.id);
+            }
+            
+            setEnemies(prevEnemies => {
+              return prevEnemies.map(enemy => {
+                if (enemy.id === targetEnemy.id) {
+                  // Apply base damage with damage factor
+                  const newHealth = enemy.health - (plant.type.damage * damageFactor);
+                  
+                  if (newHealth <= 0) {
+                    // Enemy defeated
+                    setScore(prev => prev + 10);
+                    activeEnemies.current--; // Decrement active enemies count
+                    return { ...enemy, health: 0 };
+                  }
+                  
+                  return { ...enemy, health: newHealth };
+                }
+                return enemy;
+              }).filter(enemy => enemy.health > 0);
+            });
+          }
+        }
+      }
+      
+      // Ice-shroom freezes zombies in area
+      if (plant.type.id === 'iceshroom' && plant.type.isAreaEffect && now - plant.lastFired > effectiveCooldown) {
+        plant.lastFired = now;
+        
+        // Find all enemies in range
+        const cellWidth = gameArea.width / 9;
+        const plantPosition = (plant.col + 0.5) * cellWidth;
+        
+        const enemiesInRange = enemies.filter(enemy => 
+          Math.abs(enemy.position - plantPosition) < plant.type.range
+        );
+        
+        if (enemiesInRange.length > 0) {
+          // Apply freeze effect to all enemies in range
+          // Extended freeze duration when boosted
+          const freezeDuration = plant.boosted ? 15000 : 10000; // 15s when boosted, 10s normally
+          
+          setEnemies(prevEnemies => {
+            return prevEnemies.map(enemy => {
+              if (enemiesInRange.some(e => e.id === enemy.id)) {
+                return {
+                  ...enemy,
+                  isFrozen: true,
+                  speed: enemy.speed * 0.2, // Slow down significantly
+                  frozenExpiry: Date.now() + freezeDuration
+                };
+              }
+              return enemy;
+            });
+          });
+          
+          // Play ice-shroom sound
+          if (soundManager) {
+            soundManager.playPlantSound('iceshroom');
+          }
+        }
+      }
+      
+      // Jalapeño destroys all zombies in lane
+      if (plant.type.id === 'jalapeno' && plant.type.isAreaEffect && plant.type.affectsLanes && now - plant.lastFired > effectiveCooldown) {
+        plant.lastFired = now;
+        
+        // Find all enemies in the same row
+        const enemiesInLane = enemies.filter(enemy => 
+          enemy.row === plant.row
+        );
+        
+        if (enemiesInLane.length > 0) {
+          // Apply massive damage to all enemies in lane
+          // Increased damage when boosted
+          const damageFactor = plant.boosted ? 1.5 : 1; // 50% extra damage when boosted
+          const baseDamage = plant.type.damage * damageFactor;
+          
+          setEnemies(prevEnemies => {
+            return prevEnemies.map(enemy => {
+              if (enemiesInLane.some(e => e.id === enemy.id)) {
+                const newHealth = enemy.health - baseDamage;
+                
+                if (newHealth <= 0) {
+                  setScore(prev => prev + 10);
+                  activeEnemies.current--;
+                  return { ...enemy, health: 0 };
+                }
+                
+                return { ...enemy, health: newHealth };
+              }
+              return enemy;
+            }).filter(enemy => enemy.health > 0);
+          });
+          
+          // Play jalapeño sound
+          if (soundManager) {
+            soundManager.playPlantSound('jalapeno');
+          }
+          
+          // Remove the jalapeño after use
+          setTimeout(() => {
+            setPlants(prevPlants => prevPlants.filter(p => p.id !== plant.id));
+          }, 500);
+        }
+      }
+      
       // Attack plants damage enemies
-      if (plant.type.damage > 0 && !plant.type.isPassive && !plant.type.isPeaConverter && now - plant.lastFired > plant.type.cooldown) {
+      if (plant.type.damage > 0 && !plant.type.isPassive && !plant.type.isPeaConverter && 
+          plant.type.id !== 'scaredyshroom' && plant.type.id !== 'iceshroom' && 
+          plant.type.id !== 'jalapeno' && now - plant.lastFired > effectiveCooldown) {
         // Find enemies in the same row
         const enemiesInRange = enemies.filter(enemy => {
           const cellWidth = gameArea.width / 9;
-          const plantPosition = (plant.col + 1) * cellWidth;
+          const plantPosition = Math.floor((plant.col + 1) * cellWidth);
           
-          return enemy.row === plant.row && enemy.position < plantPosition + plant.type.range;
+          // Fix: Use precise integer row matching
+          const exactRowMatch = Math.floor(enemy.row) === Math.floor(plant.row);
+          // Fix: More precise range calculation
+          const inRange = Math.floor(enemy.position) < plantPosition + plant.type.range;
+          
+          return exactRowMatch && inRange;
         });
         
-        if (enemiesInRange.length > 0) {
+        // Sort enemies by position to always attack the closest one first
+        const sortedEnemies = [...enemiesInRange].sort((a, b) => a.position - b.position);
+        
+        if (sortedEnemies.length > 0) {
           plant.lastFired = now;
+          
+          // Damage modifier for boosted plants
+          const damageFactor = plant.boosted ? 2 : 1; // Double damage when boosted
           
           // For threepeater, also check adjacent rows
           if (plant.type.id === 'threepeater' && plant.type.affectsLanes === 3) {
@@ -231,9 +480,14 @@ export const usePlantActions = ({
               if (targetRow >= 0 && targetRow < 5) { // 5 is ROWS constant
                 const enemiesInThisRow = enemies.filter(enemy => {
                   const cellWidth = gameArea.width / 9;
-                  const plantPosition = (plant.col + 1) * cellWidth;
+                  const plantPosition = Math.floor((plant.col + 1) * cellWidth);
                   
-                  return enemy.row === targetRow && enemy.position < plantPosition + plant.type.range;
+                  // Fix: Use precise integer row matching
+                  const exactRowMatch = Math.floor(enemy.row) === Math.floor(targetRow);
+                  // Fix: More precise range calculation
+                  const inRange = Math.floor(enemy.position) < plantPosition + plant.type.range;
+                  
+                  return exactRowMatch && inRange;
                 });
                 
                 if (enemiesInThisRow.length > 0) {
@@ -243,10 +497,15 @@ export const usePlantActions = ({
                   // Fire a visual projectile
                   fireProjectile({...plant, row: targetRow}, targetEnemy);
                   
+                  // Play shoot sound
+                  if (soundManager) {
+                    soundManager.playShootSound(plant.type.id);
+                  }
+                  
                   setEnemies(prevEnemies => {
                     return prevEnemies.map(enemy => {
                       if (enemy.id === targetEnemy.id) {
-                        const newHealth = enemy.health - plant.type.damage;
+                        const newHealth = enemy.health - (plant.type.damage * damageFactor);
                         
                         if (newHealth <= 0) {
                           setScore(prev => prev + 10);
@@ -264,43 +523,53 @@ export const usePlantActions = ({
             });
           } else {
             // Attack the first enemy
-            const targetEnemy = enemiesInRange[0];
+            const targetEnemy = sortedEnemies[0];
             
             // Fire a visual projectile
             fireProjectile(plant, targetEnemy);
+                      
+            // Play shoot sound
+            if (soundManager) {
+              soundManager.playShootSound(plant.type.id);
+            }
             
             // For repeater, fire a second projectile after a short delay
             if (plant.type.id === 'repeatershooter') {
-              setTimeout(() => {
-                setEnemies(prevEnemies => {
-                  const enemyStillExists = prevEnemies.some(e => e.id === targetEnemy.id);
-                  if (enemyStillExists) {
-                    const updatedEnemy = prevEnemies.find(e => e.id === targetEnemy.id)!;
-                    fireProjectile(plant, updatedEnemy);
-                    
-                    return prevEnemies.map(enemy => {
-                      if (enemy.id === targetEnemy.id) {
-                        const newHealth = enemy.health - plant.type.damage;
-                        
-                        if (newHealth <= 0) {
-                          setScore(prev => prev + 10);
-                          activeEnemies.current--;
-                          return { ...enemy, health: 0 };
+              // If boosted, fire additional projectiles
+              const projectileCount = plant.boosted ? 4 : 2; // 4 when boosted, 2 normally
+              
+              for (let i = 1; i < projectileCount; i++) {
+                setTimeout(() => {
+                  setEnemies(prevEnemies => {
+                    const enemyStillExists = prevEnemies.some(e => e.id === targetEnemy.id);
+                    if (enemyStillExists) {
+                      const updatedEnemy = prevEnemies.find(e => e.id === targetEnemy.id)!;
+                      fireProjectile(plant, updatedEnemy);
+                      
+                      return prevEnemies.map(enemy => {
+                        if (enemy.id === targetEnemy.id) {
+                          const newHealth = enemy.health - (plant.type.damage * damageFactor);
+                          
+                          if (newHealth <= 0) {
+                            setScore(prev => prev + 10);
+                            activeEnemies.current--;
+                            return { ...enemy, health: 0 };
+                          }
+                          
+                          return { ...enemy, health: newHealth };
                         }
-                        
-                        return { ...enemy, health: newHealth };
-                      }
-                      return enemy;
-                    }).filter(enemy => enemy.health > 0);
-                  }
-                  return prevEnemies;
-                });
-              }, 300);
+                        return enemy;
+                      }).filter(enemy => enemy.health > 0);
+                    }
+                    return prevEnemies;
+                  });
+                }, 200 * i); // Faster spacing when boosted
+              }
             }
             
             // Apply additional burning damage over time for enemies hit by fire
             if (plant.type.id === 'fireshooter') {
-              const burnDuration = 3000; // 3 seconds of burning
+              const burnDuration = plant.boosted ? 4000 : 3000; // Longer burn when boosted
               const burnInterval = 500; // Apply burn damage every 0.5 seconds
               let burnTicks = burnDuration / burnInterval;
               
@@ -313,7 +582,7 @@ export const usePlantActions = ({
                 setEnemies(prevEnemies => {
                   return prevEnemies.map(enemy => {
                     if (enemy.id === targetEnemy.id && enemy.isBurning) {
-                      const newHealth = enemy.health - 5; // 5 burn damage per tick
+                      const newHealth = enemy.health - (plant.boosted ? 7 : 5); // More burn damage when boosted
                       
                       if (newHealth <= 0) {
                         // Enemy defeated by burn damage
@@ -335,8 +604,8 @@ export const usePlantActions = ({
             setEnemies(prevEnemies => {
               return prevEnemies.map(enemy => {
                 if (enemy.id === targetEnemy.id) {
-                  // Apply base damage
-                  const newHealth = enemy.health - plant.type.damage;
+                  // Apply base damage with damage factor
+                  const newHealth = enemy.health - (plant.type.damage * damageFactor);
                   
                   if (newHealth <= 0) {
                     // Enemy defeated
@@ -356,7 +625,7 @@ export const usePlantActions = ({
     });
     
     return plants;
-  }, [gameArea, setEnemies, setScore, activeEnemies, fireProjectile, setSunResources]);
+  }, [gameArea, setEnemies, setScore, activeEnemies, fireProjectile, setSunResources, soundManager]);
 
   return {
     placePlant,

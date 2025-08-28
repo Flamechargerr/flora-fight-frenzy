@@ -429,6 +429,7 @@ const Game = () => {
                 onGameOver={handleGameOver} 
                 onLevelComplete={handleLevelComplete}
                 level={currentLevel}
+                soundManager={soundManager.current}
               />
             )}
           </div>

@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useRef, useEffect } from 'react';
-import type { PlantInstance, EnemyType, ProjectileType, SunResource, PlantType, GameAreaDimensions } from '../game/types';
+import type { PlantInstance, EnemyType, ProjectileType, SunResource as SunResourceType, PlantType, GameAreaDimensions } from '../game/types';
 import PlantOptimized from './PlantOptimized';
 import EnemyOptimized from './EnemyOptimized';
 import SunResource from './SunResource';
@@ -12,7 +12,7 @@ interface MobileGameGridProps {
   plants: PlantInstance[];
   enemies: EnemyType[];
   projectiles: ProjectileType[];
-  sunResources: SunResource[];
+  sunResources: SunResourceType[];
   selectedPlant: PlantType | null;
   debugMessage?: string;
   onPlacePlant: (row: number, col: number) => void;
@@ -120,26 +120,36 @@ const MobileGameGrid: React.FC<MobileGameGridProps> = memo(({
   // Mobile touch handling
   const { attachTouchHandlers, isMobile } = useMobileTouch({
     onTap: (x, y) => {
-      // Convert touch coordinates to grid position
-      const col = Math.floor(x / cellWidth);
-      const row = Math.floor(y / cellHeight);
+      // FIX: Use precise integer calculations for touch coordinates
+      // Convert touch coordinates to exact grid position
+      const exactCol = Math.floor(x / cellWidth);
+      const exactRow = Math.floor(y / cellHeight);
       
-      // Check if tap is on a sun resource first
+      console.log(`Tap detected at [${x},${y}] => Grid cell [${exactRow},${exactCol}]`);
+      
+      // FIX: Validate grid bounds
+      if (exactRow < 0 || exactRow >= ROWS || exactCol < 0 || exactCol >= COLS) {
+        console.log(`Tap outside grid bounds: [${exactRow},${exactCol}]`);
+        return;
+      }
+      
+      // Check if tap is on a sun resource first with increased tap area
       const touchedSun = sunResources.find(sun => {
-        const sunX = sun.x - 25; // sun width/2
-        const sunY = sun.y - 25; // sun height/2
-        return x >= sunX && x <= sunX + 50 && y >= sunY && y <= sunY + 50;
+        const sunRadius = isMobile ? 40 : 25; // Larger detection area on mobile
+        const dx = x - sun.x;
+        const dy = y - sun.y;
+        return (dx * dx + dy * dy) <= (sunRadius * sunRadius); // Circle collision check
       });
       
       if (touchedSun) {
+        console.log(`Sun collected at [${touchedSun.x},${touchedSun.y}]`);
         onCollectSun(touchedSun.id);
         return;
       }
       
-      // Otherwise try to place plant
-      if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
-        onPlacePlant(row, col);
-      }
+      // FIX: Place plant at EXACT integer grid position
+      console.log(`Placing plant at EXACT grid position: [${exactRow},${exactCol}]`);
+      onPlacePlant(exactRow, exactCol);
     },
     onLongPress: (x, y) => {
       // Long press could show plant info or cancel selection
