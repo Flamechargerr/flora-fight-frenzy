@@ -61,15 +61,13 @@ const GameGrid: React.FC<GameGridProps> = ({
         cells.push(
           <div 
             key={`cell-${row}-${col}`}
-            className={`grid-cell ${isAvailable ? 'available' : ''} ${isOccupied ? 'unavailable' : ''}`}
+            className={`pvz-grid-cell ${isAvailable ? 'can-place' : ''}`}
             style={{ 
               width: `${cellWidth}%`, 
               height: `${cellHeight}%`,
               position: 'absolute',
               left: `${col * cellWidth}%`,
-              top: `${row * cellHeight}%`,
-              backgroundColor: isEvenCell ? 'rgba(246, 238, 183, 0.6)' : 'rgba(188, 217, 165, 0.6)',
-              border: '1px solid rgba(105, 84, 45, 0.3)'
+              top: `${row * cellHeight}%`
             }}
             onClick={() => isAvailable && onPlacePlant(row, col)}
           >
@@ -118,12 +116,11 @@ const GameGrid: React.FC<GameGridProps> = ({
           ))}
         </div>
         
-        {/* Game grid */}
+        {/* Game grid with authentic PvZ styling */}
         <div 
-          className="garden-grid relative flex-1 overflow-hidden"
+          className="pvz-game-board garden-grid relative flex-1 overflow-hidden"
           style={{ 
-            height: `${gameArea.height}px`,
-            background: '#8DB255',
+            height: `${gameArea.height}px`
           }}
         >
           {/* Animated grass SVG background */}

@@ -102,7 +102,7 @@ const Game = () => {
   }, [isLoading]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-garden-light/30 to-garden/20 p-4 sm:p-6 md:p-8">
+    <div className="pvz-game-interface min-h-screen bg-gradient-to-b from-garden-light/30 to-garden/20 p-4 sm:p-6 md:p-8">
       {/* Loading Screen */}
       {isLoading && (
         <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center">

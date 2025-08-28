@@ -327,7 +327,7 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
   
   return (
     <div 
-      className="plant"
+      className="pvz-plant"
       style={{ 
         width: `${size}px`, 
         height: `${size}px`, 
@@ -339,15 +339,8 @@ const Plant = memo(({ plant, gridDimensions, gameAreaSize }: PlantProps) => {
       
       {/* Health bar for plants with health */}
       {plant.health !== undefined && plant.maxHealth !== undefined && (
-        <div className="absolute -bottom-5 left-0 w-full h-2 bg-black/60 rounded-full overflow-hidden">
-          <div 
-            className={`h-full transition-all duration-200 ${
-              healthPercentage > 70 ? 'bg-green-500' : 
-              healthPercentage > 30 ? 'bg-yellow-500' : 
-              'bg-red-500'
-            }`}
-            style={{ width: `${healthPercentage}%` }}
-          />
+        <div className="pvz-health-bar">
+          <div className="pvz-health-fill" style={{ width: `${healthPercentage}%` }} />
         </div>
       )}
     </div>

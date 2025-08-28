@@ -15,7 +15,7 @@ interface PlantCardProps {
 const PlantCard: React.FC<PlantCardProps> = ({ plant, selected, canAfford, onClick }) => {
   return (
     <div 
-      className={`plant-card border border-gray-800 ${selected ? 'ring-2 ring-yellow-400' : ''} ${!canAfford ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105 transition-transform'}`}
+      className={`pvz-seed-packet ${selected ? 'selected' : ''} ${!canAfford ? 'disabled' : ''}`}
       onClick={canAfford ? onClick : undefined}
     >
       <div className="w-full h-full bg-gradient-to-b from-gray-700 to-gray-900 rounded">

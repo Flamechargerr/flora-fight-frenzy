@@ -625,8 +625,357 @@
   animation: shakeHorizontal 0.5s ease-in-out;
 }
 
-.animate-bounceIn {
-  animation: bounceIn 0.6s ease-out forwards;
+/* Authentic Plants vs Zombies Visual Design */
+
+/* PvZ Color Palette */
+:root {
+  --pvz-lawn-green: #4a7c31;
+  --pvz-lawn-light: #5a8c41;
+  --pvz-lawn-dark: #3a6c21;
+  --pvz-dirt: #8B4513;
+  --pvz-dirt-light: #A0522D;
+  --pvz-ui-brown: #654321;
+  --pvz-ui-tan: #D2B48C;
+  --pvz-sun-yellow: #FFD700;
+  --pvz-zombie-green: #90EE90;
+  --pvz-blood-red: #8B0000;
+  --pvz-shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* PvZ Game Board Styling */
+.pvz-game-board {
+  background: linear-gradient(to bottom, 
+    #87CEEB 0%, 
+    #87CEEB 15%, 
+    var(--pvz-lawn-green) 15%, 
+    var(--pvz-lawn-light) 50%, 
+    var(--pvz-lawn-dark) 100%);
+  border: 4px solid var(--pvz-ui-brown);
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 0 20px rgba(0,0,0,0.3),
+    0 4px 8px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Lawn texture overlay */
+.pvz-game-board::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.1) 2px,
+      rgba(255,255,255,0.1) 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.1) 2px,
+      rgba(0,0,0,0.1) 4px
+    );
+  pointer-events: none;
+}
+
+/* PvZ Grid Cells */
+.pvz-grid-cell {
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.pvz-grid-cell:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.pvz-grid-cell.can-place {
+  background: rgba(144, 238, 144, 0.3);
+  border-color: var(--pvz-zombie-green);
+  cursor: pointer;
+}
+
+/* PvZ Plant Styling */
+.pvz-plant {
+  border-radius: 50%;
+  border: 3px solid var(--pvz-ui-brown);
+  box-shadow: 
+    0 4px 8px var(--pvz-shadow),
+    inset 0 2px 4px rgba(255,255,255,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.pvz-plant::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  animation: plantGlow 2s ease-in-out infinite alternate;
+}
+
+/* PvZ Zombie Styling */
+.pvz-zombie {
+  border-radius: 15px;
+  border: 2px solid var(--pvz-ui-brown);
+  background: linear-gradient(135deg, 
+    var(--pvz-zombie-green) 0%, 
+    #7CCD7C  50%, 
+    #6FBB6F 100%);
+  box-shadow: 
+    0 3px 6px var(--pvz-shadow),
+    inset 0 1px 3px rgba(255,255,255,0.2);
+  position: relative;
+}
+
+.pvz-zombie.eating {
+  animation: zombieEat 0.5s ease-in-out infinite;
+}
+
+.pvz-zombie.damaged {
+  filter: sepia(0.5) hue-rotate(-30deg) saturate(1.2);
+}
+
+/* PvZ Sun Resource */
+.pvz-sun {
+  background: radial-gradient(circle, 
+    var(--pvz-sun-yellow) 0%, 
+    #FFA500 70%, 
+    #FF8C00 100%);
+  border: 3px solid #FFD700;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 15px rgba(255, 215, 0, 0.6),
+    inset 0 2px 4px rgba(255,255,255,0.4);
+  animation: sunGlow 1.5s ease-in-out infinite alternate;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.pvz-sun:hover {
+  transform: scale(1.1);
+}
+
+.pvz-sun::before {
+  content: '☀';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2em;
+  text-shadow: 0 0 5px rgba(255,255,255,0.8);
+}
+
+/* PvZ Lawnmower */
+.pvz-lawnmower {
+  background: linear-gradient(135deg, 
+    #CD853F 0%, 
+    #A0522D  50%, 
+    #8B4513 100%);
+  border: 2px solid var(--pvz-ui-brown);
+  border-radius: 8px;
+  box-shadow: 
+    0 2px 4px var(--pvz-shadow),
+    inset 0 1px 2px rgba(255,255,255,0.3);
+  position: relative;
+}
+
+.pvz-lawnmower.activated {
+  animation: lawnmowerMove 0.1s ease-in-out infinite;
+}
+
+.pvz-lawnmower::before {
+  content: '🚜';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5em;
+}
+
+/* PvZ UI Elements */
+.pvz-seed-packet {
+  background: linear-gradient(135deg, 
+    var(--pvz-ui-tan) 0%, 
+    #DEB887  50%, 
+    var(--pvz-ui-brown) 100%);
+  border: 3px solid var(--pvz-ui-brown);
+  border-radius: 12px;
+  box-shadow: 
+    0 3px 6px var(--pvz-shadow),
+    inset 0 1px 3px rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pvz-seed-packet:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 5px 10px var(--pvz-shadow),
+    inset 0 1px 3px rgba(255,255,255,0.4);
+}
+
+.pvz-seed-packet.selected {
+  border-color: #FFD700;
+  box-shadow: 
+    0 0 15px rgba(255, 215, 0, 0.6),
+    inset 0 1px 3px rgba(255,255,255,0.4);
+}
+
+.pvz-seed-packet.disabled {
+  filter: grayscale(1) brightness(0.7);
+  cursor: not-allowed;
+}
+
+/* PvZ Health Bar */
+.pvz-health-bar {
+  background: var(--pvz-blood-red);
+  border: 1px solid #654321;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.pvz-health-fill {
+  background: linear-gradient(90deg, 
+    #32CD32 0%, 
+    #90EE90 50%, 
+    #32CD32 100%);
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: inherit;
+}
+
+/* PvZ Animations */
+@keyframes plantGlow {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes zombieEat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes sunGlow {
+  0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); }
+}
+
+@keyframes lawnmowerMove {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(2px); }
+}
+
+@keyframes zombieWalk {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-2px) rotate(1deg); }
+}
+
+/* PvZ Game Interface */
+.pvz-game-interface {
+  background: linear-gradient(135deg, 
+    var(--pvz-ui-tan) 0%, 
+    #DEB887  50%, 
+    var(--pvz-ui-brown) 100%);
+  border: 4px solid var(--pvz-ui-brown);
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 8px var(--pvz-shadow),
+    inset 0 2px 4px rgba(255,255,255,0.3);
+}
+
+/* PvZ Text Styling */
+.pvz-text {
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-shadow: 2px 2px 0 var(--pvz-shadow);
+  color: var(--pvz-ui-brown);
+  font-weight: bold;
+}
+
+.pvz-title {
+  font-size: 2.5em;
+  color: #2F4F2F;
+  text-shadow: 
+    3px 3px 0 #FFD700,
+    4px 4px 0 var(--pvz-shadow);
+  letter-spacing: 2px;
+}
+
+/* PvZ Button Styling */
+.pvz-button {
+  background: linear-gradient(135deg, 
+    #90EE90 0%, 
+    #32CD32 50%, 
+    #228B22 100%);
+  border: 3px solid var(--pvz-ui-brown);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+  box-shadow: 
+    0 3px 6px var(--pvz-shadow),
+    inset 0 1px 3px rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pvz-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 5px 10px var(--pvz-shadow),
+    inset 0 1px 3px rgba(255,255,255,0.3);
+}
+
+.pvz-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 4px var(--pvz-shadow),
+    inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* PvZ Projectile */
+.pvz-projectile {
+  border-radius: 50%;
+  background: radial-gradient(circle, 
+    #90EE90 0%, 
+    #32CD32 70%, 
+    #228B22 100%);
+  border: 1px solid #228B22;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.pvz-projectile.fire {
+  background: radial-gradient(circle, 
+    #FF6347 0%, 
+    #FF4500 70%, 
+    #DC143C 100%);
+  border-color: #DC143C;
+  box-shadow: 0 0 8px rgba(255, 69, 0, 0.6);
+}
+
+.pvz-projectile.ice {
+  background: radial-gradient(circle, 
+    #ADD8E6 0%, 
+    #4682B4 70%, 
+    #191970 100%);
+  border-color: #191970;
+  box-shadow: 0 0 8px rgba(70, 130, 180, 0.6);
 }
 
 /* Mobile-specific optimizations */

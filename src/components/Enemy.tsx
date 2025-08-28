@@ -81,14 +81,13 @@ const Enemy = memo(({ enemy, gridDimensions, gameAreaSize }: EnemyProps) => {
   
   return (
     <div 
-      className="enemy"
+      className={`pvz-zombie ${isEating ? 'eating' : ''} ${enemy.isBurning ? 'damaged' : ''}`}
       style={{ 
         width: `${size}px`, 
         height: `${size}px`, 
         top: `${top - (size/2)}px`, 
         left: `${enemy.position}px`,
-        transition: `left ${movementSpeed}`,
-        ...(isWalking ? wobbleStyle : eatingStyle)
+        transition: `left ${movementSpeed}`
       }}
     >
       <div className="relative w-full h-full flex items-center justify-center">

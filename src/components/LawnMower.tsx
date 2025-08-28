@@ -31,7 +31,7 @@ const LawnMower: React.FC<LawnMowerProps> = ({
   
   return (
     <div
-      className="lawn-mower"
+      className={`pvz-lawnmower ${activated ? 'activated' : ''}`}
       style={{
         position: 'absolute',
         left: `${lawnMowerAreaWidth / 2 - size / 2}px`,

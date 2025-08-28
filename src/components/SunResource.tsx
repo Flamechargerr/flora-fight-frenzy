@@ -54,24 +54,18 @@ const SunResource: React.FC<SunResourceProps> = memo(({ id, x, y, onCollect, isM
   // Performance: Memoize class names
   const classNames = useMemo(() => {
     const baseClasses = [
-      'sun-resource',
+      'pvz-sun',
       'absolute',
       'cursor-pointer',
       'select-none',
       'transform',
       'transition-all',
       'duration-200',
-      'hover:scale-110',
-      'active:scale-90',
-      'animate-float'
-    ];
+      animate ? 'animate-bounceIn' : ''
+    ].filter(Boolean);
     
     if (isMobile) {
       baseClasses.push('touch-manipulation'); // Optimize for touch
-    }
-    
-    if (animate) {
-      baseClasses.push('animate-bounceIn');
     }
     
     return baseClasses.join(' ');

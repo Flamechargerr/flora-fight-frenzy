@@ -89,15 +89,18 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
       let mowerActivated = false;
       
       enemies.forEach(enemy => {
-        // If enemy is near the edge and there's an available mower in that row
+        // If enemy reaches the lawnmower zone (left 80 pixels) and there's an available mower
         const mowerIndex = newLawnMowers.findIndex(
-          m => m.row === enemy.row && !m.activated && enemy.position <= 60
+          m => m.row === enemy.row && !m.activated && enemy.position <= 80
         );
         
         if (mowerIndex !== -1) {
           console.log(`Activating mower in row ${enemy.row} for enemy at position ${enemy.position}`);
           newLawnMowers[mowerIndex].activated = true;
           mowerActivated = true;
+          
+          // Immediately remove the zombie that triggered the mower
+          removeEnemy(enemy.id);
         }
       });
       
@@ -105,7 +108,7 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         setLawnMowers(newLawnMowers);
       }
     }
-  }, [enemies, lawnMowers]);
+  }, [enemies, lawnMowers, removeEnemy]);
   
   // Update lawn mower positions when activated and handle zombie collisions
   useEffect(() => {
@@ -116,22 +119,29 @@ const GameBoard = ({ onGameOver, onLevelComplete = () => {}, level = 1 }: GameBo
         setLawnMowers(prev => 
           prev.map(mower => {
             if (mower.activated && mower.position < gameArea.width + 100) {
-              // Move the mower
-              const updatedMower = { ...mower, position: mower.position + 20 };
+              // Move the mower faster like in PvZ
+              const updatedMower = { ...mower, position: mower.position + 30 };
               
-              // Check for collisions with zombies
-              handleZombieCollisions(updatedMower, enemies);
+              // Check for collisions with zombies and remove them
+              const zombiesInPath = enemies.filter(
+                enemy => enemy.row === mower.row && 
+                       Math.abs(enemy.position - updatedMower.position) < 60
+              );
+              
+              zombiesInPath.forEach(zombie => {
+                removeEnemy(zombie.id);
+              });
               
               return updatedMower;
             }
             return mower;
           })
         );
-      }, 50);
+      }, 50); // Faster update rate for smooth mower movement
       
       return () => clearInterval(interval);
     }
-  }, [lawnMowers, gameArea.width, enemies, handleZombieCollisions]);
+  }, [lawnMowers, gameArea.width, enemies, removeEnemy]);
   
   // Handle level win condition
   useEffect(() => {

@@ -21,7 +21,7 @@ const PlantCard = memo<{
 }>(({ plant, isSelected, canAfford, onSelect, isMobile }) => {
   const cardClasses = useMemo(() => {
     const baseClasses = [
-      'plant-card',
+      'pvz-seed-packet',
       'relative',
       'p-3',
       'rounded-lg',
@@ -39,11 +39,9 @@ const PlantCard = memo<{
     }
     
     if (isSelected) {
-      baseClasses.push('border-green-500', 'bg-green-100', 'shadow-lg', 'scale-105');
-    } else if (canAfford) {
-      baseClasses.push('border-gray-300', 'bg-white', 'hover:border-green-400', 'hover:shadow-md', 'hover:scale-102', 'active:scale-95');
-    } else {
-      baseClasses.push('border-gray-200', 'bg-gray-100', 'opacity-50', 'cursor-not-allowed');
+      baseClasses.push('selected');
+    } else if (!canAfford) {
+      baseClasses.push('disabled');
     }
     
     return baseClasses.join(' ');
@@ -60,17 +58,13 @@ const PlantCard = memo<{
   };
 
   return (
-    <div
-      className={cardClasses}
+    <div 
+      className={`pvz-seed-packet ${isSelected ? 'selected' : ''} ${!canAfford ? 'disabled' : ''}`}
       onClick={handleClick}
       role="button"
       tabIndex={canAfford ? 0 : -1}
       aria-label={`${plant.name} - Cost: ${plant.cost} sun ${canAfford ? '' : '(not affordable)'}`}
     >
-      {/* Plant Icon */}
-      <div className="text-center mb-2">
-        <div className={`text-3xl ${isMobile ? 'text-4xl' : ''}`}>{plant.icon}</div>
-      </div>
       
       {/* Plant Info */}
       <div className="text-center">
@@ -163,6 +157,7 @@ const MobilePlantSelectionPanel: React.FC<MobilePlantSelectionPanelProps> = memo
   // Performance: Memoize container classes
   const containerClasses = useMemo(() => {
     const baseClasses = [
+      'pvz-game-interface',
       'glass',
       'rounded-xl',
       'shadow-lg',

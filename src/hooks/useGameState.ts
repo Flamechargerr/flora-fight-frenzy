@@ -117,15 +117,23 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
   useEffect(() => {
     if (isGameOver || gameWon) return;
 
-    const sunTimer = setInterval(() => {
-      generateSun();
-    }, 3000);
+    // Natural sun generation - falls from sky every 10-15 seconds like in PvZ
+    const naturalSunTimer = setInterval(() => {
+      const newSun = generateRandomSun(gameArea);
+      setSunResources(prev => [...prev, newSun]);
+      
+      // Auto-remove sun after 15 seconds if not collected (authentic PvZ timing)
+      setTimeout(() => {
+        setSunResources(prev => prev.filter(sun => sun.id !== newSun.id));
+      }, 15000);
+    }, Math.random() * 5000 + 10000); // 10-15 seconds random interval
     
     const projectileTimer = setInterval(() => {
       setProjectiles(prevProjectiles => updateProjectiles(prevProjectiles));
     }, 50);
     
     const gameTickTimer = setInterval(() => {
+      // Check wave completion
       if (enemies.length === 0 && enemiesSpawned.current >= enemiesLeftInWave.current && 
           gameStarted.current && !waveCompleted && activeEnemies.current === 0) {
         completeWave();
@@ -142,7 +150,7 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
         
         const newEnemies = prevEnemies.map(enemy => {
           const plantsInPath = plantsWithPosition.filter(plant => 
-            plant.row === enemy.row && plant.position >= enemy.position - 30 && plant.position <= enemy.position + 10
+            plant.row === enemy.row && plant.position >= enemy.position - 40 && plant.position <= enemy.position + 20
           );
           
           if (plantsInPath.length > 0 && !enemy.isEating) {
@@ -160,9 +168,13 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
           else {
             const newPosition = enemy.position - (enemy.speed / 10);
             
-            if (newPosition <= 0) {
-              setIsGameOver(true);
-              onGameOver();
+            // Trigger lawnmower if zombie reaches the end
+            if (newPosition <= 80) { // Lawnmower activation zone
+              // This will be handled by lawnmower collision detection
+              if (newPosition <= 20) {
+                setIsGameOver(true);
+                onGameOver();
+              }
             }
             
             return { ...enemy, position: newPosition };
@@ -220,28 +232,37 @@ export const useGameState = ({ onGameOver, onLevelComplete, level }: UseGameStat
       });
     }, 100);
     
-    const sunflowerTimer = setInterval(() => {
+    // Sunflower sun production - every 24 seconds like in original PvZ
+    const sunflowerProductionTimer = setInterval(() => {
       const sunflowers = plants.filter(p => p.type.id === 'sunflower');
-      if (sunflowers.length > 0) {
-        const randomSunflower = sunflowers[Math.floor(Math.random() * sunflowers.length)];
+      
+      // Each sunflower produces sun independently
+      sunflowers.forEach(sunflower => {
         const cellWidth = gameArea.width / COLS;
         const cellHeight = gameArea.height / ROWS;
-        const x = (randomSunflower.col * cellWidth) + (cellWidth / 2);
-        const y = (randomSunflower.row * cellHeight) + (cellHeight / 2);
+        const x = (sunflower.col * cellWidth) + (cellWidth / 2);
+        const y = (sunflower.row * cellHeight) + (cellHeight / 2);
         
         setSunResources(prev => [...prev, { 
-          id: `sun-${Date.now()}`, 
-          x: x + (Math.random() * 40 - 20), 
-          y: y + (Math.random() * 40 - 20) 
+          id: `sunflower-${sunflower.id}-${Date.now()}`, 
+          x: x + (Math.random() * 30 - 15), // Small random offset like PvZ
+          y: y + (Math.random() * 30 - 15)
         }]);
-      }
-    }, 7000);
+        
+        // Sunflower-produced sun also disappears after 15 seconds
+        setTimeout(() => {
+          setSunResources(prev => prev.filter(sun => 
+            !sun.id.includes(`sunflower-${sunflower.id}`)
+          ));
+        }, 15000);
+      });
+    }, 24000); // Authentic PvZ timing
     
     return () => {
-      clearInterval(sunTimer);
+      clearInterval(naturalSunTimer);
       clearInterval(projectileTimer);
       clearInterval(gameTickTimer);
-      clearInterval(sunflowerTimer);
+      clearInterval(sunflowerProductionTimer);
     };
   }, [
     currentWave, enemies, generateSun, 
