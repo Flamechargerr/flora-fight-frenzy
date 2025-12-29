@@ -1,25 +1,36 @@
-#
-logs
+# Compiled class files
+*.class
+
+# Log files
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Package files
+*.war
+*.nar
+*.ear
 
-# Editor directories and files
-.vscode/*   
-!.vscode/extensions.json
-.idea
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+
+# OS files
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.vercel
+Thumbs.db
+
+# Build outputs
+out/
+build/
+target/
+bin/
+
+# Database save files
+database.txt
+
+# JavaFX SDK (should be installed locally)
+javafx-sdk*/
