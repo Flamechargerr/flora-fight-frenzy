@@ -1,19 +1,10 @@
 {
     "version": 2,
+    "public": true,
     "cleanUrls": true,
     "trailingSlash": false,
-    "routes": [
-        {
-            "handle": "filesystem"
-        },
-        {
-            "src": "/assets/(.*)",
-            "dest": "/$1",
-            "status": 404
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/index.html"
-        }
-    ]
+    "buildCommand": "echo 'Static Site'",
+    "installCommand": "echo 'No dependencies'",
+    "framework": null,
+    "outputDirectory": "."
 }
