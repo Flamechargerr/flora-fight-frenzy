@@ -11,7 +11,7 @@
 [![JavaFX](https://img.shields.io/badge/JavaFX-17+-blue)](https://openjfx.io/)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue)](LICENSE)
 
-[Features](#-features) • [Screenshots](#-screenshots) • [Installation](#-installation) • [How to Play](#-how-to-play) • [Credits](#-credits)
+[Features](#-features) • [Screenshots](#-screenshots) • [Installation](#-installation) • [How to Play](#-how-to-play) • [Build Guide](BUILD_GUIDE.md) • [Credits](#-credits)
 
 </div>
 
